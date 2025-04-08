@@ -1,0 +1,40 @@
+// Body
+$body-bg: #FFFFFF;
+$link-color: #F94F6C;
+$link-hover-color: #C4242B;
+
+// Typography
+$font-family-sans-serif: 'Roboto', sans-serif;
+$font-size-base: 0.9rem;
+$line-height-base: 1.6;
+
+$primary: #DF205B;
+$secondary: #6c757d;
+$success: #28a745;
+$danger: #dc3545;
+$warning: #ffc107;
+$info: #17a2b8;
+$light: #f8f9fa;
+$dark: #343a40;
+
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark
+);
+
+// Create your own map
+$custom-colors: (
+  "cred": #DF205B,
+  "cgreen": #30B67D,
+  "cblue": #39C5F0,
+  "cyellow": #ECB439,
+);
+
+// Merge the maps
+$theme-colors: map-merge($theme-colors, $custom-colors);
