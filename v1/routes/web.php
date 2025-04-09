@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -11,8 +12,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
-    Route::get('users', [UserController::class, 'index'])->name('users.index');
-    Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+
+    Route::resource('users', UserController::class)->except(['show']);
+    Route::get('users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
+    Route::post('users/{user}/change-password', [UserController::class, 'updatePassword'])->name('users.update-password');
+
+    Route::resource('categories', CategoryController::class)->except(['show']);
 });
 
 require __DIR__.'/settings.php';

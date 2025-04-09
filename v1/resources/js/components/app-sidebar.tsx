@@ -21,6 +21,11 @@ export function AppSidebar() {
             title: 'Users',
             href: '/users',
             icon: Users,
+        }] : []),
+        ...(auth.can.categories.viewAny ? [{
+            title: 'Categories',
+            href: '/categories',
+            icon: Folder,
         }] : [])
     ];
     const footerNavItems: NavItem[] = [

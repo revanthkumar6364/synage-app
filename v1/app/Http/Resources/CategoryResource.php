@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserResource extends JsonResource
+class CategoryResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,15 +17,13 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'email' => $this->email,
-            'role' => $this->role,
+            'description' => $this->description,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'can' => [
-                'edit' => $request->user()->can('update', $this->resource),
-                'delete' => $request->user()->can('delete', $this->resource),
-                'change_role' => $request->user()->can('update', $this->resource) && $request->user()->id !== $this->id,
+                'edit' => $request->user()?->can('update', $this->resource),
+                'delete' => $request->user()?->can('delete', $this->resource),
             ],
         ];
     }
