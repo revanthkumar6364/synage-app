@@ -55,4 +55,19 @@ return [
         '+91' => 'India',
         '+1' => 'United States',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Industry Types
+    |--------------------------------------------------------------------------
+    |
+    | This array defines the available industry types in the application.
+    | Each industry type should have a unique key and a display name.
+    |
+    */
+    'industry_types' => [
+        'retail' => 'Retail',
+        'wholesale' => 'Wholesale',
+        'service' => 'Service',
+    ],
 ];

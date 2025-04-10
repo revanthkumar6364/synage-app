@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeftIcon } from 'lucide-react';
 import { type FC } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -35,7 +36,7 @@ const EditCategory: FC<EditCategoryProps> = ({ category, statuses, categories })
         name: category.data.name,
         description: category.data.description,
         status: category.data.status,
-        parent_id: category.data.parent_id,
+        parent_id: category.data.parent_id || "",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -49,12 +50,19 @@ const EditCategory: FC<EditCategoryProps> = ({ category, statuses, categories })
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-2xl font-bold tracking-tight">Edit Category</CardTitle>
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="text-2xl font-bold tracking-tight">Edit Category</CardTitle>
+                            <Link href={route('categories.index')} className="text-sm text-gray-500 hover:text-gray-700">
+                                <Button variant="outline">
+                                    <ArrowLeftIcon className="h-4 w-4" /> Back to Categories
+                                </Button>
+                            </Link>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="name"
                                     value={data.name}
@@ -66,14 +74,24 @@ const EditCategory: FC<EditCategoryProps> = ({ category, statuses, categories })
 
                             <div className="space-y-2">
                                 <Label htmlFor="parent_id">Parent</Label>
-                                <Select value={data.parent_id} onValueChange={(value) => setData('parent_id', value)}>
+                                <Select
+                                    value={data.parent_id === null ? "0" : data.parent_id.toString()}
+                                    onValueChange={(value) => {
+                                        if (value === "0") {
+                                            setData('parent_id', null);
+                                        } else {
+                                            setData('parent_id', value);
+                                        }
+                                    }}
+                                >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select parent category" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {categories.map((category) => (
-                                            <SelectItem key={category.id} value={category.id}>
-                                                {category.name}
+                                        <SelectItem value="0">None</SelectItem>
+                                        {categories.map((cat) => (
+                                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                                                {cat.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -93,7 +111,7 @@ const EditCategory: FC<EditCategoryProps> = ({ category, statuses, categories })
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="status">Status</Label>
+                                <Label htmlFor="status">Status <span className="text-red-500">*</span></Label>
                                 <Select value={data.status} onValueChange={(value) => setData('status', value)}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select status" />

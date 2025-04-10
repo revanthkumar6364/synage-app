@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CategoryResource extends JsonResource
+class CustomerContactResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,17 +16,19 @@ class CategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'customer_id' => $this->customer_id,
             'name' => $this->name,
-            'description' => $this->description,
+            'email' => $this->email,
+            'contact_number' => $this->contact_number,
+            'role' => $this->role,
+            'address' => $this->address,
+            'city' => $this->city,
+            'state' => $this->state,
+            'country' => $this->country,
+            'zip_code' => $this->zip_code,
             'status' => $this->status,
-            'parent_id' => $this->parent_id,
-            'parent' => $this->parent,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'can' => [
-                'edit' => $request->user()?->can('update', $this->resource),
-                'delete' => $request->user()?->can('delete', $this->resource),
-            ],
         ];
     }
 }

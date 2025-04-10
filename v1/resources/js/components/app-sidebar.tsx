@@ -26,6 +26,11 @@ export function AppSidebar() {
             title: 'Categories',
             href: '/categories',
             icon: Folder,
+        }] : []),
+        ...(auth.can.customers.viewAny ? [{
+            title: 'Customers',
+            href: '/customers',
+            icon: Users,
         }] : [])
     ];
     const footerNavItems: NavItem[] = [

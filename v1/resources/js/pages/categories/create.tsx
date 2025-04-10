@@ -72,7 +72,7 @@ const CreateCategory: FC<CreateCategoryProps> = ({ statuses, categories }) => {
                                         <SelectValue placeholder="Select parent category" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="">None</SelectItem>
+                                        <SelectItem value="0">None</SelectItem>
                                         {categories.map((category) => (
                                             <SelectItem key={category.id} value={category.id.toString()}>
                                                 {category.name}

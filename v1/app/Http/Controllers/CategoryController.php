@@ -24,7 +24,7 @@ class CategoryController extends Controller
             $categories->where('status', $request->input('status'));
         }
 
-        $categories = $categories->paginate(config('all.pagination.per_page'));
+        $categories = $categories->with('parent')->paginate(config('all.pagination.per_page'));
 
         return Inertia::render('categories/index', [
             'categories' => CategoryResource::collection($categories),
@@ -52,7 +52,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'parent_id' => ['nullable', 'exists:categories,id'],
+            'parent_id' => ['nullable', 'exists:categories,id', 'not_in:0'],
             'name' => ['required', 'string', 'max:255', 'unique:categories'],
             'description' => ['nullable', 'string'],
             'status' => ['required', 'string', 'in:' . implode(',', array_keys(config('all.statuses')))],
@@ -69,7 +69,12 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        $categories = Category::all();
+        $categories = Category::where('id', '!=', $category->id)
+                         ->where(function($query) use ($category) {
+                             $query->whereNull('parent_id')
+                                   ->orWhere('parent_id', '!=', $category->id);
+                         })
+                         ->get();
 
         return Inertia::render('categories/edit', [
             'category' => new CategoryResource($category),
