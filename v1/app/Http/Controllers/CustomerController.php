@@ -12,13 +12,14 @@ class CustomerController extends Controller
 
     public function index(Request $request)
     {
-
         $customers = Customer::with('contacts')
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('business_name', 'like', "%{$search}%");
             })
             ->when($request->input('status'), function ($query, $status) {
-                $query->where('status', $status);
+                if ($status != 'all') {
+                    $query->where('status', $status);
+                }
             })
             ->orderBy('business_name')
             ->paginate(config('all.pagination.per_page'));
