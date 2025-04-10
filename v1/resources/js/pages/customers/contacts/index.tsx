@@ -78,28 +78,21 @@ export default function CustomerContactIndex({ customer, contacts }: CustomerCon
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
-                                                        <MoreVertical className="h-4 w-4" />
+                                            <div className="inline-flex gap-2">
+                                                <Link href={route('customers.contacts.edit', [customer.id, contact.id])}>
+                                                    <Button variant="outline" size="icon">
+                                                        <PencilIcon className="h-4 w-4" />
                                                     </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem asChild>
-                                                        <Link href={route('customers.contacts.edit', [customer.id, contact.id])}>
-                                                            <PencilIcon className="mr-2 h-4 w-4" />
-                                                            Edit
-                                                        </Link>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem
-                                                        className="text-red-600"
-                                                        onClick={() => handleDelete(contact)}
-                                                    >
-                                                        <TrashIcon className="mr-2 h-4 w-4" />
-                                                        Delete
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                                </Link>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    onClick={() => handleDelete(contact)}
+                                                    className="text-red-600"
+                                                >
+                                                    <TrashIcon className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}

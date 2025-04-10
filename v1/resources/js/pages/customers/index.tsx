@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { MoreVertical, PencilIcon, PlusIcon, TrashIcon, UsersIcon, SearchIcon } from 'lucide-react';
+import { MoreVertical, PencilIcon, PlusIcon, TrashIcon, UsersIcon, SearchIcon, EyeIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -132,6 +132,11 @@ export default function CustomersIndex({ customers, filters, statuses }: {
                                         </TableCell>
                                         <TableCell>
                                             <div className="inline-flex gap-2">
+                                                <Link href={route('customers.show', customer.id)}>
+                                                    <Button variant="outline" size="icon">
+                                                        <EyeIcon className="h-4 w-4" />
+                                                    </Button>
+                                                </Link>
                                                 {customer.can.edit && (
                                                     <Link href={route('customers.edit', customer.id)}>
                                                         <Button variant="outline" size="icon">
