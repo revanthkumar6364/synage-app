@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class CustomerContact extends Model
+class AccountContact extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'customer_id',
+        'account_id',
         'name',
         'email',
         'contact_number',
@@ -24,8 +24,8 @@ class CustomerContact extends Model
         'status'
     ];
 
-    public function customer(): BelongsTo
+    public function account(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Account::class);
     }
 }

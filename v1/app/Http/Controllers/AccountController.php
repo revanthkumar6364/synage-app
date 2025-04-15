@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
-use App\Http\Resources\CustomerResource;
+use App\Models\Account;
+use App\Http\Resources\AccountResource;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class CustomerController extends Controller
+class AccountController extends Controller
 {
 
     public function index(Request $request)
     {
-        $customers = Customer::with('contacts')
+        $accounts = Account::with('contacts')
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('business_name', 'like', "%{$search}%");
             })
@@ -24,8 +24,8 @@ class CustomerController extends Controller
             ->orderBy('business_name')
             ->paginate(config('all.pagination.per_page'));
 
-        return Inertia::render('customers/index', [
-            'customers' => CustomerResource::collection($customers),
+        return Inertia::render('accounts/index', [
+            'accounts' => AccountResource::collection($accounts),
             'filters' => $request->only(['search', 'status']),
             'statuses' => config('all.statuses'),
         ]);
@@ -33,7 +33,7 @@ class CustomerController extends Controller
 
     public function create()
     {
-        return Inertia::render('customers/create', [
+        return Inertia::render('accounts/create', [
             'industry_types' => config('all.industry_types'),
             'statuses' => config('all.statuses'),
         ]);
@@ -42,7 +42,7 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'business_id' => 'required|unique:customers',
+            'business_id' => 'required|unique:accounts',
             'business_name' => 'required|string|max:255',
             'gst_number' => 'nullable|string|max:255',
             'industry_type' => 'nullable|string|max:255',
@@ -58,36 +58,36 @@ class CustomerController extends Controller
             'status' => 'required|in:active,inactive'
         ]);
 
-        $customer = Customer::create($validated);
+        $account = Account::create($validated);
 
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer created successfully.');
+        return redirect()->route('accounts.index')
+            ->with('success', 'Account created successfully.');
     }
 
-    public function show(Customer $customer)
+    public function show(Account $account)
     {
-        $customer->load(['contacts' => function ($query) {
+        $account->load(['contacts' => function ($query) {
             $query->orderBy('name');
         }]);
 
-        return Inertia::render('customers/show', [
-            'customer' => new CustomerResource($customer),
+        return Inertia::render('accounts/show', [
+            'account' => new AccountResource($account),
         ]);
     }
 
-    public function edit(Customer $customer)
+    public function edit(Account $account)
     {
-        return Inertia::render('customers/edit', [
-            'customer' => new CustomerResource($customer),
+        return Inertia::render('accounts/edit', [
+            'account' => new AccountResource($account),
             'industry_types' => config('all.industry_types'),
             'statuses' => config('all.statuses'),
         ]);
     }
 
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, Account $account)
     {
         $validated = $request->validate([
-            'business_id' => 'required|unique:customers,business_id,' . $customer->id,
+            'business_id' => 'required|unique:accounts,business_id,' . $account->id,
             'business_name' => 'required|string|max:255',
             'gst_number' => 'nullable|string|max:255',
             'industry_type' => 'nullable|string|max:255',
@@ -103,17 +103,17 @@ class CustomerController extends Controller
             'status' => 'required|in:active,inactive'
         ]);
 
-        $customer->update($validated);
+        $account->update($validated);
 
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer updated successfully.');
+        return redirect()->route('accounts.index')
+            ->with('success', 'Account updated successfully.');
     }
 
-    public function destroy(Customer $customer)
+    public function destroy(Account $account)
     {
-        $customer->delete();
+        $account->delete();
 
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer deleted successfully.');
+        return redirect()->route('accounts.index')
+            ->with('success', 'Account deleted successfully.');
     }
 }

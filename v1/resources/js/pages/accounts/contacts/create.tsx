@@ -9,20 +9,20 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { type FC } from 'react';
 
-interface CreateCustomerContactProps {
-    customer: any;
+interface CreateAccountContactProps {
+    account: any;
     statuses: Record<string, string>;
 }
 
-const breadcrumbs = (customer: any): BreadcrumbItem[] => [
+const breadcrumbs = (account: any): BreadcrumbItem[] => [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Customers', href: '/customers' },
-    { title: customer.business_name, href: `/customers/${customer.id}` },
-    { title: 'Contacts', href: `/customers/${customer.id}/contacts` },
+    { title: 'Accounts', href: '/accounts' },
+    { title: account.business_name, href: `/accounts/${account.id}` },
+    { title: 'Contacts', href: `/accounts/${account.id}/contacts` },
     { title: 'Create Contact', href: '#' },
 ];
 
-const CreateCustomerContact: FC<CreateCustomerContactProps> = ({ customer, statuses }) => {
+const CreateAccountContact: FC<CreateAccountContactProps> = ({ account, statuses }) => {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
@@ -38,11 +38,11 @@ const CreateCustomerContact: FC<CreateCustomerContactProps> = ({ customer, statu
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('customers.contacts.store', customer.id));
+        post(route('accounts.contacts.store', account.id));
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(customer)}>
+        <AppLayout breadcrumbs={breadcrumbs(account)}>
             <Head title="Create Contact" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Card>
@@ -190,4 +190,4 @@ const CreateCustomerContact: FC<CreateCustomerContactProps> = ({ customer, statu
     );
 };
 
-export default CreateCustomerContact;
+export default CreateAccountContact;

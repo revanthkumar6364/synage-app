@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Category;
-use App\Models\Customer;
+use App\Models\Account;
 use App\Models\User;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
@@ -56,9 +56,9 @@ class HandleInertiaRequests extends Middleware
                         'viewAny' => $request->user()?->can('viewAny', Category::class),
                         'create' => $request->user()?->can('create', Category::class),
                     ],
-                    'customers' => [
-                        'viewAny' => $request->user()?->can('viewAny', Customer::class),
-                        'create' => $request->user()?->can('create', Customer::class),
+                    'accounts' => [
+                        'viewAny' => $request->user()?->can('viewAny', Account::class),
+                        'create' => $request->user()?->can('create', Account::class),
                     ],
                 ],
             ],

@@ -10,19 +10,19 @@ import { MoreVertical, PencilIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-interface CustomerContactIndexProps {
-    customer: any;
+interface AccountContactIndexProps {
+    account: any;
     contacts: any;
 }
 
-const breadcrumbs = (customer: any): BreadcrumbItem[] => [
+const breadcrumbs = (account: any): BreadcrumbItem[] => [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Customers', href: '/customers' },
-    { title: customer.business_name, href: `/customers/${customer.id}` },
+    { title: 'Accounts', href: '/accounts' },
+    { title: account.business_name, href: `/accounts/${account.id}` },
     { title: 'Contacts', href: '#' },
 ];
 
-export default function CustomerContactIndex({ customer, contacts }: CustomerContactIndexProps) {
+export default function AccountContactIndex({ account, contacts }: AccountContactIndexProps) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [contactToDelete, setContactToDelete] = useState<any>(null);
 
@@ -33,18 +33,18 @@ export default function CustomerContactIndex({ customer, contacts }: CustomerCon
 
     const handleDeleteConfirm = () => {
         if (contactToDelete) {
-            router.delete(route('customers.contacts.destroy', [customer.id, contactToDelete.id]));
+            router.delete(route('accounts.contacts.destroy', [account.id, contactToDelete.id]));
         }
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(customer)}>
-            <Head title="Customer Contacts" />
+        <AppLayout breadcrumbs={breadcrumbs(account)}>
+            <Head title="Account Contacts" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-2xl font-bold tracking-tight">Customer Contacts</CardTitle>
-                        <Link href={route('customers.contacts.create', customer.id)}>
+                        <CardTitle className="text-2xl font-bold tracking-tight">Account Contacts</CardTitle>
+                        <Link href={route('accounts.contacts.create', account.id)}>
                             <Button>
                                 <PlusIcon className="mr-2 h-4 w-4" />
                                 Add Contact
@@ -79,7 +79,7 @@ export default function CustomerContactIndex({ customer, contacts }: CustomerCon
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="inline-flex gap-2">
-                                                <Link href={route('customers.contacts.edit', [customer.id, contact.id])}>
+                                                <Link href={route('accounts.contacts.edit', [account.id, contact.id])}>
                                                     <Button variant="outline" size="icon">
                                                         <PencilIcon className="h-4 w-4" />
                                                     </Button>

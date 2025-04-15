@@ -12,16 +12,16 @@ import { type FC } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Customers', href: '/customers' },
-    { title: 'Create Customer', href: '#' },
+    { title: 'Accounts', href: '/accounts' },
+    { title: 'Create Account', href: '#' },
 ];
 
-interface CreateCustomerProps {
+interface CreateAccountProps {
     industry_types: Record<string, string>;
     statuses: Record<string, string>;
 }
 
-const CreateCustomer: FC<CreateCustomerProps> = ({ industry_types, statuses }) => {
+const CreateAccount: FC<CreateAccountProps> = ({ industry_types, statuses }) => {
     const { data, setData, post, processing, errors } = useForm({
         business_id: '',
         business_name: '',
@@ -41,7 +41,7 @@ const CreateCustomer: FC<CreateCustomerProps> = ({ industry_types, statuses }) =
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('customers.store'));
+        post(route('accounts.store'));
     };
 
     const handleSameAsBilling = (checked: boolean | "indeterminate") => {
@@ -58,11 +58,11 @@ const CreateCustomer: FC<CreateCustomerProps> = ({ industry_types, statuses }) =
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Customer" />
+            <Head title="Create Account" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-2xl font-bold tracking-tight">Create Customer</CardTitle>
+                        <CardTitle className="text-2xl font-bold tracking-tight">Create Account</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
@@ -243,7 +243,7 @@ const CreateCustomer: FC<CreateCustomerProps> = ({ industry_types, statuses }) =
                             </div>
 
                             <Button type="submit" disabled={processing}>
-                                Create Customer
+                                Create Account
                             </Button>
                         </form>
                     </CardContent>
@@ -253,4 +253,4 @@ const CreateCustomer: FC<CreateCustomerProps> = ({ industry_types, statuses }) =
     );
 };
 
-export default CreateCustomer;
+export default CreateAccount;

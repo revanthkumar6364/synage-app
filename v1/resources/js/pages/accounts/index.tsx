@@ -14,16 +14,16 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Customers', href: '/customers' },
+    { title: 'Accounts', href: '/accounts' },
 ];
 
-export default function CustomersIndex({ customers, filters, statuses }: {
-    customers: any;
+export default function AccountsIndex({ accounts, filters, statuses }: {
+    accounts: any;
     filters: any;
     statuses: Record<string, string>;
 }) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+    const [selectedAccount, setSelectedAccount] = useState<any>(null);
 
     const { data, setData } = useForm({
         search: filters.search || '',
@@ -32,24 +32,24 @@ export default function CustomersIndex({ customers, filters, statuses }: {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get(route('customers.index'), data, {
+        router.get(route('accounts.index'), data, {
             preserveState: true,
             preserveScroll: true,
         });
     };
 
-    const handleDelete = (customer: any) => {
-        setSelectedCustomer(customer);
+    const handleDelete = (account: any) => {
+        setSelectedAccount(account);
         setDeleteDialogOpen(true);
     };
 
     const confirmDelete = () => {
-        if (selectedCustomer) {
-            router.delete(route('customers.destroy', selectedCustomer.id), {
+        if (selectedAccount) {
+            router.delete(route('accounts.destroy', selectedAccount.id), {
                 preserveScroll: true,
                 onSuccess: () => {
                     setDeleteDialogOpen(false);
-                    setSelectedCustomer(null);
+                    setSelectedAccount(null);
                 },
             });
         }
@@ -57,16 +57,16 @@ export default function CustomersIndex({ customers, filters, statuses }: {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Customers" />
+            <Head title="Accounts" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Card>
                     <CardHeader>
                         <div className="flex items-center justify-between">
-                            <CardTitle className="text-2xl font-bold tracking-tight">Customers</CardTitle>
-                            <Link href={route('customers.create')}>
+                            <CardTitle className="text-2xl font-bold tracking-tight">Accounts</CardTitle>
+                            <Link href={route('accounts.create')}>
                                 <Button>
                                     <PlusIcon className="mr-2 h-4 w-4" />
-                                    Add Customer
+                                    Add Account
                                 </Button>
                             </Link>
                         </div>
@@ -112,48 +112,48 @@ export default function CustomersIndex({ customers, filters, statuses }: {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {customers.data.map((customer: any) => (
-                                    <TableRow key={customer.id}>
-                                        <TableCell>{customer.business_id}</TableCell>
-                                        <TableCell>{customer.business_name}</TableCell>
-                                        <TableCell>{customer.gst_number}</TableCell>
-                                        <TableCell>{customer.industry_type}</TableCell>
-                                        <TableCell>{customer.billing_city}</TableCell>
+                                {accounts.data.map((account: any) => (
+                                    <TableRow key={account.id}>
+                                        <TableCell>{account.business_id}</TableCell>
+                                        <TableCell>{account.business_name}</TableCell>
+                                        <TableCell>{account.gst_number}</TableCell>
+                                        <TableCell>{account.industry_type}</TableCell>
+                                        <TableCell>{account.billing_city}</TableCell>
                                         <TableCell>
                                             <span
                                                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                                    customer.status === 'active'
+                                                    account.status === 'active'
                                                         ? 'bg-green-100 text-green-800'
                                                         : 'bg-red-100 text-red-800'
                                                 }`}
                                             >
-                                                {customer.status}
+                                                {account.status}
                                             </span>
                                         </TableCell>
                                         <TableCell>
                                             <div className="inline-flex gap-2">
-                                                <Link href={route('customers.show', customer.id)}>
+                                                <Link href={route('accounts.show', account.id)}>
                                                     <Button variant="outline" size="icon">
                                                         <EyeIcon className="h-4 w-4" />
                                                     </Button>
                                                 </Link>
-                                                {customer.can.edit && (
-                                                    <Link href={route('customers.edit', customer.id)}>
+                                                {account.can.edit && (
+                                                    <Link href={route('accounts.edit', account.id)}>
                                                         <Button variant="outline" size="icon">
                                                             <PencilIcon className="h-4 w-4" />
                                                         </Button>
                                                     </Link>
                                                 )}
-                                                <Link href={route('customers.contacts.index', customer.id)}>
+                                                <Link href={route('accounts.contacts.index', account.id)}>
                                                     <Button variant="outline" size="icon">
                                                         <UsersIcon className="h-4 w-4" />
                                                     </Button>
                                                 </Link>
-                                                {customer.can.delete && (
+                                                {account.can.delete && (
                                                     <Button
                                                         variant="outline"
                                                         size="icon"
-                                                        onClick={() => handleDelete(customer)}
+                                                        onClick={() => handleDelete(account)}
                                                         className="text-red-600"
                                                     >
                                                         <TrashIcon className="h-4 w-4" />
@@ -166,7 +166,7 @@ export default function CustomersIndex({ customers, filters, statuses }: {
                             </TableBody>
                         </Table>
 
-                        <Pagination className="mt-4" {...customers.meta} />
+                        <Pagination className="mt-4" {...accounts.meta} />
                     </CardContent>
                 </Card>
             </div>
@@ -175,9 +175,9 @@ export default function CustomersIndex({ customers, filters, statuses }: {
             <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Delete Customer</DialogTitle>
+                        <DialogTitle>Delete Account</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete this customer? This action cannot be undone.
+                            Are you sure you want to delete this account? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

@@ -2,17 +2,17 @@
 
 namespace App\Policies;
 
-use App\Models\Customer;
+use App\Models\Account;
 use App\Models\User;
 
-class CustomerPolicy
+class AccountPolicy
 {
     public function viewAny(User $user): bool
     {
         return in_array($user->role, ['admin', 'manager']);
     }
 
-    public function view(User $user, Customer $customer): bool
+    public function view(User $user, Account $account): bool
     {
         return in_array($user->role, ['admin', 'manager']);
     }
@@ -22,12 +22,12 @@ class CustomerPolicy
         return in_array($user->role, ['admin', 'manager']);
     }
 
-    public function update(User $user, Customer $customer): bool
+    public function update(User $user, Account $account): bool
     {
         return in_array($user->role, ['admin', 'manager']);
     }
 
-    public function delete(User $user, Customer $customer): bool
+    public function delete(User $user, Account $account): bool
     {
         return $user->role === 'admin';
     }

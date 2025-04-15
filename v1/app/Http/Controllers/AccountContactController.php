@@ -2,36 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
-use App\Models\CustomerContact;
-use App\Http\Resources\CustomerContactResource;
+use App\Models\Account;
+use App\Models\AccountContact;
+use App\Http\Resources\AccountContactResource;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class CustomerContactController extends Controller
+class AccountContactController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Customer $customer)
+    public function index(Account $account)
     {
-        $contacts = $customer->contacts()
+        $contacts = $account->contacts()
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('customers/contacts/index', [
-            'customer' => $customer,
-            'contacts' => CustomerContactResource::collection($contacts),
+        return Inertia::render('accounts/contacts/index', [
+            'account' => $account,
+            'contacts' => AccountContactResource::collection($contacts),
         ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Customer $customer)
+    public function create(Account $account)
     {
-        return Inertia::render('customers/contacts/create', [
-            'customer' => $customer,
+        return Inertia::render('accounts/contacts/create', [
+            'account' => $account,
             'statuses' => config('all.statuses'),
         ]);
     }
@@ -39,7 +39,7 @@ class CustomerContactController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Customer $customer)
+    public function store(Request $request, Account $account)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -54,31 +54,31 @@ class CustomerContactController extends Controller
             'status' => 'required|in:active,inactive'
         ]);
 
-        $customer->contacts()->create($validated);
+        $account->contacts()->create($validated);
 
-        return redirect()->route('customers.contacts.index', $customer)
+        return redirect()->route('accounts.contacts.index', $account)
             ->with('success', 'Contact created successfully.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Customer $customer, CustomerContact $contact)
+    public function show(Account $account, AccountContact $contact)
     {
-        return Inertia::render('customers/contacts/show', [
-            'customer' => $customer,
-            'contact' => new CustomerContactResource($contact),
+        return Inertia::render('accounts/contacts/show', [
+            'account' => $account,
+            'contact' => new AccountContactResource($contact),
         ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Customer $customer, CustomerContact $contact)
+    public function edit(Account $account, AccountContact $contact)
     {
-        return Inertia::render('customers/contacts/edit', [
-            'customer' => $customer,
-            'contact' => new CustomerContactResource($contact),
+        return Inertia::render('accounts/contacts/edit', [
+            'account' => $account,
+            'contact' => new AccountContactResource($contact),
             'statuses' => config('all.statuses'),
         ]);
     }
@@ -86,7 +86,7 @@ class CustomerContactController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Customer $customer, CustomerContact $contact)
+    public function update(Request $request, Account $account, AccountContact $contact)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -103,18 +103,18 @@ class CustomerContactController extends Controller
 
         $contact->update($validated);
 
-        return redirect()->route('customers.contacts.index', $customer)
+        return redirect()->route('accounts.contacts.index', $account)
             ->with('success', 'Contact updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Customer $customer, CustomerContact $contact)
+    public function destroy(Account $account, AccountContact $contact)
     {
         $contact->delete();
 
-        return redirect()->route('customers.contacts.index', $customer)
+        return redirect()->route('accounts.contacts.index', $account)
             ->with('success', 'Contact deleted successfully.');
     }
 }

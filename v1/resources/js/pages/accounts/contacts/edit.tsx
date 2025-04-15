@@ -9,21 +9,21 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { type FC } from 'react';
 
-interface EditCustomerContactProps {
-    customer: any;
+interface EditAccountContactProps {
+    account: any;
     contact: any;
     statuses: Record<string, string>;
 }
 
-const breadcrumbs = (customer: any): BreadcrumbItem[] => [
+const breadcrumbs = (account: any): BreadcrumbItem[] => [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Customers', href: '/customers' },
-    { title: customer.business_name, href: `/customers/${customer.id}` },
-    { title: 'Contacts', href: `/customers/${customer.id}/contacts` },
+    { title: 'Accounts', href: '/accounts' },
+    { title: account.business_name, href: `/accounts/${account.id}` },
+    { title: 'Contacts', href: `/accounts/${account.id}/contacts` },
     { title: 'Edit Contact', href: '#' },
 ];
 
-const EditCustomerContact: FC<EditCustomerContactProps> = ({ customer, contact, statuses }) => {
+const EditAccountContact: FC<EditAccountContactProps> = ({ account, contact, statuses }) => {
     const { data, setData, put, processing, errors } = useForm({
         name: contact.data.name,
         email: contact.data.email || '',
@@ -39,11 +39,11 @@ const EditCustomerContact: FC<EditCustomerContactProps> = ({ customer, contact, 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('customers.contacts.update', [customer.id, contact.data.id]));
+        put(route('accounts.contacts.update', [account.id, contact.data.id]));
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(customer)}>
+        <AppLayout breadcrumbs={breadcrumbs(account)}>
             <Head title="Edit Contact" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Card>
@@ -191,4 +191,4 @@ const EditCustomerContact: FC<EditCustomerContactProps> = ({ customer, contact, 
     );
 };
 
-export default EditCustomerContact;
+export default EditAccountContact;

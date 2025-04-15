@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_contacts', function (Blueprint $table) {
+        Schema::create('account_contacts', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('customer_id');
+            $table->unsignedBigInteger('account_id');
             $table->string('name');
             $table->string('email')->nullable();
             $table->string('contact_number')->nullable();
@@ -26,9 +26,9 @@ return new class extends Migration
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
 
-            $table->foreign('customer_id')
+            $table->foreign('account_id')
                 ->references('id')
-                ->on('customers')
+                ->on('accounts')
                 ->onDelete('cascade');
         });
     }
@@ -38,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customer_contacts');
+        Schema::dropIfExists('account_contacts');
     }
 };

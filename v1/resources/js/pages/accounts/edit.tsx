@@ -12,37 +12,37 @@ import { type FC } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Customers', href: '/customers' },
-    { title: 'Edit Customer', href: '#' },
+    { title: 'Accounts', href: '/accounts' },
+    { title: 'Edit Account', href: '#' },
 ];
 
-interface EditCustomerProps {
-    customer: any;
+interface EditAccountProps {
+    account: any;
     industry_types: Record<string, string>;
     statuses: Record<string, string>;
 }
 
-const EditCustomer: FC<EditCustomerProps> = ({ customer, industry_types, statuses }) => {
+const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }) => {
     const { data, setData, put, processing, errors } = useForm({
-        business_id: customer.data.business_id,
-        business_name: customer.data.business_name,
-        gst_number: customer.data.gst_number || '',
-        industry_type: customer.data.industry_type || '',
-        billing_address: customer.data.billing_address || '',
-        billing_location: customer.data.billing_location || '',
-        billing_city: customer.data.billing_city || '',
-        billing_zip_code: customer.data.billing_zip_code || '',
-        shipping_address: customer.data.shipping_address || '',
-        shipping_location: customer.data.shipping_location || '',
-        shipping_city: customer.data.shipping_city || '',
-        shipping_zip_code: customer.data.shipping_zip_code || '',
-        same_as_billing: customer.data.same_as_billing,
-        status: customer.data.status,
+        business_id: account.data.business_id,
+        business_name: account.data.business_name,
+        gst_number: account.data.gst_number || '',
+        industry_type: account.data.industry_type || '',
+        billing_address: account.data.billing_address || '',
+        billing_location: account.data.billing_location || '',
+        billing_city: account.data.billing_city || '',
+        billing_zip_code: account.data.billing_zip_code || '',
+        shipping_address: account.data.shipping_address || '',
+        shipping_location: account.data.shipping_location || '',
+        shipping_city: account.data.shipping_city || '',
+        shipping_zip_code: account.data.shipping_zip_code || '',
+        same_as_billing: account.data.same_as_billing,
+        status: account.data.status,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('customers.update', customer.data.id));
+        put(route('accounts.update', account.data.id));
     };
 
     const handleSameAsBilling = (checked: boolean | "indeterminate") => {
@@ -59,11 +59,11 @@ const EditCustomer: FC<EditCustomerProps> = ({ customer, industry_types, statuse
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Edit Customer" />
+            <Head title="Edit Account" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-2xl font-bold tracking-tight">Edit Customer</CardTitle>
+                        <CardTitle className="text-2xl font-bold tracking-tight">Edit Account</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
@@ -244,7 +244,7 @@ const EditCustomer: FC<EditCustomerProps> = ({ customer, industry_types, statuse
                             </div>
 
                             <Button type="submit" disabled={processing}>
-                                Update Customer
+                                Update Account
                             </Button>
                         </form>
                     </CardContent>
@@ -254,4 +254,4 @@ const EditCustomer: FC<EditCustomerProps> = ({ customer, industry_types, statuse
     );
 };
 
-export default EditCustomer;
+export default EditAccount;

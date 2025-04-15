@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CustomerResource extends JsonResource
+class AccountResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
@@ -25,7 +25,7 @@ class CustomerResource extends JsonResource
             'shipping_zip_code' => $this->shipping_zip_code,
             'same_as_billing' => $this->same_as_billing,
             'status' => $this->status,
-            'contacts' => CustomerContactResource::collection($this->whenLoaded('contacts')),
+            'contacts' => AccountContactResource::collection($this->whenLoaded('contacts')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'can' => [

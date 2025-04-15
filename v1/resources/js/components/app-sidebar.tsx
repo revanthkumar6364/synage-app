@@ -27,9 +27,9 @@ export function AppSidebar() {
             href: '/categories',
             icon: Folder,
         }] : []),
-        ...(auth.can.customers.viewAny ? [{
-            title: 'Customers',
-            href: '/customers',
+        ...(auth.can.accounts.viewAny ? [{
+            title: 'Accounts',
+            href: '/accounts',
             icon: Users,
         }] : [])
     ];

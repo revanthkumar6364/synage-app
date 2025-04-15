@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CustomerContactController;
-use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\AccountContactController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -20,8 +20,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('users/{user}/change-password', [UserController::class, 'updatePassword'])->name('users.update-password');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
-    Route::resource('customers', CustomerController::class);
-    Route::resource('customers.contacts', CustomerContactController::class);
+    Route::resource('accounts', AccountController::class);
+    Route::resource('accounts.contacts', AccountContactController::class);
 });
 
 require __DIR__.'/settings.php';

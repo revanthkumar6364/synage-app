@@ -53,7 +53,7 @@ const CreateCategory: FC<CreateCategoryProps> = ({ statuses, categories }) => {
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
                                 <Input
                                     id="name"
                                     value={data.name}
@@ -83,7 +83,7 @@ const CreateCategory: FC<CreateCategoryProps> = ({ statuses, categories }) => {
                                 {errors.parent_id && <p className="text-sm text-red-500">{errors.parent_id}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
+                                <Label htmlFor="description">Description <span className="text-red-500">*</span></Label>
                                 <Textarea
                                     id="description"
                                     value={data.description}
@@ -94,7 +94,7 @@ const CreateCategory: FC<CreateCategoryProps> = ({ statuses, categories }) => {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="status">Status</Label>
+                                <Label htmlFor="status">Status <span className="text-red-500">*</span></Label>
                                 <Select value={data.status} onValueChange={(value) => setData('status', value)}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select status" />
