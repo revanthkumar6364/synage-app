@@ -17,7 +17,7 @@ export default function AuthCardLayout({
             <div className="flex w-full max-w-md flex-col gap-6">
                 <Link href={route('home')} className="flex items-center gap-2 self-center font-medium">
                     <div className="flex items-center justify-center bg-background rounded-md p-2">
-                        <img src="/images/logo.webp" alt="RadiantSynage" className="h-8 w-auto" />
+                        <img src="/images/logo.png" alt="RadiantSynage" className="h-8 w-auto" />
                     </div>
                 </Link>
 
