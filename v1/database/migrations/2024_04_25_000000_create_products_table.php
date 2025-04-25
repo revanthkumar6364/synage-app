@@ -19,6 +19,10 @@ return new class extends Migration
             $table->decimal('price_per_sqft', 10, 2)->nullable();
             $table->string('brand')->nullable();
             $table->string('hsn_code')->nullable();
+            $table->string('type')->nullable();
+            $table->decimal('gst_percentage', 5, 2)->nullable();
+            $table->decimal('min_price', 10, 2)->nullable();
+            $table->decimal('max_price', 10, 2)->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });

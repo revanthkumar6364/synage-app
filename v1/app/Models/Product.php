@@ -17,17 +17,23 @@ class Product extends Model
         'sku',
         'description',
         'price',
-        'price_per_sqft',
+        'min_price',
+        'max_price',
         'unit',
-        'hsn_code',
+        'price_per_sqft',
         'brand',
-        'status',
+        'type',
+        'gst_percentage',
+        'hsn_code',
+        'status'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'min_price' => 'decimal:2',
+        'max_price' => 'decimal:2',
         'price_per_sqft' => 'decimal:2',
-        'status' => 'string',
+        'gst_percentage' => 'decimal:2'
     ];
 
     public function category(): BelongsTo
@@ -46,5 +52,13 @@ class Product extends Model
         $prefix = 'PRD';
         $random = strtoupper(substr(uniqid(), -6));
         return $prefix . $random;
+    }
+
+    public function getPriceRangeAttribute()
+    {
+        if ($this->min_price && $this->max_price) {
+            return "₹{$this->min_price} - ₹{$this->max_price}";
+        }
+        return "₹{$this->price}";
     }
 }

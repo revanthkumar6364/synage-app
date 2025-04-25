@@ -4,10 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
-use App\Http\Requests\Product\StoreProductRequest;
-use App\Http\Requests\Product\UpdateProductRequest;
-use App\Http\Resources\ProductResource;
-use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Inertia\Inertia;
@@ -25,17 +21,20 @@ class ProductController extends Controller
 
     public function index()
     {
-        $products = Product::with('category')->latest()->paginate(10);
-        return inertia('products/index', [
-            'products' => $products,
+        $products = Product::with('category')
+            ->latest()
+            ->paginate(10);
+
+        return Inertia::render('products/index', [
+            'products' => $products
         ]);
     }
 
     public function create()
     {
         $categories = Category::all();
-        return inertia('products/create', [
-            'categories' => $categories,
+        return Inertia::render('products/create', [
+            'categories' => $categories
         ]);
     }
 
@@ -44,17 +43,21 @@ class ProductController extends Controller
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'sku' => 'required|string|max:255|unique:products',
+            'sku' => 'required|string|unique:products,sku',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'price_per_sqft' => 'required|numeric|min:0',
-            'unit' => 'nullable|string|max:50',
+            'min_price' => 'nullable|numeric|min:0',
+            'max_price' => 'nullable|numeric|min:0|gte:min_price',
+            'unit' => 'required|string|max:50',
+            'price_per_sqft' => 'nullable|numeric|min:0',
+            'brand' => 'nullable|string|max:255',
+            'type' => 'nullable|string|max:255',
+            'gst_percentage' => 'nullable|numeric|min:0|max:100',
             'hsn_code' => 'nullable|string|max:50',
-            'brand' => 'required|string|max:255',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:active,inactive'
         ]);
 
-        Product::create($validated);
+        $product = Product::create($validated);
 
         return redirect()->route('products.index')
             ->with('success', 'Product created successfully.');
@@ -63,9 +66,9 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::all();
-        return inertia('products/edit', [
+        return Inertia::render('products/edit', [
             'product' => $product,
-            'categories' => $categories,
+            'categories' => $categories
         ]);
     }
 
@@ -74,14 +77,18 @@ class ProductController extends Controller
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'sku' => 'required|string|max:255|unique:products,sku,' . $product->id,
+            'sku' => 'required|string|unique:products,sku,' . $product->id,
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'price_per_sqft' => 'required|numeric|min:0',
-            'unit' => 'nullable|string|max:50',
+            'min_price' => 'nullable|numeric|min:0',
+            'max_price' => 'nullable|numeric|min:0|gte:min_price',
+            'unit' => 'required|string|max:50',
+            'price_per_sqft' => 'nullable|numeric|min:0',
+            'brand' => 'nullable|string|max:255',
+            'type' => 'nullable|string|max:255',
+            'gst_percentage' => 'nullable|numeric|min:0|max:100',
             'hsn_code' => 'nullable|string|max:50',
-            'brand' => 'required|string|max:255',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:active,inactive'
         ]);
 
         $product->update($validated);

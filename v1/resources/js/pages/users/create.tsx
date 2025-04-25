@@ -185,11 +185,11 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                                 <Button type="button" variant="outline" onClick={() => window.history.back()}>
                                     Cancel
                                 </Button>
-                                <Button type="submit" disabled={processing}>
-                                    Create User
-                                </Button>
+                            <Button type="submit" disabled={processing}>
+                                Create User
+                            </Button>
                             </div>
-                        </form>
+                    </form>
                     </CardContent>
                 </Card>
             </div>

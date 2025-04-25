@@ -23,6 +23,12 @@ interface Product {
     name: string;
     sku: string;
     price: number | string;
+    min_price: number | null;
+    max_price: number | null;
+    unit: string;
+    brand: string;
+    type: string | null;
+    gst_percentage: number | null;
     status: string;
     category: {
         name: string;
@@ -66,6 +72,10 @@ const Index: FC<IndexProps> = ({ products }) => {
                                     <TableHead>SKU</TableHead>
                                     <TableHead>Category</TableHead>
                                     <TableHead>Price</TableHead>
+                                    <TableHead>Unit</TableHead>
+                                    <TableHead>Brand</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>GST %</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
@@ -76,7 +86,15 @@ const Index: FC<IndexProps> = ({ products }) => {
                                         <TableCell>{product.name}</TableCell>
                                         <TableCell>{product.sku}</TableCell>
                                         <TableCell>{product.category.name}</TableCell>
-                                        <TableCell>{formatPrice(product.price)}</TableCell>
+                                        <TableCell>
+                                            {product.min_price && product.max_price
+                                                ? `${formatPrice(product.min_price)} - ${formatPrice(product.max_price)}`
+                                                : formatPrice(product.price)}
+                                        </TableCell>
+                                        <TableCell>{product.unit}</TableCell>
+                                        <TableCell>{product.brand}</TableCell>
+                                        <TableCell>{product.type || '-'}</TableCell>
+                                        <TableCell>{product.gst_percentage ? `${product.gst_percentage}%` : '-'}</TableCell>
                                         <TableCell>
                                             <span
                                                 className={`rounded-full px-2 py-1 text-xs ${

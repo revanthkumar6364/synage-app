@@ -65,93 +65,93 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes }) =
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        id="name"
-                                        value={data.name}
-                                        onChange={(e) => setData('name', e.target.value)}
-                                        placeholder="Enter user name"
-                                    />
-                                    {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
-                                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
+                                <Input
+                                    id="name"
+                                    value={data.name}
+                                    onChange={(e) => setData('name', e.target.value)}
+                                    placeholder="Enter user name"
+                                />
+                                {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                            </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        value={data.email}
-                                        onChange={(e) => setData('email', e.target.value)}
-                                        placeholder="Enter user email"
-                                    />
-                                    {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    value={data.email}
+                                    onChange={(e) => setData('email', e.target.value)}
+                                    placeholder="Enter user email"
+                                />
+                                {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="country_code">Country Code <span className="text-red-500">*</span></Label>
-                                    <Select value={data.country_code} onValueChange={(value) => setData('country_code', value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select country code" />
-                                        </SelectTrigger>
-                                        <SelectContent>
+                            <div className="space-y-2">
+                                <Label htmlFor="country_code">Country Code <span className="text-red-500">*</span></Label>
+                                <Select value={data.country_code} onValueChange={(value) => setData('country_code', value)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select country code" />
+                                    </SelectTrigger>
+                                    <SelectContent>
                                             {Object.entries(country_codes).map(([code, country]) => (
                                                 <SelectItem key={code} value={code}>
                                                     {code} - {country}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.country_code && <p className="text-sm text-red-500">{errors.country_code}</p>}
-                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.country_code && <p className="text-sm text-red-500">{errors.country_code}</p>}
+                            </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="mobile">Mobile <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        id="mobile"
-                                        value={data.mobile}
-                                        onChange={(e) => setData('mobile', e.target.value)}
-                                        placeholder="Enter mobile number"
-                                    />
-                                    {errors.mobile && <p className="text-sm text-red-500">{errors.mobile}</p>}
+                            <div className="space-y-2">
+                                <Label htmlFor="mobile">Mobile <span className="text-red-500">*</span></Label>
+                                <Input
+                                    id="mobile"
+                                    value={data.mobile}
+                                    onChange={(e) => setData('mobile', e.target.value)}
+                                    placeholder="Enter mobile number"
+                                />
+                                {errors.mobile && <p className="text-sm text-red-500">{errors.mobile}</p>}
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="role">Role <span className="text-red-500">*</span></Label>
-                                    <Select value={data.role} onValueChange={(value) => setData('role', value)}>
-                                        <SelectTrigger>
+                            <div className="space-y-2">
+                                <Label htmlFor="role">Role <span className="text-red-500">*</span></Label>
+                                <Select value={data.role} onValueChange={(value) => setData('role', value)}>
+                                    <SelectTrigger>
                                             <SelectValue placeholder="Select role" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {Object.entries(roles).map(([value, label]) => (
-                                                <SelectItem key={value} value={value}>
-                                                    {label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
-                                </div>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(roles).map(([value, label]) => (
+                                            <SelectItem key={value} value={value}>
+                                                {label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
+                            </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="status">Status <span className="text-red-500">*</span></Label>
-                                    <Select value={data.status} onValueChange={(value) => setData('status', value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {Object.entries(statuses).map(([value, label]) => (
-                                                <SelectItem key={value} value={value}>
-                                                    {label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
+                            <div className="space-y-2">
+                                <Label htmlFor="status">Status <span className="text-red-500">*</span></Label>
+                                <Select value={data.status} onValueChange={(value) => setData('status', value)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.entries(statuses).map(([value, label]) => (
+                                            <SelectItem key={value} value={value}>
+                                                {label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
                                 </div>
                             </div>
 
@@ -159,9 +159,9 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes }) =
                                 <Button type="button" variant="outline" onClick={() => window.history.back()}>
                                     Cancel
                                 </Button>
-                                <Button type="submit" disabled={processing}>
-                                    Update User
-                                </Button>
+                            <Button type="submit" disabled={processing}>
+                                Update User
+                            </Button>
                             </div>
                         </form>
                     </CardContent>

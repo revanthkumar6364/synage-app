@@ -33,11 +33,15 @@ interface EditProps {
         sku: string;
         description: string;
         price: number;
-        price_per_sqft: number;
+        min_price: number | null;
+        max_price: number | null;
         unit: string;
-        hsn_code: string;
+        price_per_sqft: number | null;
         brand: string;
-        status: string;
+        type: string | null;
+        gst_percentage: number | null;
+        hsn_code: string | null;
+        status: 'active' | 'inactive';
     };
     categories: Array<{
         id: number;
@@ -52,10 +56,14 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
         sku: product.sku,
         description: product.description,
         price: product.price.toString(),
-        price_per_sqft: product.price_per_sqft.toString(),
+        min_price: product.min_price?.toString() || '',
+        max_price: product.max_price?.toString() || '',
         unit: product.unit,
-        hsn_code: product.hsn_code,
+        price_per_sqft: product.price_per_sqft?.toString() || '',
         brand: product.brand,
+        type: product.type || '',
+        gst_percentage: product.gst_percentage?.toString() || '',
+        hsn_code: product.hsn_code || '',
         status: product.status,
     });
 
@@ -80,121 +88,170 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="category_id">Category <span className="text-red-500">*</span></Label>
-                                <Select
-                                    value={data.category_id}
-                                    onValueChange={(value) => setData('category_id', value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categories.map((category) => (
-                                            <SelectItem key={category.id} value={category.id.toString()}>
-                                                {category.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.category_id && <p className="text-sm text-red-500">{errors.category_id}</p>}
-                            </div>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="category_id">Category <span className="text-red-500">*</span></Label>
+                                    <Select
+                                        value={data.category_id}
+                                        onValueChange={(value) => setData('category_id', value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {categories.map((category) => (
+                                                <SelectItem key={category.id} value={category.id.toString()}>
+                                                    {category.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.category_id && <p className="text-sm text-red-500">{errors.category_id}</p>}
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="name"
-                                    value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
-                                    placeholder="Enter product name"
-                                />
-                                {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
-                            </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        id="name"
+                                        value={data.name}
+                                        onChange={(e) => setData('name', e.target.value)}
+                                        placeholder="Enter product name"
+                                    />
+                                    {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="sku">SKU <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="sku"
-                                    value={data.sku}
-                                    onChange={(e) => setData('sku', e.target.value)}
-                                    placeholder="Enter SKU"
-                                />
-                                {errors.sku && <p className="text-sm text-red-500">{errors.sku}</p>}
-                            </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="sku">SKU <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        id="sku"
+                                        value={data.sku}
+                                        onChange={(e) => setData('sku', e.target.value)}
+                                        placeholder="Enter SKU"
+                                    />
+                                    {errors.sku && <p className="text-sm text-red-500">{errors.sku}</p>}
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="price">Price <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="price"
-                                    type="number"
-                                    value={data.price}
-                                    onChange={(e) => setData('price', e.target.value)}
-                                    placeholder="Enter price"
-                                />
-                                {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
-                            </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="price">Price <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        id="price"
+                                        type="number"
+                                        value={data.price}
+                                        onChange={(e) => setData('price', e.target.value)}
+                                        placeholder="Enter price"
+                                    />
+                                    {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="price_per_sqft">Price per Square Foot <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="price_per_sqft"
-                                    type="number"
-                                    value={data.price_per_sqft}
-                                    onChange={(e) => setData('price_per_sqft', e.target.value)}
-                                    placeholder="Enter price per square foot"
-                                />
-                                {errors.price_per_sqft && <p className="text-sm text-red-500">{errors.price_per_sqft}</p>}
-                            </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="min_price">Min Price</Label>
+                                    <Input
+                                        id="min_price"
+                                        type="number"
+                                        value={data.min_price}
+                                        onChange={(e) => setData('min_price', e.target.value)}
+                                        placeholder="Enter min price"
+                                    />
+                                    {errors.min_price && <p className="text-sm text-red-500">{errors.min_price}</p>}
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="brand">Brand <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="brand"
-                                    value={data.brand}
-                                    onChange={(e) => setData('brand', e.target.value)}
-                                    placeholder="Enter brand name"
-                                />
-                                {errors.brand && <p className="text-sm text-red-500">{errors.brand}</p>}
-                            </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="max_price">Max Price</Label>
+                                    <Input
+                                        id="max_price"
+                                        type="number"
+                                        value={data.max_price}
+                                        onChange={(e) => setData('max_price', e.target.value)}
+                                        placeholder="Enter max price"
+                                    />
+                                    {errors.max_price && <p className="text-sm text-red-500">{errors.max_price}</p>}
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="unit">Unit</Label>
-                                <Input
-                                    id="unit"
-                                    value={data.unit}
-                                    onChange={(e) => setData('unit', e.target.value)}
-                                    placeholder="Enter unit"
-                                />
-                                {errors.unit && <p className="text-sm text-red-500">{errors.unit}</p>}
-                            </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="unit">Unit <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        id="unit"
+                                        value={data.unit}
+                                        onChange={(e) => setData('unit', e.target.value)}
+                                        placeholder="Enter unit"
+                                    />
+                                    {errors.unit && <p className="text-sm text-red-500">{errors.unit}</p>}
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="hsn_code">HSN Code</Label>
-                                <Input
-                                    id="hsn_code"
-                                    value={data.hsn_code}
-                                    onChange={(e) => setData('hsn_code', e.target.value)}
-                                    placeholder="Enter HSN Code"
-                                />
-                                {errors.hsn_code && <p className="text-sm text-red-500">{errors.hsn_code}</p>}
-                            </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="price_per_sqft">Price per Square Foot</Label>
+                                    <Input
+                                        id="price_per_sqft"
+                                        type="number"
+                                        value={data.price_per_sqft}
+                                        onChange={(e) => setData('price_per_sqft', e.target.value)}
+                                        placeholder="Enter price per square foot"
+                                    />
+                                    {errors.price_per_sqft && <p className="text-sm text-red-500">{errors.price_per_sqft}</p>}
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="status">Status <span className="text-red-500">*</span></Label>
-                                <Select
-                                    value={data.status}
-                                    onValueChange={(value) => setData('status', value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="active">Active</SelectItem>
-                                        <SelectItem value="inactive">Inactive</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
+                                <div className="space-y-2">
+                                    <Label htmlFor="brand">Brand</Label>
+                                    <Input
+                                        id="brand"
+                                        value={data.brand}
+                                        onChange={(e) => setData('brand', e.target.value)}
+                                        placeholder="Enter brand name"
+                                    />
+                                    {errors.brand && <p className="text-sm text-red-500">{errors.brand}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="type">Type</Label>
+                                    <Input
+                                        id="type"
+                                        value={data.type}
+                                        onChange={(e) => setData('type', e.target.value)}
+                                        placeholder="Enter product type"
+                                    />
+                                    {errors.type && <p className="text-sm text-red-500">{errors.type}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="gst_percentage">GST Percentage</Label>
+                                    <Input
+                                        id="gst_percentage"
+                                        type="number"
+                                        value={data.gst_percentage}
+                                        onChange={(e) => setData('gst_percentage', e.target.value)}
+                                        placeholder="Enter GST percentage"
+                                    />
+                                    {errors.gst_percentage && <p className="text-sm text-red-500">{errors.gst_percentage}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="hsn_code">HSN Code</Label>
+                                    <Input
+                                        id="hsn_code"
+                                        value={data.hsn_code}
+                                        onChange={(e) => setData('hsn_code', e.target.value)}
+                                        placeholder="Enter HSN Code"
+                                    />
+                                    {errors.hsn_code && <p className="text-sm text-red-500">{errors.hsn_code}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="status">Status <span className="text-red-500">*</span></Label>
+                                    <Select
+                                        value={data.status}
+                                        onValueChange={(value) => setData('status', value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="active">Active</SelectItem>
+                                            <SelectItem value="inactive">Inactive</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
+                                </div>
                             </div>
 
                             <div className="space-y-2">
