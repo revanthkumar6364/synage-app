@@ -40,7 +40,7 @@ interface IndexProps {
 const Index: FC<IndexProps> = ({ products }) => {
     const formatPrice = (price: number | string) => {
         const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
-        return `$${numericPrice.toFixed(2)}`;
+        return `₹${numericPrice.toFixed(2)}`;
     };
 
     return (

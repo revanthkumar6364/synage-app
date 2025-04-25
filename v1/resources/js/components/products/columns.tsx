@@ -46,7 +46,7 @@ export const columns: ColumnDef<Product>[] = [
         header: () => <div className="text-right">Price</div>,
         cell: ({ row }) => {
             const price = parseFloat(row.getValue("price"))
-            return <div className="text-right font-medium">${price.toFixed(2)}</div>
+            return <div className="text-right font-medium">₹{price.toFixed(2)}</div>
         },
     },
     {
