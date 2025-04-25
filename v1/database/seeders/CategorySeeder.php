@@ -14,53 +14,27 @@ class CategorySeeder extends Seeder
     {
         $categories = [
             [
-                'name' => 'Electronics',
-                'description' => 'Electronic devices and accessories',
+                'name' => 'Commercial Displays',
                 'status' => 'active',
             ],
             [
-                'name' => 'Clothing',
-                'description' => 'Apparel and fashion items',
+                'name' => 'Kiosks',
                 'status' => 'active',
             ],
             [
-                'name' => 'Home & Kitchen',
-                'description' => 'Home appliances and kitchenware',
+                'name' => 'Active LED Al diecast',
                 'status' => 'active',
             ],
             [
-                'name' => 'Books',
-                'description' => 'Books and educational materials',
+                'name' => 'Cabinets',
                 'status' => 'active',
             ],
             [
-                'name' => 'Sports & Outdoors',
-                'description' => 'Sports equipment and outdoor gear',
+                'name' => 'Media Players',
                 'status' => 'active',
             ],
             [
-                'name' => 'Beauty & Personal Care',
-                'description' => 'Beauty products and personal care items',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Toys & Games',
-                'description' => 'Toys, games, and entertainment items',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Automotive',
-                'description' => 'Automotive parts and accessories',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Health & Household',
-                'description' => 'Health products and household essentials',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Office Supplies',
-                'description' => 'Office equipment and supplies',
+                'name' => 'Controllers',
                 'status' => 'active',
             ],
         ];

@@ -15,17 +15,16 @@ class Product extends Model
         'category_id',
         'name',
         'sku',
-        'description',
-        'price',
-        'min_price',
-        'max_price',
-        'unit',
-        'price_per_sqft',
+        'hsn_code',
         'brand',
         'type',
         'gst_percentage',
-        'hsn_code',
-        'status'
+        'price',
+        'price_per_sqft',
+        'min_price',
+        'max_price',
+        'description',
+        'status',
     ];
 
     protected $casts = [

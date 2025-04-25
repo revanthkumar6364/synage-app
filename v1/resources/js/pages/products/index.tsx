@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { PlusIcon } from 'lucide-react';
 import { type FC } from 'react';
 
@@ -44,9 +45,14 @@ interface IndexProps {
 }
 
 const Index: FC<IndexProps> = ({ products }) => {
-    const formatPrice = (price: number | string) => {
+    const formatPrice = (price: number | string | null | undefined): string => {
+        if (!price) return 'N/A';
         const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
         return `₹${numericPrice.toFixed(2)}`;
+    };
+
+    const handlePageChange = (page: number) => {
+        router.get(route('products.index'), { page });
     };
 
     return (
@@ -117,6 +123,50 @@ const Index: FC<IndexProps> = ({ products }) => {
                                 ))}
                             </TableBody>
                         </Table>
+
+                        {/* Pagination */}
+                        <Pagination className="mt-4">
+                            <PaginationContent>
+                                {products.current_page > 1 && (
+                                    <PaginationItem>
+                                        <PaginationPrevious
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handlePageChange(products.current_page - 1);
+                                            }}
+                                        />
+                                    </PaginationItem>
+                                )}
+
+                                {Array.from({ length: products.last_page }, (_, i) => i + 1).map((page) => (
+                                    <PaginationItem key={page}>
+                                        <PaginationLink
+                                            href="#"
+                                            isActive={page === products.current_page}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handlePageChange(page);
+                                            }}
+                                        >
+                                            {page}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                ))}
+
+                                {products.current_page < products.last_page && (
+                                    <PaginationItem>
+                                        <PaginationNext
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handlePageChange(products.current_page + 1);
+                                            }}
+                                        />
+                                    </PaginationItem>
+                                )}
+                            </PaginationContent>
+                        </Pagination>
                     </CardContent>
                 </Card>
             </div>
