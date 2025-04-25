@@ -58,6 +58,14 @@ class CategoryController extends Controller
             'status' => ['required', 'string', 'in:' . implode(',', array_keys(config('all.statuses')))],
         ]);
 
+        // Check if the parent category is not a subcategory
+        if ($request->parent_id) {
+            $parentCategory = Category::find($request->parent_id);
+            if ($parentCategory->parent_id !== null) {
+                return back()->withErrors(['parent_id' => 'A subcategory cannot be a parent category.']);
+            }
+        }
+
         Category::create($request->only(['parent_id', 'name', 'description', 'status']));
 
         return redirect()->route('categories.index')
@@ -94,6 +102,22 @@ class CategoryController extends Controller
             'description' => ['nullable', 'string'],
             'status' => ['required', 'string', 'in:' . implode(',', array_keys(config('all.statuses')))],
         ]);
+
+        // Check if the parent category is not a subcategory
+        if ($request->parent_id) {
+            $parentCategory = Category::find($request->parent_id);
+            if ($parentCategory->parent_id !== null) {
+                return back()->withErrors(['parent_id' => 'A subcategory cannot be a parent category.']);
+            }
+        }
+
+        // Check if the category is not being made a parent of its own children
+        if ($request->parent_id) {
+            $childrenIds = $category->children()->pluck('id')->toArray();
+            if (in_array($request->parent_id, $childrenIds)) {
+                return back()->withErrors(['parent_id' => 'A category cannot be a child of its own subcategory.']);
+            }
+        }
 
         $category->update($request->only(['parent_id', 'name', 'description', 'status']));
 

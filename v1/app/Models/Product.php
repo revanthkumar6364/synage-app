@@ -17,13 +17,16 @@ class Product extends Model
         'sku',
         'description',
         'price',
+        'price_per_sqft',
         'unit',
         'hsn_code',
+        'brand',
         'status',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'price_per_sqft' => 'decimal:2',
         'status' => 'string',
     ];
 

@@ -47,8 +47,10 @@ class ProductController extends Controller
             'sku' => 'required|string|max:255|unique:products',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'price_per_sqft' => 'required|numeric|min:0',
             'unit' => 'nullable|string|max:50',
             'hsn_code' => 'nullable|string|max:50',
+            'brand' => 'required|string|max:255',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -75,8 +77,10 @@ class ProductController extends Controller
             'sku' => 'required|string|max:255|unique:products,sku,' . $product->id,
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'price_per_sqft' => 'required|numeric|min:0',
             'unit' => 'nullable|string|max:50',
             'hsn_code' => 'nullable|string|max:50',
+            'brand' => 'required|string|max:255',
             'status' => 'required|in:active,inactive',
         ]);
 

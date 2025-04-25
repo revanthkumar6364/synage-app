@@ -39,8 +39,10 @@ const Create: FC<CreateProps> = ({ categories }) => {
         sku: '',
         description: '',
         price: '',
+        price_per_sqft: '',
         unit: '',
         hsn_code: '',
+        brand: '',
         status: 'active',
     });
 
@@ -118,6 +120,29 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                     placeholder="Enter price"
                                 />
                                 {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="price_per_sqft">Price per Square Foot <span className="text-red-500">*</span></Label>
+                                <Input
+                                    id="price_per_sqft"
+                                    type="number"
+                                    value={data.price_per_sqft}
+                                    onChange={(e) => setData('price_per_sqft', e.target.value)}
+                                    placeholder="Enter price per square foot"
+                                />
+                                {errors.price_per_sqft && <p className="text-sm text-red-500">{errors.price_per_sqft}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="brand">Brand <span className="text-red-500">*</span></Label>
+                                <Input
+                                    id="brand"
+                                    value={data.brand}
+                                    onChange={(e) => setData('brand', e.target.value)}
+                                    placeholder="Enter brand name"
+                                />
+                                {errors.brand && <p className="text-sm text-red-500">{errors.brand}</p>}
                             </div>
 
                             <div className="space-y-2">

@@ -16,6 +16,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
             $table->string('unit')->nullable();
+            $table->decimal('price_per_sqft', 10, 2)->nullable();
+            $table->string('brand')->nullable();
             $table->string('hsn_code')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();

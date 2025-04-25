@@ -132,11 +132,12 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'role' => ['required', 'string', 'in:' . implode(',', array_keys(config('all.roles')))],
+            'status' => ['required', 'string', 'in:' . implode(',', array_keys(config('all.statuses')))],
             'country_code' => ['required', 'string'],
-            'mobile' => ['required', 'string', 'max:10', 'unique:users,mobile,' . $user->id],
+            'mobile' => ['required', 'string', 'max:15', 'unique:users,mobile,' . $user->id],
         ]);
 
-        $user->update($request->only(['name', 'email', 'role']));
+        $user->update($request->only(['name', 'email', 'role', 'status', 'country_code', 'mobile']));
 
         return redirect()->route('users.index')
             ->with('success', 'User updated successfully.');
@@ -158,12 +159,16 @@ class UserController extends Controller
     public function updateRole(Request $request, User $user)
     {
         $request->validate([
-            'role' => ['required', 'string', 'in:admin,manager,user'],
+            'role' => ['required', 'string', 'in:' . implode(',', array_keys(config('all.roles')))],
         ]);
 
         if ($user->id === $request->user()->id) {
             return redirect()->route('users.index')
                 ->with('error', 'You cannot change your own role.');
+        }
+
+        if ($request->user()->cannot('update', $user)) {
+            abort(403);
         }
 
         $user->update([

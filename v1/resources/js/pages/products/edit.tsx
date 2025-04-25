@@ -33,8 +33,10 @@ interface EditProps {
         sku: string;
         description: string;
         price: number;
+        price_per_sqft: number;
         unit: string;
         hsn_code: string;
+        brand: string;
         status: string;
     };
     categories: Array<{
@@ -50,8 +52,10 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
         sku: product.sku,
         description: product.description,
         price: product.price.toString(),
+        price_per_sqft: product.price_per_sqft.toString(),
         unit: product.unit,
         hsn_code: product.hsn_code,
+        brand: product.brand,
         status: product.status,
     });
 
@@ -129,6 +133,29 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     placeholder="Enter price"
                                 />
                                 {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="price_per_sqft">Price per Square Foot <span className="text-red-500">*</span></Label>
+                                <Input
+                                    id="price_per_sqft"
+                                    type="number"
+                                    value={data.price_per_sqft}
+                                    onChange={(e) => setData('price_per_sqft', e.target.value)}
+                                    placeholder="Enter price per square foot"
+                                />
+                                {errors.price_per_sqft && <p className="text-sm text-red-500">{errors.price_per_sqft}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="brand">Brand <span className="text-red-500">*</span></Label>
+                                <Input
+                                    id="brand"
+                                    value={data.brand}
+                                    onChange={(e) => setData('brand', e.target.value)}
+                                    placeholder="Enter brand name"
+                                />
+                                {errors.brand && <p className="text-sm text-red-500">{errors.brand}</p>}
                             </div>
 
                             <div className="space-y-2">
