@@ -30,11 +30,16 @@ interface CreateCategoryProps {
 }
 
 const CreateCategory: FC<CreateCategoryProps> = ({ statuses, categories }) => {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<{
+        name: string;
+        description: string;
+        status: string;
+        parent_id: string | null;
+    }>({
         name: '',
         description: '',
         status: 'active',
-        parent_id: '',
+        parent_id: null,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -65,14 +70,20 @@ const CreateCategory: FC<CreateCategoryProps> = ({ statuses, categories }) => {
                             <div className="space-y-2">
                                 <Label htmlFor="parent_id">Parent</Label>
                                 <Select
-                                    value={data.parent_id || undefined}
-                                    onValueChange={(value) => setData('parent_id', value)}
+                                    value={data.parent_id === null ? "0" : data.parent_id}
+                                    onValueChange={(value) => {
+                                        if (value === "0") {
+                                            setData('parent_id', null);
+                                        } else {
+                                            setData('parent_id', value);
+                                        }
+                                    }}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select parent category" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="">None</SelectItem>
+                                        <SelectItem value="0">None</SelectItem>
                                         {categories
                                             .filter(category => !category.parent_id)
                                             .map((category) => (
@@ -88,7 +99,7 @@ const CreateCategory: FC<CreateCategoryProps> = ({ statuses, categories }) => {
                                 <Label htmlFor="description">Description <span className="text-red-500">*</span></Label>
                                 <Textarea
                                     id="description"
-                                    value={data.description}
+                                    value={data.description || ''}
                                     onChange={(e) => setData('description', e.target.value)}
                                     placeholder="Enter category description"
                                 />

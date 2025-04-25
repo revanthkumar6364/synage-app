@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -63,11 +63,11 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                             </Link>
                         </div>
                     </CardHeader>
-                    <form onSubmit={handleSubmit}>
-                        <CardContent className="space-y-4">
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    <CardContent>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Name <span className='text-red-500'>*</span></Label>
+                                    <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
                                     <Input
                                         id="name"
                                         value={data.name}
@@ -76,8 +76,9 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                                     />
                                     {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                                 </div>
+
                                 <div className="space-y-2">
-                                    <Label htmlFor="email">Email <span className='text-red-500'>*</span></Label>
+                                    <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
                                     <Input
                                         id="email"
                                         type="email"
@@ -88,9 +89,10 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                                     {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                                 </div>
                             </div>
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="country_code">Country Code <span className='text-red-500'>*</span></Label>
+                                    <Label htmlFor="country_code">Country Code <span className="text-red-500">*</span></Label>
                                     <Select value={data.country_code} onValueChange={(value) => setData('country_code', value)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select country code" />
@@ -105,8 +107,9 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                                     </Select>
                                     {errors.country_code && <p className="text-sm text-red-500">{errors.country_code}</p>}
                                 </div>
+
                                 <div className="space-y-2">
-                                    <Label htmlFor="mobile">Mobile <span className='text-red-500'>*</span></Label>
+                                    <Label htmlFor="mobile">Mobile <span className="text-red-500">*</span></Label>
                                     <Input
                                         id="mobile"
                                         value={data.mobile}
@@ -116,9 +119,10 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                                     {errors.mobile && <p className="text-sm text-red-500">{errors.mobile}</p>}
                                 </div>
                             </div>
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="password">Password <span className='text-red-500'>*</span></Label>
+                                    <Label htmlFor="password">Password <span className="text-red-500">*</span></Label>
                                     <Input
                                         id="password"
                                         type="password"
@@ -128,8 +132,9 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                                     />
                                     {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
                                 </div>
+
                                 <div className="space-y-2">
-                                    <Label htmlFor="password_confirmation">Confirm Password <span className='text-red-500'>*</span></Label>
+                                    <Label htmlFor="password_confirmation">Confirm Password <span className="text-red-500">*</span></Label>
                                     <Input
                                         id="password_confirmation"
                                         type="password"
@@ -139,9 +144,10 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                                     />
                                 </div>
                             </div>
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="role">Role <span className='text-red-500'>*</span></Label>
+                                    <Label htmlFor="role">Role <span className="text-red-500">*</span></Label>
                                     <Select value={data.role} onValueChange={(value) => setData('role', value)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select role" />
@@ -156,8 +162,9 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                                     </Select>
                                     {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
                                 </div>
+
                                 <div className="space-y-2">
-                                    <Label htmlFor="status">Status <span className='text-red-500'>*</span></Label>
+                                    <Label htmlFor="status">Status <span className="text-red-500">*</span></Label>
                                     <Select value={data.status} onValueChange={(value) => setData('status', value)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select status" />
@@ -173,13 +180,17 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                                     {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
                                 </div>
                             </div>
-                        </CardContent>
-                        <CardFooter>
-                            <Button type="submit" disabled={processing}>
-                                Create User
-                            </Button>
-                        </CardFooter>
-                    </form>
+
+                            <div className="flex justify-end gap-4">
+                                <Button type="button" variant="outline" onClick={() => window.history.back()}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={processing}>
+                                    Create User
+                                </Button>
+                            </div>
+                        </form>
+                    </CardContent>
                 </Card>
             </div>
         </AppLayout>

@@ -201,7 +201,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 <Label htmlFor="description">Description</Label>
                                 <Textarea
                                     id="description"
-                                    value={data.description}
+                                    value={data.description || ''}
                                     onChange={(e) => setData('description', e.target.value)}
                                     placeholder="Enter product description"
                                 />

@@ -103,7 +103,7 @@ const EditCategory: FC<EditCategoryProps> = ({ category, statuses, categories })
                                 <Label htmlFor="description">Description</Label>
                                 <Textarea
                                     id="description"
-                                    value={data.description}
+                                    value={data.description || ''}
                                     onChange={(e) => setData('description', e.target.value)}
                                     placeholder="Enter category description"
                                 />
