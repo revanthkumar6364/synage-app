@@ -4,11 +4,12 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AccountContactController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', [HomeController::class,'index'])->name('home');
+Route::redirect('/', '/dashboard', 301)->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -22,6 +23,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('accounts', AccountController::class);
     Route::resource('accounts.contacts', AccountContactController::class);
+    Route::resource('products', ProductController::class);
+    // Additional routes for image management
+    Route::post('products/{product}/images', [ProductController::class, 'addImages'])
+        ->name('products.images.store');
+    Route::delete('products/{product}/images/{image}', [ProductController::class, 'removeImage'])
+        ->name('products.images.destroy');
 });
 
 require __DIR__.'/settings.php';

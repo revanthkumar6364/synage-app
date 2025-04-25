@@ -1,21 +1,21 @@
 // Body
 $body-bg: #FFFFFF;
-$link-color: #F94F6C;
-$link-hover-color: #C4242B;
+$link-color: #1A73E8;
+$link-hover-color: #0D47A1;
 
 // Typography
 $font-family-sans-serif: 'Roboto', sans-serif;
 $font-size-base: 0.9rem;
 $line-height-base: 1.6;
 
-$primary: #DF205B;
-$secondary: #6c757d;
-$success: #28a745;
-$danger: #dc3545;
-$warning: #ffc107;
-$info: #17a2b8;
+$primary: #1A73E8;
+$secondary: #5F6368;
+$success: #34A853;
+$danger: #EA4335;
+$warning: #FBBC05;
+$info: #4285F4;
 $light: #f8f9fa;
-$dark: #343a40;
+$dark: #202124;
 
 $theme-colors: (
   "primary":    $primary,
@@ -30,10 +30,10 @@ $theme-colors: (
 
 // Create your own map
 $custom-colors: (
-  "cred": #DF205B,
-  "cgreen": #30B67D,
-  "cblue": #39C5F0,
-  "cyellow": #ECB439,
+  "cred": #EA4335,
+  "cgreen": #34A853,
+  "cblue": #4285F4,
+  "cyellow": #FBBC05,
 );
 
 // Merge the maps
