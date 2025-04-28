@@ -78,7 +78,6 @@ const Index: FC<IndexProps> = ({ products }) => {
                                     <TableHead>SKU</TableHead>
                                     <TableHead>Category</TableHead>
                                     <TableHead>Price</TableHead>
-                                    <TableHead>Unit</TableHead>
                                     <TableHead>Brand</TableHead>
                                     <TableHead>Type</TableHead>
                                     <TableHead>GST %</TableHead>
@@ -97,7 +96,6 @@ const Index: FC<IndexProps> = ({ products }) => {
                                                 ? `${formatPrice(product.min_price)} - ${formatPrice(product.max_price)}`
                                                 : formatPrice(product.price)}
                                         </TableCell>
-                                        <TableCell>{product.unit}</TableCell>
                                         <TableCell>{product.brand}</TableCell>
                                         <TableCell>{product.type || '-'}</TableCell>
                                         <TableCell>{product.gst_percentage ? `${product.gst_percentage}%` : '-'}</TableCell>
