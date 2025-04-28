@@ -35,7 +35,6 @@ interface EditProps {
         price: number;
         min_price: number | null;
         max_price: number | null;
-        unit: string;
         price_per_sqft: number | null;
         brand: string;
         type: string | null;
@@ -58,7 +57,6 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
         price: product.price.toString(),
         min_price: product.min_price?.toString() || '',
         max_price: product.max_price?.toString() || '',
-        unit: product.unit,
         price_per_sqft: product.price_per_sqft?.toString() || '',
         brand: product.brand,
         type: product.type || '',
@@ -169,17 +167,6 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="unit">Unit <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        id="unit"
-                                        value={data.unit}
-                                        onChange={(e) => setData('unit', e.target.value)}
-                                        placeholder="Enter unit"
-                                    />
-                                    {errors.unit && <p className="text-sm text-red-500">{errors.unit}</p>}
-                                </div>
-
-                                <div className="space-y-2">
                                     <Label htmlFor="price_per_sqft">Price per Square Foot</Label>
                                     <Input
                                         id="price_per_sqft"
@@ -240,7 +227,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     <Label htmlFor="status">Status <span className="text-red-500">*</span></Label>
                                     <Select
                                         value={data.status}
-                                        onValueChange={(value) => setData('status', value)}
+                                        onValueChange={(value) => setData('status', value as 'active' | 'inactive')}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select status" />

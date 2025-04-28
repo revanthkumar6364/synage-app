@@ -41,7 +41,6 @@ const Create: FC<CreateProps> = ({ categories }) => {
         price: '',
         min_price: '',
         max_price: '',
-        unit: '',
         price_per_sqft: '',
         brand: '',
         type: '',
@@ -149,17 +148,6 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                         placeholder="Enter max price"
                                     />
                                     {errors.max_price && <p className="text-sm text-red-500">{errors.max_price}</p>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="unit">Unit <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        id="unit"
-                                        value={data.unit}
-                                        onChange={(e) => setData('unit', e.target.value)}
-                                        placeholder="Enter unit"
-                                    />
-                                    {errors.unit && <p className="text-sm text-red-500">{errors.unit}</p>}
                                 </div>
 
                                 <div className="space-y-2">
