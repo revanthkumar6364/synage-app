@@ -1,66 +1,11 @@
-import { LucideIcon } from 'lucide-react';
-import type { Config } from 'ziggy-js';
-
-export interface Auth {
-    user: User;
-}
-
-export interface BreadcrumbItem {
-    title: string;
-    href: string;
-}
-
-export interface NavGroup {
-    title: string;
-    items: NavItem[];
-}
-
-export interface NavItem {
-    title: string;
-    href: string;
-    icon?: LucideIcon | null;
-    isActive?: boolean;
-}
-
-export interface SharedData {
-    name: string;
-    quote: { message: string; author: string };
-    auth: Auth;
-    ziggy: Config & { location: string };
-    [key: string]: unknown;
-}
-
-export interface User {
-    id: number;
-    name: string;
-    email: string;
-    avatar?: string;
-    email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
-    [key: string]: unknown;
-}
-
 export interface Account {
     id: number;
-    business_id: string;
-    business_name: string;
-    gst_number?: string;
-    industry_type?: string;
-    billing_address?: string;
-    billing_location?: string;
-    billing_city?: string;
-    billing_zip_code?: string;
-    shipping_address?: string;
-    shipping_location?: string;
-    shipping_city?: string;
-    shipping_zip_code?: string;
-    same_as_billing: boolean;
-    status: 'active' | 'inactive';
+    name: string;
+    email?: string;
+    phone?: string;
+    address?: string;
     created_at: string;
     updated_at: string;
-    contacts?: AccountContact[];
-    [key: string]: unknown;
 }
 
 export interface AccountContact {
@@ -72,7 +17,6 @@ export interface AccountContact {
     position?: string;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown;
 }
 
 export interface Product {
@@ -84,7 +28,6 @@ export interface Product {
     currency: string;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown;
 }
 
 export interface QuotationItem {
@@ -99,7 +42,6 @@ export interface QuotationItem {
     total: number;
     notes?: string;
     product?: Product;
-    [key: string]: unknown;
 }
 
 export interface QuotationShippingDetail {
@@ -112,7 +54,6 @@ export interface QuotationShippingDetail {
     delivery_terms?: string;
     payment_terms?: string;
     special_instructions?: string;
-    [key: string]: unknown;
 }
 
 export interface Quotation {
@@ -136,5 +77,9 @@ export interface Quotation {
     contact: AccountContact;
     items: QuotationItem[];
     shipping_details: QuotationShippingDetail;
-    [key: string]: unknown;
+}
+
+export interface BreadcrumbItem {
+    title: string;
+    href: string;
 }

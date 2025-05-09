@@ -36,7 +36,13 @@ export function AppSidebar() {
             title: 'Products',
             href: '/products',
             icon: Users,
-        }] : [])
+        }] : []),
+        {
+            title: 'Quotations',
+            href: '/quotations',
+            icon: Users,
+        }
+
     ];
     const footerNavItems: NavItem[] = [
         {

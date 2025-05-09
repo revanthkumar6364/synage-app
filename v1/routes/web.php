@@ -6,6 +6,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\QuotationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -29,6 +30,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('products.images.store');
     Route::delete('products/{product}/images/{image}', [ProductController::class, 'removeImage'])
         ->name('products.images.destroy');
+    Route::resource('quotations', QuotationController::class);
+    Route::post('quotations/{quotation}/details', [QuotationController::class, 'updateDetails'])->name('quotations.update.details');
+    Route::post('quotations/{quotation}/products', [QuotationController::class, 'updateProducts'])->name('quotations.update.products');
+    Route::post('quotations/{quotation}/overview', [QuotationController::class, 'updateOverview'])->name('quotations.update.overview');
 });
 
 require __DIR__.'/settings.php';
