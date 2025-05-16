@@ -30,10 +30,10 @@ interface EditUserProps {
     statuses: Record<string, string>;
     country_codes: Record<string, string>;
     accounts: any[];
-    contacts: any[]; // Add contacts prop
+    contacts: any[];
 }
 
-const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, accounts, contacts }) => { // Add contacts parameter
+const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, accounts, contacts }) => {
     const [accountContacts, setAccountContacts] = useState<any[]>([]);
 
     const { data, setData, put, processing, errors } = useForm({
@@ -106,7 +106,7 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, acc
                                             <SelectValue placeholder="Select account" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {accounts.map((account) => (
+                                            {accounts?.map((account) => (
                                                 <SelectItem key={account.id} value={account.id.toString()}>
                                                     {account.business_name}
                                                 </SelectItem>
@@ -127,7 +127,7 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, acc
                                             <SelectValue placeholder="Select contact" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {accountContacts.map((contact) => (
+                                            {accountContacts?.map((contact) => (
                                                 <SelectItem key={contact.id} value={contact.id.toString()}>
                                                     {contact.name}
                                                 </SelectItem>
@@ -146,7 +146,7 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, acc
                                             <SelectValue placeholder="Select country code" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {Object.entries(country_codes).map(([code, country]) => (
+                                            {Object.entries(country_codes || {}).map(([code, country]) => (
                                                 <SelectItem key={code} value={code}>
                                                     {code} - {country}
                                                 </SelectItem>
@@ -176,7 +176,7 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, acc
                                             <SelectValue placeholder="Select role" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {Object.entries(roles).map(([value, label]) => (
+                                            {Object.entries(roles || {}).map(([value, label]) => (
                                                 <SelectItem key={value} value={value}>
                                                     {label}
                                                 </SelectItem>
@@ -193,7 +193,7 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, acc
                                             <SelectValue placeholder="Select status" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {Object.entries(statuses).map(([value, label]) => (
+                                            {Object.entries(statuses || {}).map(([value, label]) => (
                                                 <SelectItem key={value} value={value}>
                                                     {label}
                                                 </SelectItem>
