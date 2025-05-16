@@ -19,11 +19,14 @@ class Quotation extends Model
     const STATUS_REJECTED = 'rejected';
 
     protected $fillable = [
+        'parent_id',
         'reference',
         'quotation_number',
         'title',
-        'available_size',
-        'proposed_size',
+        'available_size_width_mm',
+        'available_size_height_mm',
+        'proposed_size_width_mm',
+        'proposed_size_height_mm',
         'description',
         'estimate_date',
         'account_id',
@@ -39,13 +42,27 @@ class Quotation extends Model
         'same_as_billing',
         'notes',
         'client_scope',
-        'status',
-        'total_amount',
-        'tax_amount',
-        'discount_amount',
-        'grand_total',
+        'taxes_terms',
+        'warranty_terms',
+        'delivery_terms',
+        'payment_terms',
+        'electrical_terms',
         'subtotal',
         'tax_rate',
+        'tax_amount',
+        'discount_amount',
+        'total_amount',
+        'grand_total',
+        'status',
+        'editable',
+        'last_action',
+        'created_by',
+        'updated_by',
+        'approved_at',
+        'approved_by',
+        'rejected_at',
+        'rejected_by',
+        'rejection_reason',
     ];
 
     protected $casts = [
@@ -60,6 +77,8 @@ class Quotation extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     protected $with = ['account', 'account_contact'];

@@ -55,12 +55,6 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-2xl font-bold tracking-tight">Create User</CardTitle>
-                            <Link href={route('users.index')}>
-                                <Button variant="outline">
-                                    <ArrowLeftIcon className="mr-2 h-4 w-4" />
-                                    Back to Users
-                                </Button>
-                            </Link>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -182,14 +176,15 @@ export default function CreateUser({ country_codes, roles, statuses }: Props) {
                             </div>
 
                             <div className="flex justify-end gap-4">
+
+                                <Button type="submit" disabled={processing}>
+                                    Create User
+                                </Button>
                                 <Button type="button" variant="outline" onClick={() => window.history.back()}>
                                     Cancel
                                 </Button>
-                            <Button type="submit" disabled={processing}>
-                                Create User
-                            </Button>
                             </div>
-                    </form>
+                        </form>
                     </CardContent>
                 </Card>
             </div>

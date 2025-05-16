@@ -14,6 +14,7 @@ export interface Account {
     shipping_zip_code?: string;
     same_as_billing: boolean;
     status?: string;
+    contacts?: AccountContact[];
     created_at: string;
     updated_at: string;
 }
@@ -65,8 +66,10 @@ export interface Quotation {
     reference: string;
     quotation_number: string;
     title: string;
-    available_size: string;
-    proposed_size: string;
+    available_size_width_mm: string;
+    available_size_height_mm: string;
+    proposed_size_width_mm: string;
+    proposed_size_height_mm: string;
     description: string;
     estimate_date: string;
     account_id: number;
@@ -82,6 +85,11 @@ export interface Quotation {
     same_as_billing: boolean;
     notes?: string;
     client_scope?: string;
+    taxes_terms?: string;
+    warranty_terms?: string;
+    delivery_terms?: string;
+    payment_terms?: string;
+    electrical_terms?: string;
     status: 'draft' | 'pending' | 'approved' | 'rejected';
     subtotal: number;
     tax_rate: number;
@@ -91,6 +99,11 @@ export interface Quotation {
     grand_total: number;
     created_at: string;
     updated_at: string;
+    approved_at?: string;
+    approved_by?: number;
+    rejected_at?: string;
+    rejected_by?: number;
+    rejection_reason?: string;
     account?: Account;
     account_contact?: AccountContact;
     items: QuotationItem[];

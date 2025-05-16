@@ -37,6 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('quotations/{quotation}/preview', [QuotationController::class, 'preview'])->name('quotations.preview');
     Route::post('/quotations/{quotation}/update-overview', [QuotationController::class, 'updateOverview'])
         ->name('quotations.update-overview');
+    Route::post('/quotations/{quotation}/save-terms', [QuotationController::class, 'saveTerms'])
+        ->name('quotations.save-terms');
+    Route::post('/quotations/{quotation}/approve', [QuotationController::class, 'approve'])
+        ->name('quotations.approve');
+    Route::post('/quotations/{quotation}/reject', [QuotationController::class, 'reject'])
+        ->name('quotations.reject');
 });
 
 require __DIR__.'/settings.php';

@@ -9,6 +9,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Account, AccountContact, Quotation, type BreadcrumbItem } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
 import { toast, Toaster } from "sonner";
+import { useState, useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -19,16 +20,19 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Props {
     quotation: Quotation;
     accounts: Account[];
-    contacts: AccountContact[];
 }
 
-export default function Edit({ quotation, accounts, contacts }: Props) {
+export default function Edit({ quotation, accounts }: Props) {
+    const [accountContacts, setAccountContacts] = useState<AccountContact[]>([]);
+
     const { data, setData, put, processing, errors } = useForm({
         title: quotation.title,
         account_id: quotation.account_id,
         account_contact_id: quotation.account_contact_id,
-        available_size: quotation.available_size,
-        proposed_size: quotation.proposed_size,
+        available_size_width_mm: quotation.available_size_width_mm,
+        available_size_height_mm: quotation.available_size_height_mm,
+        proposed_size_width_mm: quotation.proposed_size_width_mm,
+        proposed_size_height_mm: quotation.proposed_size_height_mm,
         description: quotation.description,
         estimate_date: quotation.estimate_date ? new Date(quotation.estimate_date).toISOString().split('T')[0] : '',
         billing_address: quotation.billing_address,
@@ -41,6 +45,15 @@ export default function Edit({ quotation, accounts, contacts }: Props) {
         shipping_zip_code: quotation.shipping_zip_code,
         same_as_billing: false,
     });
+
+    useEffect(() => {
+        if (data.account_id) {
+            const selectedAccount = accounts.find(account => account.id === data.account_id);
+            if (selectedAccount) {
+                setAccountContacts(selectedAccount.contacts || []);
+            }
+        }
+    }, [data.account_id, accounts]);
 
     const handleSameAsBillingChange = (checked: boolean) => {
         setData((prev: typeof data) => ({
@@ -58,6 +71,7 @@ export default function Edit({ quotation, accounts, contacts }: Props) {
         setData(prev => ({
             ...prev,
             account_id: Number(value),
+            account_contact_id: undefined,
             billing_address: selectedAccount?.billing_address || '',
             billing_location: selectedAccount?.billing_location || '',
             billing_city: selectedAccount?.billing_city || '',
@@ -67,6 +81,12 @@ export default function Edit({ quotation, accounts, contacts }: Props) {
             shipping_city: data.same_as_billing ? (selectedAccount?.shipping_city || '') : prev.shipping_city,
             shipping_zip_code: data.same_as_billing ? (selectedAccount?.shipping_zip_code || '') : prev.shipping_zip_code
         }));
+
+        if (selectedAccount) {
+            setAccountContacts(selectedAccount.contacts || []);
+        } else {
+            setAccountContacts([]);
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -150,12 +170,13 @@ export default function Edit({ quotation, accounts, contacts }: Props) {
                                     <Select
                                         value={data.account_contact_id?.toString()}
                                         onValueChange={(value) => setData('account_contact_id', Number(value))}
+                                        disabled={!data.account_id}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select a contact" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {contacts.map((contact) => (
+                                            {accountContacts.map((contact) => (
                                                 <SelectItem key={contact.id} value={contact.id.toString()}>
                                                     {contact.name}
                                                 </SelectItem>
@@ -282,23 +303,51 @@ export default function Edit({ quotation, accounts, contacts }: Props) {
 
                             <div className="space-y-6">
                                 <div>
-                                    <Label>Available Size</Label>
-                                    <Input
-                                        value={data.available_size}
-                                        onChange={e => setData('available_size', e.target.value)}
-                                        className={errors.available_size ? 'border-red-500' : ''}
-                                    />
-                                    {errors.available_size && <span className="text-red-500 text-sm">{errors.available_size}</span>}
+                                    <Label>Available Size (mm)</Label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Input
+                                                placeholder="Width (mm)"
+                                                value={data.available_size_width_mm}
+                                                onChange={e => setData('available_size_width_mm', e.target.value)}
+                                                className={errors.available_size_width_mm ? 'border-red-500' : ''}
+                                            />
+                                            {errors.available_size_width_mm && <span className="text-red-500 text-sm">{errors.available_size_width_mm}</span>}
+                                        </div>
+                                        <div>
+                                            <Input
+                                                placeholder="Height (mm)"
+                                                value={data.available_size_height_mm}
+                                                onChange={e => setData('available_size_height_mm', e.target.value)}
+                                                className={errors.available_size_height_mm ? 'border-red-500' : ''}
+                                            />
+                                            {errors.available_size_height_mm && <span className="text-red-500 text-sm">{errors.available_size_height_mm}</span>}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <Label>Proposed Size</Label>
-                                    <Input
-                                        value={data.proposed_size}
-                                        onChange={e => setData('proposed_size', e.target.value)}
-                                        className={errors.proposed_size ? 'border-red-500' : ''}
-                                    />
-                                    {errors.proposed_size && <span className="text-red-500 text-sm">{errors.proposed_size}</span>}
+                                    <Label>Proposed Size (mm)</Label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Input
+                                                placeholder="Width (mm)"
+                                                value={data.proposed_size_width_mm}
+                                                onChange={e => setData('proposed_size_width_mm', e.target.value)}
+                                                className={errors.proposed_size_width_mm ? 'border-red-500' : ''}
+                                            />
+                                            {errors.proposed_size_width_mm && <span className="text-red-500 text-sm">{errors.proposed_size_width_mm}</span>}
+                                        </div>
+                                        <div>
+                                            <Input
+                                                placeholder="Height (mm)"
+                                                value={data.proposed_size_height_mm}
+                                                onChange={e => setData('proposed_size_height_mm', e.target.value)}
+                                                className={errors.proposed_size_height_mm ? 'border-red-500' : ''}
+                                            />
+                                            {errors.proposed_size_height_mm && <span className="text-red-500 text-sm">{errors.proposed_size_height_mm}</span>}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div>

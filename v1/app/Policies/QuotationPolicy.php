@@ -37,30 +37,10 @@ class QuotationPolicy
      */
     public function update(User $user, Quotation $quotation): bool
     {
-        return in_array($user->role, ['admin', 'manager', 'sales']);
+        return in_array($user->role, ['admin', 'manager', 'sales']) && $quotation->editable;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Quotation $quotation): bool
-    {
-        return in_array($user->role, ['admin', 'manager', 'sales']);
-    }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Quotation $quotation): bool
-    {
-        return in_array($user->role, ['admin', 'manager', 'sales']);
-    }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Quotation $quotation): bool
-    {
-        return in_array($user->role, ['admin', 'manager', 'sales']);
-    }
+
 }

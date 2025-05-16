@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router, useForm } from '@inertiajs/react';
-import { Quotation, BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { Toaster, toast } from 'sonner';
 import { useRef, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,51 +10,91 @@ import { Textarea } from '@/components/ui/textarea';
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Quotations', href: '/quotations' },
-    { title: 'Preview', href: '#' },
+    { title: 'View Quotation', href: '#' },
 ];
 
 interface Props {
-    quotation: Quotation;
+    quotation: any;
 }
 
-export default function Preview({ quotation }: Props) {
+export default function Show({ quotation }: Props) {
+    const [loading, setLoading] = useState(false);
+    const [comments, setComments] = useState('');
     const contentRef = useRef<HTMLDivElement>(null);
-    const [isEditing, setIsEditing] = useState(false);
 
     const form = useForm({
-        notes: quotation.notes || '',
-        client_scope: quotation.client_scope || '',
         status: 'pending',
-        taxes: quotation.taxes_terms || '',
-        warranty: quotation.warranty_terms || '',
-        delivery_terms: quotation.delivery_terms || '',
-        payment_terms: quotation.payment_terms || '',
-        electrical_terms: quotation.electrical_terms || '',
+        rejection_reason: '',
     });
 
-    const handleSubmitForApproval = () => {
-        form.post(route('quotations.update-overview', quotation.id), {
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'draft':
+                return 'bg-gray-500';
+            case 'pending':
+                return 'bg-yellow-500';
+            case 'approved':
+                return 'bg-green-500';
+            case 'rejected':
+                return 'bg-red-500';
+            default:
+                return 'bg-gray-500';
+        }
+    };
+
+    const handleApprove = () => {
+        setLoading(true);
+        form.post(route('quotations.approve', quotation.id), {
             onSuccess: () => {
-                toast.success('Quotation submitted for approval successfully');
-                setIsEditing(false);
+                toast.success('Quotation approved successfully');
                 router.visit(route('quotations.index'));
             },
-            onError: (errors) => {
-                toast.error('Failed to submit quotation for approval');
+            onError: (errors: any) => {
+                toast.error('Failed to approve quotation');
                 console.error('Form errors:', errors);
+            },
+            onFinish: () => {
+                setLoading(false);
             }
         });
     };
 
-    const handleSaveTerms = () => {
-        form.post(route('quotations.save-terms', quotation.id), {
+    const handleReject = () => {
+        if (!comments.trim()) {
+            toast.error('Please provide a rejection reason');
+            return;
+        }
+
+        setLoading(true);
+        form.post(route('quotations.reject', quotation.id), {
+            rejection_reason: comments,
             onSuccess: () => {
-                toast.success('Terms and conditions saved successfully');
-                setIsEditing(false);
+                toast.success('Quotation rejected successfully');
+                router.visit(route('quotations.index'));
             },
-            onError: (errors) => {
-                toast.error('Failed to save terms and conditions');
+            onError: (errors: any) => {
+                toast.error('Failed to reject quotation');
                 console.error('Form errors:', errors);
+            },
+            onFinish: () => {
+                setLoading(false);
+            }
+        });
+    };
+
+    const handleSubmitForApproval = () => {
+        setLoading(true);
+        form.post(route('quotations.update-overview', quotation.id), {
+            onSuccess: () => {
+                toast.success('Quotation submitted for approval successfully');
+                router.visit(route('quotations.index'));
+            },
+            onError: (errors: any) => {
+                toast.error('Failed to submit quotation for approval');
+                console.error('Form errors:', errors);
+            },
+            onFinish: () => {
+                setLoading(false);
             }
         });
     };
@@ -76,67 +117,68 @@ export default function Preview({ quotation }: Props) {
         return subtotal + tax;
     };
 
-    const totalSubtotal = quotation.items.reduce((sum, item) => sum + calculateSubtotal(item), 0);
-    const totalTax = quotation.items.reduce((sum, item) => sum + calculateTax(item), 0);
+    const totalSubtotal = quotation.items.reduce((sum: number, item: any) => sum + calculateSubtotal(item), 0);
+    const totalTax = quotation.items.reduce((sum: number, item: any) => sum + calculateTax(item), 0);
     const grandTotal = totalSubtotal + totalTax;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Preview Quotation" />
+            <Head title="View Quotation" />
             <Toaster position="top-right" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <div className="flex gap-2">
+            <div className="container mx-auto px-4 py-6 space-y-6">
+                {/* Top Section - Status and Details */}
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-2xl font-bold">View Quotation</h2>
+                        <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(quotation.status)} text-white`}>
+                            {quotation.status}
+                        </div>
+                    </div>
                     <Button
-                        variant='outline'
+                        variant="outline"
                         onClick={() => router.visit(route('quotations.edit', quotation.id))}
                     >
-                        Details
+                        Edit Quotation
                     </Button>
-                    <Button
-                        variant='outline'
-                        onClick={() => router.visit(route('quotations.products', quotation.id))}
-                    >
-                        Products
-                    </Button>
-                    <Button
-                        variant='default'
-                        onClick={() => router.visit(route('quotations.preview', quotation.id))}
-                    >
-                        Preview
-                    </Button>
-                </div>
-                <div className="flex justify-end gap-2 mb-4">
-                    {isEditing ? (
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleSaveTerms}
-                            >
-                                Save
-                            </Button>
-                            <Button
-                                variant="default"
-                                size="sm"
-                                onClick={() => setIsEditing(false)}
-                            >
-                                Cancel
-                            </Button>
-                        </div>
-                    ) : (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setIsEditing(true)}
-                        >
-                            Edit Terms
-                        </Button>
-                    )}
                 </div>
 
-                <div ref={contentRef} className="bg-white p-4">
-                    <div className="max-w-[900px] mx-auto border border-gray-700 text-[10px] leading-[1.1] select-none">
+                <Card className="mb-6">
+                    <CardHeader>
+                        <CardTitle>Quotation Details</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                            <div>
+                                <p className="text-sm font-medium text-gray-500">Reference</p>
+                                <p>{quotation.reference}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-gray-500">Title</p>
+                                <p>{quotation.title}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-gray-500">Customer</p>
+                                <p>{quotation.account?.business_name}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-gray-500">Date</p>
+                                <p>{new Date(quotation.estimate_date).toLocaleDateString()}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-gray-500">Total Amount</p>
+                                <p>{new Intl.NumberFormat('en-IN', {
+                                    style: 'currency',
+                                    currency: 'INR'
+                                }).format(quotation.total_amount || 0)}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Middle Section - Preview Content */}
+                <div ref={contentRef} className="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <div className="max-w-[1200px] mx-auto border border-gray-700 text-[10px] leading-[1.1] select-none">
                         {/* Header top */}
                         <div className="flex border-b border-gray-400">
                             <div className="w-[180px] p-2">
@@ -241,7 +283,7 @@ export default function Preview({ quotation }: Props) {
                             <tbody>
                                 <tr className="bg-[#2f6cc1] text-white text-[10px] font-semibold text-center">
                                     <td className="py-3" colSpan={11}>
-                                        {quotation.title}
+                                    {quotation.title}
                                         <br />
                                         <br />
                                         Available Size : {quotation.available_size_width_mm} mm W x {quotation.available_size_height_mm} mm H
@@ -262,7 +304,7 @@ export default function Preview({ quotation }: Props) {
                                     </td>
                                 </tr>
 
-                                {quotation.items.map((item, index) => (
+                                {quotation.items.map((item: any, index: number) => (
                                     <tr key={item.id}>
                                         <td className="border border-gray-400 text-center align-top font-bold py-1">A</td>
                                         <td className="border border-gray-400 px-1 py-1">{item.product.name}</td>
@@ -279,7 +321,15 @@ export default function Preview({ quotation }: Props) {
                                                     {grandTotal.toFixed(2)}
                                                 </td>
                                                 <td className="border border-gray-400 text-[9px] px-2 py-1 align-top" rowSpan={quotation.items.length}>
-                                                    {quotation.notes}
+                                                    P 2.5 LED
+                                                    <br />
+                                                    <br />
+                                                    Refresh Rate - 3840
+                                                    <br />
+                                                    <br />
+                                                    Brightness of 500 Nits
+                                                    <br />
+                                                    <br />3 year Warranty
                                                 </td>
                                             </>
                                         )}
@@ -339,72 +389,25 @@ export default function Preview({ quotation }: Props) {
                                         </tr>
                                         <tr>
                                             <td className="border border-gray-700 text-left px-2 py-1 font-normal italic">
-                                                {isEditing ? (
-                                                    <div className="space-y-4">
-                                                        <div>
-                                                            <b>TAXES</b>
-                                                            <Textarea
-                                                                value={form.data.taxes}
-                                                                onChange={e => form.setData('taxes', e.target.value)}
-                                                                className="mt-1 text-[9px]"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <b>Warranty</b>
-                                                            <Textarea
-                                                                value={form.data.warranty}
-                                                                onChange={e => form.setData('warranty', e.target.value)}
-                                                                className="mt-1 text-[9px]"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <b>Delivery Terms</b>
-                                                            <Textarea
-                                                                value={form.data.delivery_terms}
-                                                                onChange={e => form.setData('delivery_terms', e.target.value)}
-                                                                className="mt-1 text-[9px]"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <b>Payment Terms</b>
-                                                            <Textarea
-                                                                value={form.data.payment_terms}
-                                                                onChange={e => form.setData('payment_terms', e.target.value)}
-                                                                className="mt-1 text-[9px]"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <b>Electrical Points and Installation</b>
-                                                            <Textarea
-                                                                value={form.data.electrical_terms}
-                                                                onChange={e => form.setData('electrical_terms', e.target.value)}
-                                                                className="mt-1 text-[9px]"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <b>TAXES</b>
-                                                        <br />
-                                                        {form.data.taxes}
-                                                        <br />
-                                                        <b>Warranty</b>
-                                                        <br />
-                                                        {form.data.warranty}
-                                                        <br />
-                                                        <b>Delivery Terms</b>
-                                                        <br />
-                                                        {form.data.delivery_terms}
-                                                        <br />
-                                                        <b>Payment Terms</b>
-                                                        <br />
-                                                        {form.data.payment_terms}
-                                                        <br />
-                                                        <b>Electrical Points and Installation</b>
-                                                        <br />
-                                                        {form.data.electrical_terms}
-                                                    </>
-                                                )}
+                                                <b>TAXES</b>
+                                                <br />
+                                                {quotation.taxes_terms}
+                                                <br />
+                                                <b>Warranty</b>
+                                                <br />
+                                                {quotation.warranty_terms}
+                                                <br />
+                                                <b>Delivery Terms</b>
+                                                <br />
+                                                {quotation.delivery_terms}
+                                                <br />
+                                                <b>Payment Terms</b>
+                                                <br />
+                                                {quotation.payment_terms}
+                                                <br />
+                                                <b>Electrical Points and Installation</b>
+                                                <br />
+                                                {quotation.electrical_terms}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -424,28 +427,67 @@ export default function Preview({ quotation }: Props) {
                                 />
                                 <div className="text-[9px] font-bold text-[#0f2f5a] mb-1">Dhanunjay Reddy D</div>
                                 <div className="flex items-center space-x-1 select-none">
-                                    <img src="/images/logo.png" alt="Radiant Synage Logo" className="h-6" />
+                                    <img src="/images/logo.png" alt="Radiant Synage Logo" className="h-8" />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex justify-between pt-4">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => router.visit(route('quotations.index'))}
-                    >
-                        Back
-                    </Button>
-                    <Button
-                        type="button"
-                        onClick={handleSubmitForApproval}
-                        disabled={form.processing || quotation.status !== 'draft'}
-                    >
-                        {form.processing ? 'Submitting...' : 'Submit for Approval'}
-                    </Button>
+                {/* Bottom Section - Actions */}
+                <div className="space-y-4">
+                    {quotation.status === 'pending' && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Approval Actions</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    <Textarea
+                                        placeholder="Add comments (required for rejection)"
+                                        value={comments}
+                                        onChange={(e) => setComments(e.target.value)}
+                                        className="min-h-[100px]"
+                                    />
+                                    <div className="flex gap-4">
+                                        <Button
+                                            onClick={handleApprove}
+                                            disabled={loading}
+                                            className="bg-green-500 hover:bg-green-600"
+                                        >
+                                            {loading ? 'Processing...' : 'Approve Quotation'}
+                                        </Button>
+                                        <Button
+                                            onClick={handleReject}
+                                            disabled={loading || !comments.trim()}
+                                            variant="destructive"
+                                        >
+                                            {loading ? 'Processing...' : 'Reject Quotation'}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    <div className="flex justify-between pt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.visit(route('quotations.index'))}
+                        >
+                            Back
+                        </Button>
+                        {quotation.status === 'draft' && (
+                            <Button
+                                type="button"
+                                onClick={handleSubmitForApproval}
+                                disabled={loading}
+                            >
+                                {loading ? 'Submitting...' : 'Submit for Approval'}
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </AppLayout>

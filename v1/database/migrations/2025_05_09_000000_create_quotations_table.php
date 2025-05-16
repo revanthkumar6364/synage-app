@@ -11,13 +11,16 @@ return new class extends Migration
     {
         Schema::create('quotations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('parent_id')->nullable()->constrained('quotations');
             $table->string('reference')->unique();
             $table->string('quotation_number')->unique()->nullable(); // Made nullable since we generate it
             $table->string('title');
             $table->foreignId('account_id')->constrained('accounts'); // Made required
             $table->foreignId('account_contact_id')->nullable()->constrained('account_contacts');
-            $table->string('available_size');
-            $table->string('proposed_size');
+            $table->string('available_size_width_mm');
+            $table->string('available_size_height_mm');
+            $table->string('proposed_size_width_mm');
+            $table->string('proposed_size_height_mm');
             $table->text('description');
             $table->date('estimate_date');
 
@@ -37,7 +40,11 @@ return new class extends Migration
             // Additional Information
             $table->text('notes')->nullable();
             $table->text('client_scope')->nullable();
-            $table->enum('status', ['draft', 'pending', 'approved', 'rejected'])->default('draft'); // Changed to enum
+            $table->text('taxes_terms')->nullable();
+            $table->text('warranty_terms')->nullable();
+            $table->text('delivery_terms')->nullable();
+            $table->text('payment_terms')->nullable();
+            $table->text('electrical_terms')->nullable();
 
             // Financial Details
             $table->decimal('subtotal', 10, 2)->default(0);
@@ -46,6 +53,19 @@ return new class extends Migration
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('total_amount', 10, 2)->default(0);
             $table->decimal('grand_total', 10, 2)->default(0);
+            $table->enum('status', ['draft', 'pending', 'approved', 'rejected'])->default('draft'); // Changed to enum
+            $table->boolean('editable')->default(true);
+            $table->text('last_action')->nullable();
+            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('updated_by')->constrained('users');
+            $table->timestamp('approved_at')->nullable();
+            $table->unsignedBigInteger('approved_by')->nullable();
+            $table->timestamp('rejected_at')->nullable();
+            $table->unsignedBigInteger('rejected_by')->nullable();
+            $table->text('rejection_reason')->nullable();
+
+            $table->foreign('approved_by')->references('id')->on('users');
+            $table->foreign('rejected_by')->references('id')->on('users');
 
             $table->timestamps();
             $table->softDeletes();

@@ -33,7 +33,13 @@ interface Quotation {
 interface Props {
     quotations: {
         data: Quotation[];
-        meta: any;
+        links: Array<{
+            url: string | null;
+            label: string;
+            active: boolean;
+        }>;
+        current_page: number;
+        last_page: number;
     };
     filters: {
         search: string;
@@ -75,16 +81,6 @@ export default function Index({ quotations, filters }: Props) {
     const formatAmount = (amount: number | null): string => {
         if (amount === null || isNaN(amount)) return '₹0.00';
         return `₹${Number(amount).toFixed(2)}`;
-    };
-
-    const handlePageChange = (page: number) => {
-        router.get(route('quotations.index'), {
-            ...data,
-            page
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
     };
 
     return (
@@ -240,20 +236,23 @@ export default function Index({ quotations, filters }: Props) {
 
                         <Pagination>
                             <PaginationContent>
-                                {quotations.meta.links.map((link: any, i: number) => (
+                                {Array.isArray(quotations.links) && quotations.links.map((link, i) => (
                                     <PaginationItem key={i}>
                                         <PaginationLink
-                                            href={link.url}
+                                            href="#"
                                             isActive={link.active}
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 if (link.url) {
-                                                    handlePageChange(link.label);
+                                                    router.get(link.url, {
+                                                        ...data,
+                                                        preserveState: true,
+                                                        preserveScroll: true
+                                                    });
                                                 }
                                             }}
-                                        >
-                                            {link.label}
-                                        </PaginationLink>
+                                            dangerouslySetInnerHTML={{ __html: link.label }}
+                                        />
                                     </PaginationItem>
                                 ))}
                             </PaginationContent>

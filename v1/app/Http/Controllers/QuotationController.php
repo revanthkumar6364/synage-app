@@ -23,19 +23,19 @@ class QuotationController extends Controller
             ->when($request->search, fn($q, $search) => $q->search($search))
             ->when($request->status && $request->status !== 'all', fn($q, $status) => $q->where('status', $status));
 
-        $quotations = $query->latest()->paginate(10);
+        $quotations = $query->latest()->paginate(config('all.pagination.per_page'));
 
         return Inertia::render('Quotations/Index', [
             'quotations' => QuotationResource::collection($quotations),
             'filters' => $request->only(['search', 'status']),
+            'statuses' => config('all.statuses'),
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Quotations/Create', [
-            'accounts' => Account::select('id', 'business_name', 'billing_address', 'billing_location', 'billing_city', 'billing_zip_code', 'shipping_address', 'shipping_location', 'shipping_city', 'shipping_zip_code')->get(),
-            'contacts' => AccountContact::select('id', 'account_id', 'name', 'email', 'contact_number')->get(),
+            'accounts' => Account::with('contacts')->get(),
         ]);
     }
 
@@ -47,8 +47,10 @@ class QuotationController extends Controller
             'title' => 'required|string|max:255',
             'account_id' => 'required|exists:accounts,id',
             'account_contact_id' => 'nullable|exists:account_contacts,id',
-            'available_size' => 'required|string|max:100',
-            'proposed_size' => 'required|string|max:100',
+            'available_size_width_mm' => 'required|string|max:100',
+            'available_size_height_mm' => 'required|string|max:100',
+            'proposed_size_width_mm' => 'required|string|max:100',
+            'proposed_size_height_mm' => 'required|string|max:100',
             'description' => 'required|string',
             'estimate_date' => 'required|date|after_or_equal:today',
             'billing_address' => 'required|string',
@@ -73,7 +75,10 @@ class QuotationController extends Controller
                 $quotation = new Quotation();
                 $validated['quotation_number'] = $quotation->generateQuotationNumber();
             }
-
+            $validated['status'] = 'draft';
+            $validated['created_by'] = $request->user()->id;
+            $validated['updated_by'] = $request->user()->id;
+            $validated['last_action'] = 'created';
             $quotation = Quotation::create($validated);
 
             DB::commit();
@@ -86,14 +91,20 @@ class QuotationController extends Controller
         }
     }
 
+    public function show(Quotation $quotation)
+    {
+        return Inertia::render('Quotations/Show', [
+            'quotation' => $quotation->load(['items', 'account']),
+        ]);
+    }
+
     public function edit(Quotation $quotation)
     {
         //dd($quotation);
         return Inertia::render('Quotations/Edit', [
             'quotation' => $quotation,
-            'accounts' => Account::select('id', 'business_name', 'billing_address', 'billing_location', 'billing_city', 'billing_zip_code', 'shipping_address', 'shipping_location', 'shipping_city', 'shipping_zip_code')->get(),
-            'contacts' => AccountContact::select('id', 'account_id', 'name', 'email', 'contact_number')->get(),
-            'products' => Product::select('id', 'name', 'description')->get(),
+            'accounts' => Account::with('contacts')->get(),
+            'products' => Product::get(),
         ]);
     }
 
@@ -103,8 +114,10 @@ class QuotationController extends Controller
             'title' => 'required|string',
             'account_id' => 'required|exists:accounts,id',
             'account_contact_id' => 'nullable|exists:account_contacts,id',
-            'available_size' => 'required|string',
-            'proposed_size' => 'required|string',
+            'available_size_width_mm' => 'required|string',
+            'available_size_height_mm' => 'required|string',
+            'proposed_size_width_mm' => 'required|string',
+            'proposed_size_height_mm' => 'required|string',
             'description' => 'required|string',
             'estimate_date' => 'required|date',
             'billing_address' => 'required|string',
@@ -118,6 +131,8 @@ class QuotationController extends Controller
             'same_as_billing' => 'boolean',
         ]);
 
+        $validated['updated_by'] = $request->user()->id;
+        $validated['last_action'] = 'updated';
         $quotation->update($validated);
 
         return back()->with('success', 'Quotation details updated successfully.');
@@ -168,9 +183,10 @@ class QuotationController extends Controller
                 $quotationItem->calculateTotals();
                 $quotation->items()->save($quotationItem);
             }
-
+            $quotation->updated_by = $request->user()->id;
+            $quotation->last_action = 'updated';
             $quotation->calculateTotals();
-
+            $quotation->save();
             DB::commit();
 
             return back()->with('success', 'Quotation products updated successfully.');
@@ -194,6 +210,11 @@ class QuotationController extends Controller
             'notes' => 'nullable|string',
             'client_scope' => 'nullable|string',
             'status' => 'required|in:draft,pending,approved,rejected',
+            'taxes' => 'nullable|string',
+            'warranty' => 'nullable|string',
+            'delivery_terms' => 'nullable|string',
+            'payment_terms' => 'nullable|string',
+            'electrical_terms' => 'nullable|string',
         ]);
 
         try {
@@ -204,6 +225,14 @@ class QuotationController extends Controller
                 'notes' => $validated['notes'],
                 'client_scope' => $validated['client_scope'],
                 'status' => $validated['status'],
+                'taxes_terms' => $validated['taxes'],
+                'warranty_terms' => $validated['warranty'],
+                'delivery_terms' => $validated['delivery_terms'],
+                'payment_terms' => $validated['payment_terms'],
+                'electrical_terms' => $validated['electrical_terms'],
+                'updated_by' => $request->user()->id,
+                'last_action' => 'updated',
+                'editable' => false,
             ]);
 
             DB::commit();
@@ -230,6 +259,90 @@ class QuotationController extends Controller
     {
         // Placeholder for future order conversion
         return back()->with('error', 'Conversion to order not implemented yet.');
+    }
+
+    public function saveTerms(Request $request, Quotation $quotation)
+    {
+        $validated = $request->validate([
+            'taxes' => 'nullable|string',
+            'warranty' => 'nullable|string',
+            'delivery_terms' => 'nullable|string',
+            'payment_terms' => 'nullable|string',
+            'electrical_terms' => 'nullable|string',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Update the quotation terms
+            $quotation->update([
+                'taxes_terms' => $validated['taxes'],
+                'warranty_terms' => $validated['warranty'],
+                'delivery_terms' => $validated['delivery_terms'],
+                'payment_terms' => $validated['payment_terms'],
+                'electrical_terms' => $validated['electrical_terms'],
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', 'Terms and conditions saved successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to save terms and conditions: ' . $e->getMessage());
+        }
+    }
+
+    public function approve(Request $request, Quotation $quotation)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Update the quotation status
+            $quotation->update([
+                'status' => 'approved',
+                'updated_by' => $request->user()->id,
+                'last_action' => 'approved',
+                'editable' => false,
+                'approved_at' => now(),
+                'approved_by' => $request->user()->id
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', 'Quotation approved successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to approve quotation: ' . $e->getMessage());
+        }
+    }
+
+    public function reject(Request $request, Quotation $quotation)
+    {
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string|max:500'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Update the quotation status
+            $quotation->update([
+                'status' => 'rejected',
+                'updated_by' => $request->user()->id,
+                'last_action' => 'rejected',
+                'rejected_at' => now(),
+                'editable' => false,
+                'rejected_by' => $request->user()->id,
+                'rejection_reason' => $validated['rejection_reason']
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', 'Quotation rejected successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to reject quotation: ' . $e->getMessage());
+        }
     }
 
 }
