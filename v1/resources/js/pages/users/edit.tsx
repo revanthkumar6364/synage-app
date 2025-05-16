@@ -100,7 +100,7 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, acc
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="account">Account <span className="text-red-500">*</span></Label>
+                                    <Label htmlFor="account">Account</Label>
                                     <Select value={data.account_id?.toString()} onValueChange={(value) => setData('account_id', parseInt(value))}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select account" />
@@ -117,7 +117,7 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, acc
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="contact">Contact <span className="text-red-500">*</span></Label>
+                                    <Label htmlFor="contact">Contact</Label>
                                     <Select
                                         value={data.account_contact_id?.toString()}
                                         onValueChange={(value) => setData('account_contact_id', parseInt(value))}
