@@ -50,8 +50,25 @@ class QuotationItem extends Model
 
     public function calculateTotals(): void
     {
+        // Calculate subtotal
         $this->subtotal = $this->quantity * $this->unit_price;
-        $this->total = $this->subtotal - $this->discount_amount + $this->tax_amount;
+
+        // Calculate discount amount if percentage is provided
+        if ($this->discount_percentage > 0) {
+            $this->discount_amount = ($this->subtotal * $this->discount_percentage) / 100;
+        }
+
+        // Calculate amount after discount
+        $amountAfterDiscount = $this->subtotal - $this->discount_amount;
+
+        // Calculate tax amount if percentage is provided
+        if ($this->tax_percentage > 0) {
+            $this->tax_amount = ($amountAfterDiscount * $this->tax_percentage) / 100;
+        }
+
+        // Calculate final total
+        $this->total = $amountAfterDiscount + $this->tax_amount;
+
         $this->save();
     }
 }

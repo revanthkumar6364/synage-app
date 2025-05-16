@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Pagination } from '@/components/ui/pagination';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
@@ -77,6 +77,16 @@ export default function Index({ quotations, filters }: Props) {
         return `₹${Number(amount).toFixed(2)}`;
     };
 
+    const handlePageChange = (page: number) => {
+        router.get(route('quotations.index'), {
+            ...data,
+            page
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Quotations" />
@@ -99,11 +109,10 @@ export default function Index({ quotations, filters }: Props) {
                                 <div className="relative w-full md:w-auto flex-1 max-w-sm">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                                     <Input
-                                        type="search"
-                                        placeholder="Search quotations..."
-                                        className="pl-8 w-full md:w-[300px]"
+                                        placeholder="Search by name"
                                         value={data.search}
                                         onChange={(e) => setData('search', e.target.value)}
+                                        className="md:max-w-sm"
                                     />
                                 </div>
                                 <Button type="submit">
@@ -229,7 +238,26 @@ export default function Index({ quotations, filters }: Props) {
                             </TabsContent>
                         </Tabs>
 
-                        <Pagination className="mt-4" {...quotations.meta} />
+                        <Pagination>
+                            <PaginationContent>
+                                {quotations.meta.links.map((link: any, i: number) => (
+                                    <PaginationItem key={i}>
+                                        <PaginationLink
+                                            href={link.url}
+                                            isActive={link.active}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                if (link.url) {
+                                                    handlePageChange(link.label);
+                                                }
+                                            }}
+                                        >
+                                            {link.label}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                ))}
+                            </PaginationContent>
+                        </Pagination>
                     </CardContent>
                 </Card>
             </div>

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
     data: any;
@@ -9,25 +10,72 @@ interface Props {
     processing: boolean;
 }
 
+interface QuotationPreviewData {
+    reference: string;
+    title: string;
+    estimate_date: string;
+    account: {
+        business_name: string;
+    };
+    items: Array<{
+        product: {
+            name: string;
+        };
+        quantity: number;
+        unit_price: number;
+        discount: number;
+        tax: number;
+        total: number;
+    }>;
+    status: 'draft' | 'pending' | 'approved' | 'rejected';
+    notes?: string;
+    client_scope?: string;
+}
+
 export default function QuotationPreview({ data, onSubmit, processing }: Props) {
     const calculateSubtotal = () => {
         return data.products.reduce((sum: number, item: any) => sum + item.total, 0);
     };
 
+    const getStatusVariant = (status: string) => {
+        switch (status) {
+            case 'draft':
+                return 'default';
+            case 'pending':
+                return 'destructive';
+            case 'approved':
+                return 'destructive';
+            case 'rejected':
+                return 'destructive';
+            default:
+                return 'default';
+        }
+    };
+
+    const formatDate = (date: string) => {
+        const formattedDate = new Date(date).toLocaleDateString();
+        return formattedDate;
+    };
+
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Quotation Preview</CardTitle>
+                <div className="flex justify-between items-center">
+                    <CardTitle>Quotation Preview</CardTitle>
+                    <Badge variant={getStatusVariant(data.status)}>
+                        {data.status}
+                    </Badge>
+                </div>
             </CardHeader>
             <CardContent>
-                <div className="space-y-6">
-                    {/* Header Information */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h3 className="font-medium mb-2">Quotation Details</h3>
-                            <p>Reference: {data.reference}</p>
-                            <p>Title: {data.title}</p>
-                            <p>Date: {data.estimateDate}</p>
+                <div className="grid grid-cols-2 gap-8">
+                    <div>
+                        <h3 className="text-lg font-semibold mb-4">Quotation Details</h3>
+                        <div className="space-y-2">
+                            <p><span className="font-medium">Reference:</span> {data.reference}</p>
+                            <p><span className="font-medium">Title:</span> {data.title}</p>
+                            <p><span className="font-medium">Date:</span> {formatDate(data.estimate_date)}</p>
+                            <p><span className="font-medium">Customer:</span> {data.account.business_name}</p>
                         </div>
                         <div>
                             <h3 className="font-medium mb-2">Contact Information</h3>

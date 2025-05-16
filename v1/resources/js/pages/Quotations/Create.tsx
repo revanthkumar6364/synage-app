@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { Account, AccountContact, BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -15,34 +15,34 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Create Quotation', href: '#' },
 ];
 
-interface Account {
-    id: number;
-    business_name: string;
-    billing_address?: string;
-    billing_location?: string;
-    billing_city?: string;
-    billing_zip_code?: string;
-    shipping_address?: string;
-    shipping_location?: string;
-    shipping_city?: string;
-    shipping_zip_code?: string;
-}
-
-interface AccountContact {
-    id: number;
-    account_id: number;
-    name: string;
-    email?: string;
-    contact_number?: string;
-}
-
 interface Props {
     accounts: Account[];
     contacts: AccountContact[];
 }
 
+interface FormData {
+    reference: string;
+    quotation_number: string;
+    title: string;
+    account_id: string;
+    account_contact_id: string;
+    available_size: string;
+    proposed_size: string;
+    description: string;
+    estimate_date: string;
+    billing_address: string;
+    billing_location: string;
+    billing_city: string;
+    billing_zip_code: string;
+    shipping_address: string;
+    shipping_location: string;
+    shipping_city: string;
+    shipping_zip_code: string;
+    same_as_billing: boolean;
+    status: 'draft';
+}
 export default function Create({ accounts, contacts }: Props) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<Record<string, any>>({
         reference: generateReference(),
         quotation_number: "",
         title: "",
@@ -88,7 +88,7 @@ export default function Create({ accounts, contacts }: Props) {
         if (checked) {
             setData({
                 ...data,
-                same_as_billing: true,
+                same_as_billing: checked,
                 shipping_address: data.billing_address,
                 shipping_location: data.billing_location,
                 shipping_city: data.billing_city,
@@ -97,7 +97,7 @@ export default function Create({ accounts, contacts }: Props) {
         } else {
             setData({
                 ...data,
-                same_as_billing: false,
+                same_as_billing: checked,
                 shipping_address: '',
                 shipping_location: '',
                 shipping_city: '',

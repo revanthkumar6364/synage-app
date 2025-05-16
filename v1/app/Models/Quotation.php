@@ -65,9 +65,9 @@ class Quotation extends Model
     protected $with = ['account', 'account_contact'];
 
     // Relationships
-    public function items(): HasMany
+    public function items()
     {
-        return $this->hasMany(QuotationItem::class);
+        return $this->hasMany(QuotationItem::class)->with('product');
     }
 
     public function account(): BelongsTo
@@ -85,8 +85,7 @@ class Quotation extends Model
     {
         $subtotal = $this->items->sum('subtotal');
         $discountAmount = $this->items->sum('discount_amount');
-        $taxRate = $this->tax_rate ?? 0;
-        $taxAmount = ($subtotal - $discountAmount) * ($taxRate / 100);
+        $taxAmount = $this->items->sum('tax_amount');
         $total = $subtotal - $discountAmount + $taxAmount;
 
         $this->update([
@@ -112,7 +111,11 @@ class Quotation extends Model
 
         $sequence = $lastQuotation ? (int)substr($lastQuotation->quotation_number, -4) + 1 : 1;
 
-        return sprintf('%s%s%s%04d', $prefix, $year, $month, $sequence);
+        // Ensure the sequence is padded with leading zeros
+        $paddedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
+
+        // Format: QT-YYYYMM-XXXX
+        return sprintf('%s-%s%s-%s', $prefix, $year, $month, $paddedSequence);
     }
 
     // Scopes
@@ -174,5 +177,76 @@ class Quotation extends Model
                 throw new \InvalidArgumentException('Invalid quotation status');
             }
         });
+    }
+
+    // Status transition validation
+    private function validateStatusTransition(string $newStatus): bool
+    {
+        $validTransitions = [
+            self::STATUS_DRAFT => [self::STATUS_PENDING, self::STATUS_REJECTED],
+            self::STATUS_PENDING => [self::STATUS_APPROVED, self::STATUS_REJECTED],
+            self::STATUS_APPROVED => [self::STATUS_REJECTED],
+            self::STATUS_REJECTED => [self::STATUS_DRAFT],
+        ];
+
+        return in_array($newStatus, $validTransitions[$this->status] ?? []);
+    }
+
+    // Status transition methods
+    public function markAsPending(): bool
+    {
+        if ($this->validateStatusTransition(self::STATUS_PENDING)) {
+            $this->status = self::STATUS_PENDING;
+            return $this->save();
+        }
+        return false;
+    }
+
+    public function markAsApproved(): bool
+    {
+        if ($this->validateStatusTransition(self::STATUS_APPROVED)) {
+            $this->status = self::STATUS_APPROVED;
+            return $this->save();
+        }
+        return false;
+    }
+
+    public function markAsRejected(): bool
+    {
+        if ($this->validateStatusTransition(self::STATUS_REJECTED)) {
+            $this->status = self::STATUS_REJECTED;
+            return $this->save();
+        }
+        return false;
+    }
+
+    public function markAsDraft(): bool
+    {
+        if ($this->validateStatusTransition(self::STATUS_DRAFT)) {
+            $this->status = self::STATUS_DRAFT;
+            return $this->save();
+        }
+        return false;
+    }
+
+    // Status check methods
+    public function isDraft(): bool
+    {
+        return $this->status === self::STATUS_DRAFT;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === self::STATUS_APPROVED;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === self::STATUS_REJECTED;
     }
 }

@@ -1,9 +1,19 @@
 export interface Account {
     id: number;
-    name: string;
-    email?: string;
-    phone?: string;
-    address?: string;
+    business_id: number;
+    business_name: string;
+    gst_number?: string;
+    industry_type?: string;
+    billing_address?: string;
+    billing_location?: string;
+    billing_city?: string;
+    billing_zip_code?: string;
+    shipping_address?: string;
+    shipping_location?: string;
+    shipping_city?: string;
+    shipping_zip_code?: string;
+    same_as_billing: boolean;
+    status?: string;
     created_at: string;
     updated_at: string;
 }
@@ -21,62 +31,69 @@ export interface AccountContact {
 
 export interface Product {
     id: number;
+    category_id: number;
     name: string;
-    description?: string;
     sku?: string;
+    hsn_code?: string;
+    brand?: string;
+    type?: string;
+    gst_percentage: number;
     price: number;
-    currency: string;
+    price_per_sqft?: number;
+    min_price?: number;
+    max_price?: number;
+    description?: string;
+    status?: string;
     created_at: string;
     updated_at: string;
 }
 
 export interface QuotationItem {
-    id?: number;
-    quotation_id?: number;
+    product: any;
+    total: ReactNode;
+    id: number;
     product_id: number;
-    quantity: number;
-    unit_price: number;
-    discount: number;
-    tax: number;
-    subtotal: number;
-    total: number;
+    quantity: string | number;
+    unit_price: string | number;
+    discount_percentage: string | number;
+    tax_percentage: string | number;
     notes?: string;
-    product?: Product;
-}
-
-export interface QuotationShippingDetail {
-    id?: number;
-    quotation_id?: number;
-    shipping_address: string;
-    billing_address: string;
-    shipping_method: string;
-    shipping_cost: number;
-    delivery_terms?: string;
-    payment_terms?: string;
-    special_instructions?: string;
 }
 
 export interface Quotation {
     id: number;
+    reference: string;
     quotation_number: string;
-    date: string;
-    valid_until: string;
-    customer_account_id: number;
-    contact_id: number;
-    status: 'draft' | 'sent' | 'accepted' | 'rejected';
-    currency: string;
-    tax_rate: number;
-    subtotal: number;
-    tax_amount: number;
-    total_amount: number;
-    terms_conditions?: string;
+    title: string;
+    available_size: string;
+    proposed_size: string;
+    description: string;
+    estimate_date: string;
+    account_id: number;
+    account_contact_id?: number;
+    billing_address: string;
+    billing_location: string;
+    billing_city: string;
+    billing_zip_code: string;
+    shipping_address: string;
+    shipping_location: string;
+    shipping_city: string;
+    shipping_zip_code: string;
+    same_as_billing: boolean;
     notes?: string;
+    client_scope?: string;
+    status: 'draft' | 'pending' | 'approved' | 'rejected';
+    subtotal: number;
+    tax_rate: number;
+    tax_amount: number;
+    discount_amount: number;
+    total_amount: number;
+    grand_total: number;
     created_at: string;
     updated_at: string;
-    customer_account: Account;
-    contact: AccountContact;
+    account?: Account;
+    account_contact?: AccountContact;
     items: QuotationItem[];
-    shipping_details: QuotationShippingDetail;
 }
 
 export interface BreadcrumbItem {

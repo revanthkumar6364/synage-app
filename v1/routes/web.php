@@ -31,9 +31,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('products/{product}/images/{image}', [ProductController::class, 'removeImage'])
         ->name('products.images.destroy');
     Route::resource('quotations', QuotationController::class);
-    Route::post('quotations/{quotation}/details', [QuotationController::class, 'updateDetails'])->name('quotations.update.details');
+    Route::get('quotations/{quotation}/edit', [QuotationController::class, 'edit'])->name('quotations.edit');
+    Route::get('quotations/{quotation}/products', [QuotationController::class, 'products'])->name('quotations.products');
     Route::post('quotations/{quotation}/products', [QuotationController::class, 'updateProducts'])->name('quotations.update.products');
-    Route::post('quotations/{quotation}/overview', [QuotationController::class, 'updateOverview'])->name('quotations.update.overview');
+    Route::get('quotations/{quotation}/preview', [QuotationController::class, 'preview'])->name('quotations.preview');
+    Route::post('/quotations/{quotation}/update-overview', [QuotationController::class, 'updateOverview'])
+        ->name('quotations.update-overview');
 });
 
 require __DIR__.'/settings.php';
