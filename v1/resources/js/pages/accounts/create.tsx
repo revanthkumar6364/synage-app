@@ -23,7 +23,6 @@ interface CreateAccountProps {
 
 const CreateAccount: FC<CreateAccountProps> = ({ industry_types, statuses }) => {
     const { data, setData, post, processing, errors } = useForm({
-        business_id: '',
         business_name: '',
         gst_number: '',
         industry_type: '',
@@ -67,17 +66,6 @@ const CreateAccount: FC<CreateAccountProps> = ({ industry_types, statuses }) => 
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="business_id">Business ID <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        id="business_id"
-                                        value={data.business_id}
-                                        onChange={(e) => setData('business_id', e.target.value)}
-                                        placeholder="Enter business ID"
-                                    />
-                                    {errors.business_id && <p className="text-sm text-red-500">{errors.business_id}</p>}
-                                </div>
-
                                 <div className="space-y-2">
                                     <Label htmlFor="business_name">Business Name <span className="text-red-500">*</span></Label>
                                     <Input

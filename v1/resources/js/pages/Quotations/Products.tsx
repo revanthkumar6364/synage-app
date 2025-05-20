@@ -46,6 +46,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
         discount_percentage: number;
         tax_percentage: number;
         notes: string;
+        priceError?: string;
     }[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -109,6 +110,21 @@ export default function QuotationProducts({ quotation, products }: Props) {
 
     const handleProductChange = (index: number, field: string, value: any) => {
         const newProducts = [...selectedProducts];
+        const product = products.find(p => p.id === newProducts[index].id);
+
+        if (field === 'unit_price' && product) {
+            const minPrice = product.min_price || 0;
+            const maxPrice = product.max_price || Infinity;
+
+            // Remove any previous error
+            delete newProducts[index].priceError;
+
+            // Check price limits and set error if outside range
+            if (value < minPrice || value > maxPrice) {
+                newProducts[index].priceError = `Price must be between ₹${minPrice} and ₹${maxPrice}`;
+            }
+        }
+
         newProducts[index] = {
             ...newProducts[index],
             [field]: value
@@ -128,6 +144,22 @@ export default function QuotationProducts({ quotation, products }: Props) {
 
         if (selectedProducts.length === 0) {
             toast.error("Please add at least one product");
+            return;
+        }
+
+        // Check for any price errors before submitting
+        const hasErrors = selectedProducts.some(product => {
+            const productDetails = products.find(p => p.id === product.id);
+            if (productDetails) {
+                const minPrice = productDetails.min_price || 0;
+                const maxPrice = productDetails.max_price || Infinity;
+                return product.unit_price < minPrice || product.unit_price > maxPrice;
+            }
+            return false;
+        });
+
+        if (hasErrors) {
+            toast.error("Please fix the price errors before submitting");
             return;
         }
 
@@ -228,54 +260,62 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {selectedProducts.map((product, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>
-                                                {products.find(p => p.id === product.id)?.id}
-                                            </TableCell>
-                                            <TableCell>
-                                                {products.find(p => p.id === product.id)?.name}
-                                            </TableCell>
-                                            <TableCell>
-                                                {products.find(p => p.id === product.id)?.hsn_code}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Input
-                                                    type="number"
-                                                    step="0.01"
-                                                    className="w-28"
-                                                    value={product.unit_price}
-                                                    onChange={(e) => handleProductChange(index, 'unit_price', parseFloat(e.target.value))}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <Input
-                                                    type="number"
-                                                    min="1"
-                                                    className="w-20"
-                                                    value={product.quantity}
-                                                    onChange={(e) => handleProductChange(index, 'quantity', parseInt(e.target.value))}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                ₹{(product.quantity * product.unit_price).toFixed(2)}
-                                            </TableCell>
-                                            <TableCell>
-                                                {product.tax_percentage}%
-                                            </TableCell>
-                                            <TableCell>
-                                                ₹{calculateSubtotal(product)}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    variant="destructive"
-                                                    onClick={() => handleRemoveProduct(index)}
-                                                >
-                                                    Remove
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+                                    {selectedProducts.map((product, index) => {
+                                        const productDetails = products.find(p => p.id === product.id);
+                                        return (
+                                            <TableRow key={index}>
+                                                <TableCell>
+                                                    {productDetails?.id}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {productDetails?.name}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {productDetails?.hsn_code}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="space-y-1">
+                                                        <Input
+                                                            type="number"
+                                                            step="0.01"
+                                                            className={`w-28 ${product.priceError ? 'border-red-500' : ''}`}
+                                                            value={product.unit_price}
+                                                            onChange={(e) => handleProductChange(index, 'unit_price', parseFloat(e.target.value))}
+                                                        />
+                                                        {product.priceError && (
+                                                            <div className="text-xs text-red-500">{product.priceError}</div>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Input
+                                                        type="number"
+                                                        min="1"
+                                                        className="w-20"
+                                                        value={product.quantity}
+                                                        onChange={(e) => handleProductChange(index, 'quantity', parseInt(e.target.value))}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    ₹{(product.quantity * product.unit_price).toFixed(2)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {product.tax_percentage}%
+                                                </TableCell>
+                                                <TableCell>
+                                                    ₹{calculateSubtotal(product)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        variant="destructive"
+                                                        onClick={() => handleRemoveProduct(index)}
+                                                    >
+                                                        Remove
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
                                 </TableBody>
                             </Table>
                             <div className="grid grid-cols-2 gap-4 my-4">

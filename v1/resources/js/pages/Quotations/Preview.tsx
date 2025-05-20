@@ -250,12 +250,9 @@ export default function Preview({ quotation }: Props) {
                                         Proposed Size : {quotation.proposed_size_width_mm} mm W x {quotation.proposed_size_height_mm} mm H | {(() => {
                                             const width = parseInt(quotation.proposed_size_width_mm);
                                             const height = parseInt(quotation.proposed_size_height_mm);
-                                            const widthFt = Math.round(width/304.8 * 100) / 100;
-                                            const heightFt = Math.round(height/304.8 * 100) / 100;
-                                            const sqFt = Math.round((width * height)/(304.8 * 304.8) * 100) / 100;
                                             const rows = Math.ceil(height/160);
                                             const cols = Math.ceil(width/320);
-                                            return `${widthFt} ft W x ${heightFt} ft H = ${sqFt} Sq ft | ${rows} R x ${cols} C of 320 W x 160 H mm`;
+                                            return `${quotation.proposed_size_width_ft} ft W x ${quotation.proposed_size_height_ft} ft H = ${quotation.proposed_size_sqft} Sq ft | ${rows} R x ${cols} C of 320 W x 160 H mm`;
                                         })()} Modules
                                         <br />
                                         Resolution: 512 x {Number(quotation.proposed_size_width_mm)} = {Number(quotation.proposed_size_width_mm) * 512} Pixels

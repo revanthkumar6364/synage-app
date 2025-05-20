@@ -13,7 +13,7 @@ return [
     'roles' => [
         'admin' => 'Admin',
         'manager' => 'Manager',
-        'user' => 'User',
+        'sales' => 'Sales',
     ],
 
     /*

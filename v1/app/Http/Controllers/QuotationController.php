@@ -6,14 +6,10 @@ use App\Http\Resources\QuotationResource;
 use App\Models\Quotation;
 use App\Models\QuotationItem;
 use App\Models\Account;
-use App\Models\AccountContact;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 
 class QuotationController extends Controller
 {
@@ -25,7 +21,7 @@ class QuotationController extends Controller
 
         $quotations = $query->latest()->paginate(config('all.pagination.per_page'));
 
-        return Inertia::render('Quotations/Index', [
+        return Inertia::render('quotations/index', [
             'quotations' => QuotationResource::collection($quotations),
             'filters' => $request->only(['search', 'status']),
             'statuses' => config('all.statuses'),
@@ -34,7 +30,7 @@ class QuotationController extends Controller
 
     public function create()
     {
-        return Inertia::render('Quotations/Create', [
+        return Inertia::render('quotations/create', [
             'accounts' => Account::with('contacts')->get(),
         ]);
     }
@@ -47,10 +43,22 @@ class QuotationController extends Controller
             'title' => 'required|string|max:255',
             'account_id' => 'required|exists:accounts,id',
             'account_contact_id' => 'nullable|exists:account_contacts,id',
+            'available_size_width' => 'required|string|max:100',
+            'available_size_height' => 'required|string|max:100',
+            'available_size_unit' => 'required|in:mm,ft',
+            'proposed_size_width' => 'required|string|max:100',
+            'proposed_size_height' => 'required|string|max:100',
+            'proposed_size_unit' => 'required|in:mm,ft',
             'available_size_width_mm' => 'required|string|max:100',
             'available_size_height_mm' => 'required|string|max:100',
+            'available_size_width_ft' => 'required|string|max:100',
+            'available_size_height_ft' => 'required|string|max:100',
+            'available_size_sqft' => 'required|string|max:100',
             'proposed_size_width_mm' => 'required|string|max:100',
             'proposed_size_height_mm' => 'required|string|max:100',
+            'proposed_size_width_ft' => 'required|string|max:100',
+            'proposed_size_height_ft' => 'required|string|max:100',
+            'proposed_size_sqft' => 'required|string|max:100',
             'description' => 'required|string',
             'estimate_date' => 'required|date|after_or_equal:today',
             'billing_address' => 'required|string',
@@ -93,7 +101,7 @@ class QuotationController extends Controller
 
     public function show(Quotation $quotation)
     {
-        return Inertia::render('Quotations/Show', [
+        return Inertia::render('quotations/show', [
             'quotation' => $quotation->load(['items', 'account']),
         ]);
     }
@@ -101,7 +109,7 @@ class QuotationController extends Controller
     public function edit(Quotation $quotation)
     {
         //dd($quotation);
-        return Inertia::render('Quotations/Edit', [
+        return Inertia::render('quotations/edit', [
             'quotation' => $quotation,
             'accounts' => Account::with('contacts')->get(),
             'products' => Product::get(),
@@ -111,23 +119,35 @@ class QuotationController extends Controller
     public function update(Request $request, Quotation $quotation)
     {
         $validated = $request->validate([
-            'title' => 'required|string',
+            'title' => 'required|string|max:255',
             'account_id' => 'required|exists:accounts,id',
             'account_contact_id' => 'nullable|exists:account_contacts,id',
-            'available_size_width_mm' => 'required|string',
-            'available_size_height_mm' => 'required|string',
-            'proposed_size_width_mm' => 'required|string',
-            'proposed_size_height_mm' => 'required|string',
+            'available_size_width' => 'required|string|max:100',
+            'available_size_height' => 'required|string|max:100',
+            'available_size_unit' => 'required|in:mm,ft',
+            'proposed_size_width' => 'required|string|max:100',
+            'proposed_size_height' => 'required|string|max:100',
+            'proposed_size_unit' => 'required|in:mm,ft',
+            'available_size_width_mm' => 'required|string|max:100',
+            'available_size_height_mm' => 'required|string|max:100',
+            'available_size_width_ft' => 'required|string|max:100',
+            'available_size_height_ft' => 'required|string|max:100',
+            'available_size_sqft' => 'required|string|max:100',
+            'proposed_size_width_mm' => 'required|string|max:100',
+            'proposed_size_height_mm' => 'required|string|max:100',
+            'proposed_size_width_ft' => 'required|string|max:100',
+            'proposed_size_height_ft' => 'required|string|max:100',
+            'proposed_size_sqft' => 'required|string|max:100',
             'description' => 'required|string',
             'estimate_date' => 'required|date',
             'billing_address' => 'required|string',
-            'billing_location' => 'required|string',
-            'billing_city' => 'required|string',
-            'billing_zip_code' => 'required|string',
+            'billing_location' => 'required|string|max:100',
+            'billing_city' => 'required|string|max:100',
+            'billing_zip_code' => 'required|string|max:20',
             'shipping_address' => 'required|string',
-            'shipping_location' => 'required|string',
-            'shipping_city' => 'required|string',
-            'shipping_zip_code' => 'required|string',
+            'shipping_location' => 'required|string|max:100',
+            'shipping_city' => 'required|string|max:100',
+            'shipping_zip_code' => 'required|string|max:20',
             'same_as_billing' => 'boolean',
         ]);
 
@@ -140,7 +160,7 @@ class QuotationController extends Controller
 
     public function products(Quotation $quotation)
     {
-        return Inertia::render('Quotations/Products', [
+        return Inertia::render('quotations/products', [
             'quotation' => $quotation->load('items'),
             'products' => Product::get(),
         ]);
@@ -198,7 +218,7 @@ class QuotationController extends Controller
 
     public function preview(Quotation $quotation)
     {
-        return Inertia::render('Quotations/Preview', [
+        return Inertia::render('quotations/preview', [
             'quotation' => $quotation->load(['items', 'account']),
             'products' => Product::select('id', 'name', 'description', 'price', 'gst_percentage')->get(),
         ]);

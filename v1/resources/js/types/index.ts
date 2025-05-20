@@ -63,13 +63,26 @@ export interface QuotationItem {
 
 export interface Quotation {
     id: number;
+    parent_id?: number;
     reference: string;
     quotation_number: string;
     title: string;
+    available_size_width: string;
+    available_size_height: string;
+    available_size_unit: string;
+    proposed_size_width: string;
+    proposed_size_height: string;
+    proposed_size_unit: string;
     available_size_width_mm: string;
     available_size_height_mm: string;
     proposed_size_width_mm: string;
     proposed_size_height_mm: string;
+    available_size_width_ft: string;
+    available_size_height_ft: string;
+    proposed_size_width_ft: string;
+    proposed_size_height_ft: string;
+    available_size_sqft: string;
+    proposed_size_sqft: string;
     description: string;
     estimate_date: string;
     account_id: number;
@@ -90,15 +103,20 @@ export interface Quotation {
     delivery_terms?: string;
     payment_terms?: string;
     electrical_terms?: string;
-    status: 'draft' | 'pending' | 'approved' | 'rejected';
     subtotal: number;
     tax_rate: number;
     tax_amount: number;
     discount_amount: number;
     total_amount: number;
     grand_total: number;
+    status: 'draft' | 'pending' | 'approved' | 'rejected';
+    editable: boolean;
+    last_action?: string;
+    created_by: number;
+    updated_by: number;
     created_at: string;
     updated_at: string;
+    deleted_at?: string;
     approved_at?: string;
     approved_by?: number;
     rejected_at?: string;

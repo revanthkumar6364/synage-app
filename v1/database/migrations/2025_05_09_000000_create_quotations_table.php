@@ -17,10 +17,23 @@ return new class extends Migration
             $table->string('title');
             $table->foreignId('account_id')->constrained('accounts'); // Made required
             $table->foreignId('account_contact_id')->nullable()->constrained('account_contacts');
+            $table->string('available_size_width');
+            $table->string('available_size_height');
+            $table->string('available_size_unit');
+            $table->string('proposed_size_width');
+            $table->string('proposed_size_height');
+            $table->string('proposed_size_unit');
             $table->string('available_size_width_mm');
             $table->string('available_size_height_mm');
             $table->string('proposed_size_width_mm');
             $table->string('proposed_size_height_mm');
+            $table->string('available_size_width_ft');
+            $table->string('available_size_height_ft');
+            $table->string('proposed_size_width_ft');
+            $table->string('proposed_size_height_ft');
+            $table->string('available_size_sqft');
+            $table->string('proposed_size_sqft');
+
             $table->text('description');
             $table->date('estimate_date');
 

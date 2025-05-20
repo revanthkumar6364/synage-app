@@ -29,10 +29,22 @@ export default function Edit({ quotation, accounts }: Props) {
         title: quotation.title,
         account_id: quotation.account_id,
         account_contact_id: quotation.account_contact_id,
+        available_size_width: quotation.available_size_width || '',
+        available_size_height: quotation.available_size_height || '',
+        available_size_unit: quotation.available_size_unit || 'mm',
+        proposed_size_width: quotation.proposed_size_width || '',
+        proposed_size_height: quotation.proposed_size_height || '',
+        proposed_size_unit: quotation.proposed_size_unit || 'mm',
         available_size_width_mm: quotation.available_size_width_mm,
         available_size_height_mm: quotation.available_size_height_mm,
+        available_size_width_ft: quotation.available_size_width_ft,
+        available_size_height_ft: quotation.available_size_height_ft,
+        available_size_sqft: quotation.available_size_sqft,
         proposed_size_width_mm: quotation.proposed_size_width_mm,
         proposed_size_height_mm: quotation.proposed_size_height_mm,
+        proposed_size_width_ft: quotation.proposed_size_width_ft,
+        proposed_size_height_ft: quotation.proposed_size_height_ft,
+        proposed_size_sqft: quotation.proposed_size_sqft,
         description: quotation.description,
         estimate_date: quotation.estimate_date ? new Date(quotation.estimate_date).toISOString().split('T')[0] : '',
         billing_address: quotation.billing_address,
@@ -45,6 +57,78 @@ export default function Edit({ quotation, accounts }: Props) {
         shipping_zip_code: quotation.shipping_zip_code,
         same_as_billing: false,
     });
+
+    useEffect(() => {
+        // Calculate derived measurements when width/height/unit changes
+        const calculateMeasurements = () => {
+            const width = parseFloat(data.available_size_width) || 0;
+            const height = parseFloat(data.available_size_height) || 0;
+            const unit = data.available_size_unit;
+
+            let width_mm, height_mm, width_ft, height_ft, sqft;
+
+            if (unit === 'mm') {
+                width_mm = width;
+                height_mm = height;
+                width_ft = width / 304.8;
+                height_ft = height / 304.8;
+            } else { // ft
+                width_ft = width;
+                height_ft = height;
+                width_mm = width * 304.8;
+                height_mm = height * 304.8;
+            }
+
+            sqft = width_ft * height_ft;
+
+            setData(prev => ({
+                ...prev,
+                available_size_width_mm: width_mm.toFixed(2),
+                available_size_height_mm: height_mm.toFixed(2),
+                available_size_width_ft: width_ft.toFixed(2),
+                available_size_height_ft: height_ft.toFixed(2),
+                available_size_sqft: sqft.toFixed(2)
+            }));
+        };
+
+        calculateMeasurements();
+    }, [data.available_size_width, data.available_size_height, data.available_size_unit]);
+
+    useEffect(() => {
+        // Similar calculation for proposed size
+        const calculateProposedMeasurements = () => {
+            const width = parseFloat(data.proposed_size_width) || 0;
+            const height = parseFloat(data.proposed_size_height) || 0;
+            const unit = data.proposed_size_unit;
+
+            let width_mm, height_mm, width_ft, height_ft, sqft;
+
+            if (unit === 'mm') {
+                width_mm = width;
+                height_mm = height;
+                width_ft = width / 304.8;
+                height_ft = height / 304.8;
+            } else { // ft
+                width_ft = width;
+                height_ft = height;
+                width_mm = width * 304.8;
+                height_mm = height * 304.8;
+            }
+
+            sqft = width_ft * height_ft;
+
+            setData(prev => ({
+                ...prev,
+                proposed_size_width_mm: width_mm.toFixed(2),
+                proposed_size_height_mm: height_mm.toFixed(2),
+                proposed_size_width_ft: width_ft.toFixed(2),
+                proposed_size_height_ft: height_ft.toFixed(2),
+                proposed_size_sqft: sqft.toFixed(2)
+            }));
+        };
+
+        calculateProposedMeasurements();
+    }, [data.proposed_size_width, data.proposed_size_height, data.proposed_size_unit]);
 
     useEffect(() => {
         if (data.account_id) {
@@ -303,50 +387,92 @@ export default function Edit({ quotation, accounts }: Props) {
 
                             <div className="space-y-6">
                                 <div>
-                                    <Label>Available Size (mm)</Label>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <Label>Available Size</Label>
+                                    <div className="grid grid-cols-3 gap-4">
                                         <div>
                                             <Input
-                                                placeholder="Width (mm)"
-                                                value={data.available_size_width_mm}
-                                                onChange={e => setData('available_size_width_mm', e.target.value)}
-                                                className={errors.available_size_width_mm ? 'border-red-500' : ''}
+                                                type="number"
+                                                placeholder="Width"
+                                                value={data.available_size_width}
+                                                onChange={e => setData('available_size_width', e.target.value)}
+                                                className={errors.available_size_width ? 'border-red-500' : ''}
                                             />
-                                            {errors.available_size_width_mm && <span className="text-red-500 text-sm">{errors.available_size_width_mm}</span>}
+                                            {errors.available_size_width && <span className="text-red-500 text-sm">{errors.available_size_width}</span>}
                                         </div>
                                         <div>
                                             <Input
-                                                placeholder="Height (mm)"
-                                                value={data.available_size_height_mm}
-                                                onChange={e => setData('available_size_height_mm', e.target.value)}
-                                                className={errors.available_size_height_mm ? 'border-red-500' : ''}
+                                                type="number"
+                                                placeholder="Height"
+                                                value={data.available_size_height}
+                                                onChange={e => setData('available_size_height', e.target.value)}
+                                                className={errors.available_size_height ? 'border-red-500' : ''}
                                             />
-                                            {errors.available_size_height_mm && <span className="text-red-500 text-sm">{errors.available_size_height_mm}</span>}
+                                            {errors.available_size_height && <span className="text-red-500 text-sm">{errors.available_size_height}</span>}
                                         </div>
+                                        <div>
+                                            <Select
+                                                value={data.available_size_unit}
+                                                onValueChange={(value) => setData('available_size_unit', value)}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Unit" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="mm">mm</SelectItem>
+                                                    <SelectItem value="ft">ft</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <div className="mt-2 text-sm text-gray-500">
+                                        Calculated: {data.available_size_width_mm}mm x {data.available_size_height_mm}mm |
+                                        {data.available_size_width_ft}ft x {data.available_size_height_ft}ft |
+                                        Area: {data.available_size_sqft} sq.ft
                                     </div>
                                 </div>
 
                                 <div>
-                                    <Label>Proposed Size (mm)</Label>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <Label>Proposed Size</Label>
+                                    <div className="grid grid-cols-3 gap-4">
                                         <div>
                                             <Input
-                                                placeholder="Width (mm)"
-                                                value={data.proposed_size_width_mm}
-                                                onChange={e => setData('proposed_size_width_mm', e.target.value)}
-                                                className={errors.proposed_size_width_mm ? 'border-red-500' : ''}
+                                                type="number"
+                                                placeholder="Width"
+                                                value={data.proposed_size_width}
+                                                onChange={e => setData('proposed_size_width', e.target.value)}
+                                                className={errors.proposed_size_width ? 'border-red-500' : ''}
                                             />
-                                            {errors.proposed_size_width_mm && <span className="text-red-500 text-sm">{errors.proposed_size_width_mm}</span>}
+                                            {errors.proposed_size_width && <span className="text-red-500 text-sm">{errors.proposed_size_width}</span>}
                                         </div>
                                         <div>
                                             <Input
-                                                placeholder="Height (mm)"
-                                                value={data.proposed_size_height_mm}
-                                                onChange={e => setData('proposed_size_height_mm', e.target.value)}
-                                                className={errors.proposed_size_height_mm ? 'border-red-500' : ''}
+                                                type="number"
+                                                placeholder="Height"
+                                                value={data.proposed_size_height}
+                                                onChange={e => setData('proposed_size_height', e.target.value)}
+                                                className={errors.proposed_size_height ? 'border-red-500' : ''}
                                             />
-                                            {errors.proposed_size_height_mm && <span className="text-red-500 text-sm">{errors.proposed_size_height_mm}</span>}
+                                            {errors.proposed_size_height && <span className="text-red-500 text-sm">{errors.proposed_size_height}</span>}
                                         </div>
+                                        <div>
+                                            <Select
+                                                value={data.proposed_size_unit}
+                                                onValueChange={(value) => setData('proposed_size_unit', value)}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Unit" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="mm">mm</SelectItem>
+                                                    <SelectItem value="ft">ft</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <div className="mt-2 text-sm text-gray-500">
+                                        Calculated: {data.proposed_size_width_mm}mm x {data.proposed_size_height_mm}mm |
+                                        {data.proposed_size_width_ft}ft x {data.proposed_size_height_ft}ft |
+                                        Area: {data.proposed_size_sqft} sq.ft
                                     </div>
                                 </div>
 

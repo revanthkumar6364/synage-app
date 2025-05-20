@@ -42,7 +42,6 @@ class AccountController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'business_id' => 'required|unique:accounts',
             'business_name' => 'required|string|max:255',
             'gst_number' => 'nullable|string|max:255',
             'industry_type' => 'nullable|string|max:255',
@@ -57,9 +56,9 @@ class AccountController extends Controller
             'same_as_billing' => 'boolean',
             'status' => 'required|in:active,inactive'
         ]);
-
         $account = Account::create($validated);
-
+        $account->business_id = 'ACC-' . date('Y') . '-' . str_pad($account->id, 5, '0', STR_PAD_LEFT);
+        $account->save();
         return redirect()->route('accounts.index')
             ->with('success', 'Account created successfully.');
     }
@@ -87,7 +86,6 @@ class AccountController extends Controller
     public function update(Request $request, Account $account)
     {
         $validated = $request->validate([
-            'business_id' => 'required|unique:accounts,business_id,' . $account->id,
             'business_name' => 'required|string|max:255',
             'gst_number' => 'nullable|string|max:255',
             'industry_type' => 'nullable|string|max:255',
