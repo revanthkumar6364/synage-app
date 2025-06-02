@@ -42,7 +42,10 @@ interface FormData {
     proposed_size_height_ft: string;
     available_size_sqft: string;
     proposed_size_sqft: string;
+    quantity: string;
+    max_quantity: string;
     description: string;
+    category: string;
     estimate_date: string;
     billing_address: string;
     billing_location: string;
@@ -55,6 +58,14 @@ interface FormData {
     same_as_billing: boolean;
     status: 'draft';
 }
+
+// Add categories constant
+const CATEGORIES = {
+    unilumin: 'Unilumin',
+    absen: 'Absen',
+    radiant_synage: 'Radiant Synage',
+    custom: 'Custom',
+} as const;
 
 export default function Create({ accounts = [] }: Props) {
     const { data, setData, post, processing, errors } = useForm<Record<string, any>>({
@@ -79,7 +90,10 @@ export default function Create({ accounts = [] }: Props) {
         proposed_size_height_ft: "",
         available_size_sqft: "",
         proposed_size_sqft: "",
+        quantity: "",
+        max_quantity: "",
         description: "",
+        category: "custom",
         estimate_date: "",
         billing_address: "",
         billing_location: "",
@@ -116,54 +130,83 @@ export default function Create({ accounts = [] }: Props) {
 
             sqft = width_ft * height_ft;
 
-            setData(prev => ({
-                ...prev,
-                available_size_width_mm: width_mm.toFixed(2),
-                available_size_height_mm: height_mm.toFixed(2),
-                available_size_width_ft: width_ft.toFixed(2),
-                available_size_height_ft: height_ft.toFixed(2),
-                available_size_sqft: sqft.toFixed(2)
-            }));
+            // Calculate maximum possible boxes based on available space
+            const boxWidth = 320; // mm
+            const boxHeight = 160; // mm
+
+            // Calculate how many boxes can fit in the width and height
+            const boxesInWidth = Math.floor(width_mm / boxWidth);
+            const boxesInHeight = Math.floor(height_mm / boxHeight);
+            const maxPossibleBoxes = boxesInWidth * boxesInHeight;
+
+            // Calculate proposed dimensions based on max boxes
+            const proposedWidth = boxWidth * boxesInWidth;
+            const proposedHeight = boxHeight * Math.ceil(maxPossibleBoxes / boxesInWidth);
+
+            setData((prev: FormData) => {
+                // If no quantity is set yet, set it to max
+                const newQuantity = prev.quantity === "" ? maxPossibleBoxes.toString() :
+                    (parseInt(prev.quantity) > maxPossibleBoxes ? maxPossibleBoxes.toString() : prev.quantity);
+
+                return {
+                    ...prev,
+                    available_size_width_mm: width_mm.toFixed(2),
+                    available_size_height_mm: height_mm.toFixed(2),
+                    available_size_width_ft: width_ft.toFixed(2),
+                    available_size_height_ft: height_ft.toFixed(2),
+                    available_size_sqft: sqft.toFixed(2),
+                    max_quantity: maxPossibleBoxes.toString(),
+                    quantity: newQuantity,
+                    proposed_size_width: proposedWidth.toString(),
+                    proposed_size_height: proposedHeight.toString(),
+                    proposed_size_unit: "mm"
+                };
+            });
         };
 
         calculateMeasurements();
     }, [data.available_size_width, data.available_size_height, data.available_size_unit]);
 
     useEffect(() => {
-        // Similar calculation for proposed size
-        const calculateProposedMeasurements = () => {
-            const width = parseFloat(data.proposed_size_width) || 0;
-            const height = parseFloat(data.proposed_size_height) || 0;
-            const unit = data.proposed_size_unit;
+        // Calculate proposed size based on quantity
+        const calculateProposedSize = () => {
+            const quantity = parseInt(data.quantity) || 0;
+            const maxQuantity = parseInt(data.max_quantity) || 0;
+            const availableWidth = parseFloat(data.available_size_width_mm) || 0;
 
-            let width_mm, height_mm, width_ft, height_ft, sqft;
+            if (quantity <= 0 || maxQuantity <= 0 || availableWidth <= 0) return;
 
-            if (unit === 'mm') {
-                width_mm = width;
-                height_mm = height;
-                width_ft = width / 304.8;
-                height_ft = height / 304.8;
-            } else { // ft
-                width_ft = width;
-                height_ft = height;
-                width_mm = width * 304.8;
-                height_mm = height * 304.8;
-            }
+            const boxWidth = 320; // mm
+            const boxHeight = 160; // mm
 
-            sqft = width_ft * height_ft;
+            // Calculate minimum number of boxes in width and height needed
+            const boxesInWidth = Math.floor(availableWidth / boxWidth);
+            if (boxesInWidth <= 0) return;
 
-            setData(prev => ({
+            // Calculate required rows based on quantity
+            const requiredRows = Math.ceil(quantity / boxesInWidth);
+
+            // Calculate final proposed dimensions
+            const proposedWidth = boxWidth * boxesInWidth;
+            const proposedHeight = boxHeight * requiredRows;
+
+            setData((prev: FormData) => ({
                 ...prev,
-                proposed_size_width_mm: width_mm.toFixed(2),
-                proposed_size_height_mm: height_mm.toFixed(2),
-                proposed_size_width_ft: width_ft.toFixed(2),
-                proposed_size_height_ft: height_ft.toFixed(2),
-                proposed_size_sqft: sqft.toFixed(2)
+                proposed_size_width: proposedWidth.toString(),
+                proposed_size_height: proposedHeight.toString(),
+                proposed_size_unit: "mm",
+                proposed_size_width_mm: proposedWidth.toFixed(2),
+                proposed_size_height_mm: proposedHeight.toFixed(2),
+                proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
+                proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
+                proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2),
+                quantity: quantity.toString(),
+                max_quantity: maxQuantity.toString()
             }));
         };
 
-        calculateProposedMeasurements();
-    }, [data.proposed_size_width, data.proposed_size_height, data.proposed_size_unit]);
+        calculateProposedSize();
+    }, [data.quantity, data.max_quantity, data.available_size_width_mm]);
 
     const handleAccountChange = (val: string) => {
         const account = accounts.find(acc => acc.id.toString() === val);
@@ -313,55 +356,94 @@ export default function Create({ accounts = [] }: Props) {
                                         )}
                                     </div>
                                 </div>
+
                                 <div>
-                                    <Label>Proposed Size <span className="text-red-500">*</span></Label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <Input
-                                            placeholder="Width"
-                                            value={data.proposed_size_width}
-                                            onChange={(e) => setData('proposed_size_width', e.target.value)}
-                                            required
-                                        />
-                                        <Input
-                                            placeholder="Height"
-                                            value={data.proposed_size_height}
-                                            onChange={(e) => setData('proposed_size_height', e.target.value)}
-                                            required
-                                        />
-                                        <Select value={data.proposed_size_unit} onValueChange={(val) => setData('proposed_size_unit', val)}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Unit" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="mm">mm</SelectItem>
-                                                <SelectItem value="ft">ft</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="mt-2 text-sm text-gray-500">
-                                        {data.proposed_size_unit === 'mm' ? (
-                                            <>
-                                                {data.proposed_size_width_ft} ft x {data.proposed_size_height_ft} ft
-                                                ({data.proposed_size_sqft} sq.ft)
-                                            </>
-                                        ) : (
-                                            <>
-                                                {data.proposed_size_width_mm} mm x {data.proposed_size_height_mm} mm
-                                                ({data.proposed_size_sqft} sq.ft)
-                                            </>
+                                    <Label>Quantity <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        type="number"
+                                        min="1"
+                                        max={data.max_quantity}
+                                        placeholder="Enter quantity"
+                                        value={data.quantity}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value) || 0;
+                                            const max = parseInt(data.max_quantity) || 0;
+                                            setData('quantity', Math.min(val, max).toString());
+                                        }}
+                                        required
+                                    />
+                                    <p className="mt-2 text-sm text-gray-500">
+                                        Box size: 320mm x 160mm
+                                        {data.max_quantity && (
+                                            <> | Maximum possible quantity: {data.max_quantity} boxes</>
                                         )}
-                                    </div>
+                                    </p>
                                 </div>
                             </div>
 
                             <div>
-                                <Label>Description <span className="text-red-500">*</span></Label>
-                                <Textarea
-                                    value={data.description}
-                                    onChange={(e) => setData('description', e.target.value)}
-                                    required
-                                />
-                                {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
+                                <Label>Proposed Size (Auto-calculated)</Label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <Input
+                                        placeholder="Width"
+                                        value={data.proposed_size_width}
+                                        readOnly
+                                    />
+                                    <Input
+                                        placeholder="Height"
+                                        value={data.proposed_size_height}
+                                        readOnly
+                                    />
+                                    <Input
+                                        value={data.proposed_size_unit}
+                                        readOnly
+                                    />
+                                </div>
+                                <div className="mt-2 text-sm text-gray-500">
+                                    {data.proposed_size_unit === 'mm' ? (
+                                        <>
+                                            {data.proposed_size_width_ft} ft x {data.proposed_size_height_ft} ft
+                                            ({data.proposed_size_sqft} sq.ft)
+                                        </>
+                                    ) : (
+                                        <>
+                                            {data.proposed_size_width_mm} mm x {data.proposed_size_height_mm} mm
+                                            ({data.proposed_size_sqft} sq.ft)
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <Label>Description <span className="text-red-500">*</span></Label>
+                                    <Textarea
+                                        value={data.description}
+                                        onChange={(e) => setData('description', e.target.value)}
+                                        required
+                                    />
+                                    {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
+                                </div>
+
+                                <div>
+                                    <Label>Category <span className="text-red-500">*</span></Label>
+                                    <Select value={data.category} onValueChange={(val) => setData('category', val)}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {Object.entries(CATEGORIES).map(([key, label]) => (
+                                                <SelectItem key={key} value={key}>
+                                                    {label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+                                    <p className="mt-2 text-sm text-gray-500">
+                                        Select a category to organize quotation files
+                                    </p>
+                                </div>
                             </div>
 
                             <div>

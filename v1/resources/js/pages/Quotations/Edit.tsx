@@ -22,10 +22,46 @@ interface Props {
     accounts: Account[];
 }
 
+interface FormData extends Record<string, any> {
+    title: string;
+    account_id: number;
+    account_contact_id: number | undefined;
+    available_size_width: string;
+    available_size_height: string;
+    available_size_unit: string;
+    proposed_size_width: string;
+    proposed_size_height: string;
+    proposed_size_unit: string;
+    available_size_width_mm: string;
+    available_size_height_mm: string;
+    available_size_width_ft: string;
+    available_size_height_ft: string;
+    available_size_sqft: string;
+    proposed_size_width_mm: string;
+    proposed_size_height_mm: string;
+    proposed_size_width_ft: string;
+    proposed_size_height_ft: string;
+    proposed_size_sqft: string;
+    quantity: string;
+    max_quantity: string;
+    description: string;
+    estimate_date: string;
+    category: string;
+    billing_address: string;
+    billing_location: string;
+    billing_city: string;
+    billing_zip_code: string;
+    shipping_address: string;
+    shipping_location: string;
+    shipping_city: string;
+    shipping_zip_code: string;
+    same_as_billing: boolean;
+}
+
 export default function Edit({ quotation, accounts }: Props) {
     const [accountContacts, setAccountContacts] = useState<AccountContact[]>([]);
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, put, processing, errors } = useForm<FormData>({
         title: quotation.title,
         account_id: quotation.account_id,
         account_contact_id: quotation.account_contact_id,
@@ -35,26 +71,29 @@ export default function Edit({ quotation, accounts }: Props) {
         proposed_size_width: quotation.proposed_size_width || '',
         proposed_size_height: quotation.proposed_size_height || '',
         proposed_size_unit: quotation.proposed_size_unit || 'mm',
-        available_size_width_mm: quotation.available_size_width_mm,
-        available_size_height_mm: quotation.available_size_height_mm,
-        available_size_width_ft: quotation.available_size_width_ft,
-        available_size_height_ft: quotation.available_size_height_ft,
-        available_size_sqft: quotation.available_size_sqft,
-        proposed_size_width_mm: quotation.proposed_size_width_mm,
-        proposed_size_height_mm: quotation.proposed_size_height_mm,
-        proposed_size_width_ft: quotation.proposed_size_width_ft,
-        proposed_size_height_ft: quotation.proposed_size_height_ft,
-        proposed_size_sqft: quotation.proposed_size_sqft,
-        description: quotation.description,
+        available_size_width_mm: quotation.available_size_width_mm || '',
+        available_size_height_mm: quotation.available_size_height_mm || '',
+        available_size_width_ft: quotation.available_size_width_ft || '',
+        available_size_height_ft: quotation.available_size_height_ft || '',
+        available_size_sqft: quotation.available_size_sqft || '',
+        proposed_size_width_mm: quotation.proposed_size_width_mm || '',
+        proposed_size_height_mm: quotation.proposed_size_height_mm || '',
+        proposed_size_width_ft: quotation.proposed_size_width_ft || '',
+        proposed_size_height_ft: quotation.proposed_size_height_ft || '',
+        proposed_size_sqft: quotation.proposed_size_sqft || '',
+        quantity: quotation.quantity?.toString() || '',
+        max_quantity: quotation.max_quantity?.toString() || '',
+        description: quotation.description || '',
         estimate_date: quotation.estimate_date ? new Date(quotation.estimate_date).toISOString().split('T')[0] : '',
-        billing_address: quotation.billing_address,
-        billing_location: quotation.billing_location,
-        billing_city: quotation.billing_city,
-        billing_zip_code: quotation.billing_zip_code,
-        shipping_address: quotation.shipping_address,
-        shipping_location: quotation.shipping_location,
-        shipping_city: quotation.shipping_city,
-        shipping_zip_code: quotation.shipping_zip_code,
+        billing_address: quotation.billing_address || '',
+        billing_location: quotation.billing_location || '',
+        billing_city: quotation.billing_city || '',
+        billing_zip_code: quotation.billing_zip_code || '',
+        shipping_address: quotation.shipping_address || '',
+        shipping_location: quotation.shipping_location || '',
+        shipping_city: quotation.shipping_city || '',
+        shipping_zip_code: quotation.shipping_zip_code || '',
+        category: quotation.category || 'custom',
         same_as_billing: false,
     });
 
@@ -81,13 +120,24 @@ export default function Edit({ quotation, accounts }: Props) {
 
             sqft = width_ft * height_ft;
 
+            // Calculate maximum possible boxes based on available space
+            const boxWidth = 320; // mm
+            const boxHeight = 160; // mm
+
+            // Calculate how many boxes can fit in the width and height
+            const boxesInWidth = Math.floor(width_mm / boxWidth);
+            const boxesInHeight = Math.floor(height_mm / boxHeight);
+            const maxPossibleBoxes = boxesInWidth * boxesInHeight;
+
             setData(prev => ({
                 ...prev,
                 available_size_width_mm: width_mm.toFixed(2),
                 available_size_height_mm: height_mm.toFixed(2),
                 available_size_width_ft: width_ft.toFixed(2),
                 available_size_height_ft: height_ft.toFixed(2),
-                available_size_sqft: sqft.toFixed(2)
+                available_size_sqft: sqft.toFixed(2),
+                max_quantity: maxPossibleBoxes.toString(),
+                quantity: parseInt(prev.quantity) > maxPossibleBoxes ? maxPossibleBoxes.toString() : prev.quantity
             }));
         };
 
@@ -95,40 +145,45 @@ export default function Edit({ quotation, accounts }: Props) {
     }, [data.available_size_width, data.available_size_height, data.available_size_unit]);
 
     useEffect(() => {
-        // Similar calculation for proposed size
-        const calculateProposedMeasurements = () => {
-            const width = parseFloat(data.proposed_size_width) || 0;
-            const height = parseFloat(data.proposed_size_height) || 0;
-            const unit = data.proposed_size_unit;
+        // Calculate proposed size based on quantity
+        const calculateProposedSize = () => {
+            const quantity = parseInt(data.quantity) || 0;
+            const maxQuantity = parseInt(data.max_quantity) || 0;
+            const availableWidth = parseFloat(data.available_size_width_mm) || 0;
 
-            let width_mm, height_mm, width_ft, height_ft, sqft;
+            if (quantity <= 0 || maxQuantity <= 0 || availableWidth <= 0) return;
 
-            if (unit === 'mm') {
-                width_mm = width;
-                height_mm = height;
-                width_ft = width / 304.8;
-                height_ft = height / 304.8;
-            } else { // ft
-                width_ft = width;
-                height_ft = height;
-                width_mm = width * 304.8;
-                height_mm = height * 304.8;
-            }
+            const boxWidth = 320; // mm
+            const boxHeight = 160; // mm
 
-            sqft = width_ft * height_ft;
+            // Calculate minimum number of boxes in width and height needed
+            const boxesInWidth = Math.floor(availableWidth / boxWidth);
+            if (boxesInWidth <= 0) return;
+
+            // Calculate required rows based on quantity
+            const requiredRows = Math.ceil(quantity / boxesInWidth);
+
+            // Calculate final proposed dimensions
+            const proposedWidth = boxWidth * boxesInWidth;
+            const proposedHeight = boxHeight * requiredRows;
 
             setData(prev => ({
                 ...prev,
-                proposed_size_width_mm: width_mm.toFixed(2),
-                proposed_size_height_mm: height_mm.toFixed(2),
-                proposed_size_width_ft: width_ft.toFixed(2),
-                proposed_size_height_ft: height_ft.toFixed(2),
-                proposed_size_sqft: sqft.toFixed(2)
+                proposed_size_width: proposedWidth.toString(),
+                proposed_size_height: proposedHeight.toString(),
+                proposed_size_unit: "mm",
+                proposed_size_width_mm: proposedWidth.toFixed(2),
+                proposed_size_height_mm: proposedHeight.toFixed(2),
+                proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
+                proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
+                proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2),
+                quantity: quantity.toString(),
+                max_quantity: maxQuantity.toString()
             }));
         };
 
-        calculateProposedMeasurements();
-    }, [data.proposed_size_width, data.proposed_size_height, data.proposed_size_unit]);
+        calculateProposedSize();
+    }, [data.quantity, data.max_quantity, data.available_size_width_mm]);
 
     useEffect(() => {
         if (data.account_id) {
@@ -197,6 +252,12 @@ export default function Edit({ quotation, accounts }: Props) {
                         onClick={() => router.visit(route('quotations.edit', quotation.id))}
                     >
                         Details
+                    </Button>
+                    <Button
+                        variant='outline'
+                        onClick={() => router.visit(route('quotations.files', quotation.id))}
+                    >
+                        Files
                     </Button>
                     <Button
                         variant='outline'
@@ -432,42 +493,45 @@ export default function Edit({ quotation, accounts }: Props) {
                                 </div>
 
                                 <div>
-                                    <Label>Proposed Size</Label>
+                                    <Label>Quantity</Label>
+                                    <Input
+                                        type="number"
+                                        min="1"
+                                        max={data.max_quantity}
+                                        placeholder="Enter quantity"
+                                        value={data.quantity}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value) || 0;
+                                            const max = parseInt(data.max_quantity) || 0;
+                                            setData('quantity', Math.min(val, max).toString());
+                                        }}
+                                        required
+                                    />
+                                    <p className="mt-2 text-sm text-gray-500">
+                                        Box size: 320mm x 160mm
+                                        {data.max_quantity && (
+                                            <> | Maximum possible quantity: {data.max_quantity} boxes</>
+                                        )}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <Label>Proposed Size (Auto-calculated)</Label>
                                     <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                            <Input
-                                                type="number"
-                                                placeholder="Width"
-                                                value={data.proposed_size_width}
-                                                onChange={e => setData('proposed_size_width', e.target.value)}
-                                                className={errors.proposed_size_width ? 'border-red-500' : ''}
-                                            />
-                                            {errors.proposed_size_width && <span className="text-red-500 text-sm">{errors.proposed_size_width}</span>}
-                                        </div>
-                                        <div>
-                                            <Input
-                                                type="number"
-                                                placeholder="Height"
-                                                value={data.proposed_size_height}
-                                                onChange={e => setData('proposed_size_height', e.target.value)}
-                                                className={errors.proposed_size_height ? 'border-red-500' : ''}
-                                            />
-                                            {errors.proposed_size_height && <span className="text-red-500 text-sm">{errors.proposed_size_height}</span>}
-                                        </div>
-                                        <div>
-                                            <Select
-                                                value={data.proposed_size_unit}
-                                                onValueChange={(value) => setData('proposed_size_unit', value)}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Unit" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="mm">mm</SelectItem>
-                                                    <SelectItem value="ft">ft</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
+                                        <Input
+                                            placeholder="Width"
+                                            value={data.proposed_size_width}
+                                            readOnly
+                                        />
+                                        <Input
+                                            placeholder="Height"
+                                            value={data.proposed_size_height}
+                                            readOnly
+                                        />
+                                        <Input
+                                            value={data.proposed_size_unit}
+                                            readOnly
+                                        />
                                     </div>
                                     <div className="mt-2 text-sm text-gray-500">
                                         Calculated: {data.proposed_size_width_mm}mm x {data.proposed_size_height_mm}mm |
@@ -484,6 +548,24 @@ export default function Edit({ quotation, accounts }: Props) {
                                         className={errors.description ? 'border-red-500' : ''}
                                     />
                                     {errors.description && <span className="text-red-500 text-sm">{errors.description}</span>}
+                                </div>
+                                <div>
+                                    <Label>Category</Label>
+                                    <Select
+                                        value={data.category}
+                                        onValueChange={(value) => setData('category', value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="unilumin">Unilumin</SelectItem>
+                                            <SelectItem value="absen">Absen</SelectItem>
+                                            <SelectItem value="radiant_synage">Radiant Synage</SelectItem>
+                                            <SelectItem value="custom">Custom</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.category && <span className="text-red-500 text-sm">{errors.category}</span>}
                                 </div>
                             </div>
 

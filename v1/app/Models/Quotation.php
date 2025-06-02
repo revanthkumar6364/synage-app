@@ -39,6 +39,8 @@ class Quotation extends Model
         'proposed_size_height_ft',
         'available_size_sqft',
         'proposed_size_sqft',
+        'quantity',
+        'max_quantity',
         'description',
         'estimate_date',
         'account_id',
@@ -65,6 +67,7 @@ class Quotation extends Model
         'discount_amount',
         'total_amount',
         'grand_total',
+        'category',
         'status',
         'editable',
         'last_action',
@@ -99,6 +102,11 @@ class Quotation extends Model
     public function items()
     {
         return $this->hasMany(QuotationItem::class)->with('product');
+    }
+
+    public function media()
+    {
+        return $this->hasMany(QuotationMedia::class);
     }
 
     public function account(): BelongsTo

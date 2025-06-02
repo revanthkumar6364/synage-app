@@ -18,6 +18,7 @@ class QuotationItem extends Model
         'product_id',
         'quantity',
         'unit_price',
+        'proposed_unit_price',
         'discount_percentage',
         'discount_amount',
         'tax_percentage',
@@ -30,6 +31,7 @@ class QuotationItem extends Model
     protected $casts = [
         'quantity' => 'integer',
         'unit_price' => 'decimal:2',
+        'proposed_unit_price' => 'decimal:2',
         'discount_percentage' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'tax_percentage' => 'decimal:2',
@@ -50,8 +52,8 @@ class QuotationItem extends Model
 
     public function calculateTotals(): void
     {
-        // Calculate subtotal
-        $this->subtotal = $this->quantity * $this->unit_price;
+        // Calculate subtotal using proposed_unit_price
+        $this->subtotal = $this->quantity * $this->proposed_unit_price;
 
         // Calculate discount amount if percentage is provided
         if ($this->discount_percentage > 0) {

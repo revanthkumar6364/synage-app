@@ -34,11 +34,9 @@ export interface User {
     id: number;
     name: string;
     email: string;
-    avatar?: string;
-    email_verified_at: string | null;
+    avatar_url?: string;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown;
 }
 
 export interface Account {
@@ -75,66 +73,70 @@ export interface AccountContact {
     [key: string]: unknown;
 }
 
-export interface Product {
+export interface QuotationMedia {
     id: number;
+    quotation_id: number | null;
+    category: string;
     name: string;
-    description?: string;
-    sku?: string;
-    price: number;
-    currency: string;
+    file_name: string;
+    file_path: string;
+    mime_type: string;
+    file_size: number;
+    is_active: boolean;
+    sort_order: number;
+    created_by: number;
+    updated_by: number;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown;
-}
-
-export interface QuotationItem {
-    id?: number;
-    quotation_id?: number;
-    product_id: number;
-    quantity: number;
-    unit_price: number;
-    discount: number;
-    tax: number;
-    subtotal: number;
-    total: number;
-    notes?: string;
-    product?: Product;
-    [key: string]: unknown;
-}
-
-export interface QuotationShippingDetail {
-    id?: number;
-    quotation_id?: number;
-    shipping_address: string;
-    billing_address: string;
-    shipping_method: string;
-    shipping_cost: number;
-    delivery_terms?: string;
-    payment_terms?: string;
-    special_instructions?: string;
-    [key: string]: unknown;
+    deleted_at: string | null;
+    full_url: string;
+    creator?: User;
+    updater?: User;
 }
 
 export interface Quotation {
     id: number;
+    reference: string;
     quotation_number: string;
-    date: string;
-    valid_until: string;
-    customer_account_id: number;
-    contact_id: number;
-    status: 'draft' | 'sent' | 'accepted' | 'rejected';
-    currency: string;
-    tax_rate: number;
-    subtotal: number;
-    tax_amount: number;
-    total_amount: number;
-    terms_conditions?: string;
-    notes?: string;
+    title: string;
+    account_id: number;
+    account_contact_id?: number;
+    available_size_width: string;
+    available_size_height: string;
+    available_size_unit: string;
+    proposed_size_width: string;
+    proposed_size_height: string;
+    proposed_size_unit: string;
+    available_size_width_mm: string;
+    available_size_height_mm: string;
+    available_size_width_ft: string;
+    available_size_height_ft: string;
+    available_size_sqft: string;
+    proposed_size_width_mm: string;
+    proposed_size_height_mm: string;
+    proposed_size_width_ft: string;
+    proposed_size_height_ft: string;
+    proposed_size_sqft: string;
+    quantity: number;
+    max_quantity: number;
+    description: string;
+    category: string;
+    estimate_date: string;
+    billing_address: string;
+    billing_location: string;
+    billing_city: string;
+    billing_zip_code: string;
+    shipping_address: string;
+    shipping_location: string;
+    shipping_city: string;
+    shipping_zip_code: string;
+    status: string;
     created_at: string;
     updated_at: string;
-    customer_account: Account;
-    contact: AccountContact;
-    items: QuotationItem[];
-    shipping_details: QuotationShippingDetail;
-    [key: string]: unknown;
+    created_by: number;
+    updated_by: number;
+    last_action: string;
+    editable: boolean;
+    account?: Account;
+    items?: QuotationItem[];
 }

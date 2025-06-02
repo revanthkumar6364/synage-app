@@ -135,12 +135,20 @@ export default function Show({ quotation }: Props) {
                             {quotation.status}
                         </div>
                     </div>
-                    <Button
-                        variant="outline"
-                        onClick={() => router.visit(route('quotations.edit', quotation.id))}
-                    >
-                        Edit Quotation
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => router.visit(route('quotations.files', quotation.id))}
+                        >
+                            Files
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => router.visit(route('quotations.edit', quotation.id))}
+                        >
+                            Edit Quotation
+                        </Button>
+                    </div>
                 </div>
 
                 <Card className="mb-6">

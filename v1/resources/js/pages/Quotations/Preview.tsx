@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router, useForm } from '@inertiajs/react';
-import { Quotation, BreadcrumbItem } from '@/types';
+import { Product, BreadcrumbItem } from '@/types';
 import { Toaster, toast } from 'sonner';
 import { useRef, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,8 +12,62 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Preview', href: '#' },
 ];
 
+interface QuotationItem {
+    id: number;
+    product_id: number;
+    product: {
+        id: number;
+        name: string;
+        hsn_code: string;
+    };
+    quantity: number;
+    unit_price: number;
+    proposed_unit_price: number;
+    discount_percentage: number;
+    tax_percentage: number;
+    notes: string | null;
+}
+
 interface Props {
-    quotation: Quotation;
+    quotation: {
+        id: number;
+        items: QuotationItem[];
+        notes?: string;
+        client_scope?: string;
+        title: string;
+        estimate_date: string;
+        available_size_width_mm: string;
+        available_size_height_mm: string;
+        proposed_size_width_mm: string;
+        proposed_size_height_mm: string;
+        proposed_size_width_ft: string;
+        proposed_size_height_ft: string;
+        proposed_size_sqft: string;
+        account?: {
+            business_name: string;
+            gst_number: string;
+        };
+        account_contact?: {
+            name: string;
+        };
+        billing_address: string;
+        billing_city: string;
+        billing_location: string;
+        billing_zip_code: string;
+        shipping_address: string;
+        shipping_city: string;
+        shipping_location: string;
+        shipping_zip_code: string;
+        reference: string;
+        description: string;
+        status: string;
+        taxes_terms?: string;
+        warranty_terms?: string;
+        delivery_terms?: string;
+        payment_terms?: string;
+        electrical_terms?: string;
+    };
+    products: Product[];
 }
 
 export default function Preview({ quotation }: Props) {
@@ -59,9 +113,9 @@ export default function Preview({ quotation }: Props) {
     };
 
     const calculateSubtotal = (item: any) => {
-        const unitPrice = parseFloat(item.unit_price) || 0;
+        const proposedPrice = parseFloat(item.proposed_unit_price) || 0;
         const quantity = parseFloat(item.quantity) || 0;
-        return unitPrice * quantity;
+        return proposedPrice * quantity;
     };
 
     const calculateTax = (item: any) => {
@@ -92,6 +146,12 @@ export default function Preview({ quotation }: Props) {
                         onClick={() => router.visit(route('quotations.edit', quotation.id))}
                     >
                         Details
+                    </Button>
+                    <Button
+                        variant='outline'
+                        onClick={() => router.visit(route('quotations.files', quotation.id))}
+                    >
+                        Files
                     </Button>
                     <Button
                         variant='outline'
@@ -229,11 +289,11 @@ export default function Preview({ quotation }: Props) {
                                     <th className="border border-gray-400 px-1 py-[3px] min-w-[140px]">Description of Item</th>
                                     <th className="border border-gray-400 px-1 py-[3px] w-[50px]">HSN Code</th>
                                     <th className="border border-gray-400 px-1 py-[3px] w-[60px]">Unit Rate</th>
+                                    <th className="border border-gray-400 px-1 py-[3px] w-[60px]">Proposed Rate</th>
                                     <th className="border border-gray-400 px-1 py-[3px] w-[30px]">QTY</th>
                                     <th className="border border-gray-400 px-1 py-[3px] w-[70px]">Total W/o TAX</th>
                                     <th className="border border-gray-400 px-1 py-[3px] w-[40px]">IGST %</th>
                                     <th className="border border-gray-400 px-1 py-[3px] w-[70px]">IGST</th>
-                                    <th className="border border-gray-400 px-1 py-[3px] w-[70px]">Tot With TAX</th>
                                     <th className="border border-gray-400 px-1 py-[3px] w-[70px]">Tot With TAX</th>
                                     <th className="border border-gray-400 px-1 py-[3px] min-w-[90px] text-left">Features | Notes</th>
                                 </tr>
@@ -265,6 +325,7 @@ export default function Preview({ quotation }: Props) {
                                         <td className="border border-gray-400 px-1 py-1">{item.product.name}</td>
                                         <td className="border border-gray-400 text-center align-top py-1">{item.product.hsn_code}</td>
                                         <td className="border border-gray-400 text-right align-top py-1">{Number(item.unit_price).toFixed(2)}</td>
+                                        <td className="border border-gray-400 text-right align-top py-1">{Number(item.proposed_unit_price).toFixed(2)}</td>
                                         <td className="border border-gray-400 text-center align-top py-1">{Number(item.quantity)}</td>
                                         <td className="border border-gray-400 text-right align-top py-1">{calculateSubtotal(item).toFixed(2)}</td>
                                         <td className="border border-gray-400 text-center align-top py-1">{Number(item.tax_percentage)}%</td>

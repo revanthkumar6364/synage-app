@@ -1,3 +1,6 @@
+import { ReactNode } from "react";
+import { LucideIcon } from 'lucide-react';
+
 export interface Account {
     id: number;
     business_id: number;
@@ -67,34 +70,37 @@ export interface Quotation {
     reference: string;
     quotation_number: string;
     title: string;
-    available_size_width: string;
-    available_size_height: string;
-    available_size_unit: string;
-    proposed_size_width: string;
-    proposed_size_height: string;
-    proposed_size_unit: string;
-    available_size_width_mm: string;
-    available_size_height_mm: string;
-    proposed_size_width_mm: string;
-    proposed_size_height_mm: string;
-    available_size_width_ft: string;
-    available_size_height_ft: string;
-    proposed_size_width_ft: string;
-    proposed_size_height_ft: string;
-    available_size_sqft: string;
-    proposed_size_sqft: string;
-    description: string;
-    estimate_date: string;
+    available_size_width?: string;
+    available_size_height?: string;
+    available_size_unit?: string;
+    proposed_size_width?: string;
+    proposed_size_height?: string;
+    proposed_size_unit?: string;
+    available_size_width_mm?: string;
+    available_size_height_mm?: string;
+    available_size_width_ft?: string;
+    available_size_height_ft?: string;
+    available_size_sqft?: string;
+    proposed_size_width_mm?: string;
+    proposed_size_height_mm?: string;
+    proposed_size_width_ft?: string;
+    proposed_size_height_ft?: string;
+    proposed_size_sqft?: string;
+    quantity?: number;
+    max_quantity?: number;
+    description?: string;
+    category?: string;
+    estimate_date?: string;
     account_id: number;
     account_contact_id?: number;
-    billing_address: string;
-    billing_location: string;
-    billing_city: string;
-    billing_zip_code: string;
-    shipping_address: string;
-    shipping_location: string;
-    shipping_city: string;
-    shipping_zip_code: string;
+    billing_address?: string;
+    billing_location?: string;
+    billing_city?: string;
+    billing_zip_code?: string;
+    shipping_address?: string;
+    shipping_location?: string;
+    shipping_city?: string;
+    shipping_zip_code?: string;
     same_as_billing: boolean;
     notes?: string;
     client_scope?: string;
@@ -130,4 +136,37 @@ export interface Quotation {
 export interface BreadcrumbItem {
     title: string;
     href: string;
+}
+
+export interface QuotationMedia {
+    id: number;
+    category: string;
+    name: string;
+    file_name: string;
+    file_path: string;
+    mime_type: string;
+    file_size: number;
+    is_active: boolean;
+    sort_order: number;
+    created_by: number;
+    updated_by: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    full_url: string;
+    creator?: User;
+    updater?: User;
+}
+
+export interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+export interface NavItem {
+    title: string;
+    href: string;
+    icon?: LucideIcon | null;
+    isActive?: boolean;
 }

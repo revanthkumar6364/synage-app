@@ -8,8 +8,11 @@ use App\Models\QuotationItem;
 use App\Models\Account;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use App\Models\QuotationMedia;
+use Str;
 
 class QuotationController extends Controller
 {
@@ -18,8 +21,12 @@ class QuotationController extends Controller
         $query = Quotation::with(['account', 'account_contact'])
             ->when($request->search, fn($q, $search) => $q->search($search))
             ->when($request->status && $request->status !== 'all', fn($q, $status) => $q->where('status', $status));
-
+        $authUser = auth()->user()->role;
+        if ($authUser == 'sales') {
+            $query->where('created_by', auth()->user()->id);
+        }
         $quotations = $query->latest()->paginate(config('all.pagination.per_page'));
+
 
         return Inertia::render('quotations/index', [
             'quotations' => QuotationResource::collection($quotations),
@@ -59,7 +66,10 @@ class QuotationController extends Controller
             'proposed_size_width_ft' => 'required|string|max:100',
             'proposed_size_height_ft' => 'required|string|max:100',
             'proposed_size_sqft' => 'required|string|max:100',
+            'quantity' => 'required|string|max:100',
+            'max_quantity' => 'required|string|max:100',
             'description' => 'required|string',
+            'category' => 'required|string|in:unilumin,absen,radiant_synage,custom',
             'estimate_date' => 'required|date|after_or_equal:today',
             'billing_address' => 'required|string',
             'billing_location' => 'required|string|max:100',
@@ -73,6 +83,7 @@ class QuotationController extends Controller
             'status' => 'required|in:draft,pending,approved,rejected',
             'notes' => 'nullable|string',
             'client_scope' => 'nullable|string',
+
         ]);
 
         try {
@@ -87,7 +98,40 @@ class QuotationController extends Controller
             $validated['created_by'] = $request->user()->id;
             $validated['updated_by'] = $request->user()->id;
             $validated['last_action'] = 'created';
+            $validated['taxes_terms'] = config('all.terms_and_conditions.taxes_terms');
+            $validated['warranty_terms'] = config('all.terms_and_conditions.warranty_terms');
+            $validated['delivery_terms'] = config('all.terms_and_conditions.delivery_terms');
+            $validated['payment_terms'] = config('all.terms_and_conditions.payment_terms');
+            $validated['electrical_terms'] = config('all.terms_and_conditions.electrical_terms');
             $quotation = Quotation::create($validated);
+
+            // Handle file uploads if any
+            if ($request->hasFile('files')) {
+                foreach ($request->file('files') as $file) {
+                    $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                    $filePath = 'quotation-images/' . $quotation->id;
+                    $fullPath = "{$filePath}/{$fileName}";
+
+                    // Store the file
+                    if (!Storage::disk('public')->put($fullPath, file_get_contents($file->getRealPath()))) {
+                        throw new \Exception('Failed to store file: ' . $file->getClientOriginalName());
+                    }
+
+                    // Create media record
+                    QuotationMedia::create([
+                        'quotation_id' => $quotation->id,
+                        'category' => $validated['category'],
+                        'name' => $file->getClientOriginalName(),
+                        'file_name' => $fileName,
+                        'file_path' => $filePath,
+                        'mime_type' => $file->getMimeType(),
+                        'file_size' => $file->getSize(),
+                        'is_active' => true,
+                        'created_by' => $request->user()->id,
+                        'updated_by' => $request->user()->id,
+                    ]);
+                }
+            }
 
             DB::commit();
 
@@ -95,6 +139,10 @@ class QuotationController extends Controller
                 ->with('success', 'Quotation created successfully. Now add products.');
         } catch (\Exception $e) {
             DB::rollBack();
+            // Clean up any uploaded files
+            if (isset($quotation) && $request->hasFile('files')) {
+                Storage::disk('public')->deleteDirectory('quotation-images/' . $quotation->id);
+            }
             return back()->withErrors(['error' => 'Failed to create quotation: ' . $e->getMessage()]);
         }
     }
@@ -138,7 +186,10 @@ class QuotationController extends Controller
             'proposed_size_width_ft' => 'required|string|max:100',
             'proposed_size_height_ft' => 'required|string|max:100',
             'proposed_size_sqft' => 'required|string|max:100',
+            'quantity' => 'required|string|max:100',
+            'max_quantity' => 'required|string|max:100',
             'description' => 'required|string',
+            'category' => 'required|string|in:unilumin,absen,radiant_synage,custom',
             'estimate_date' => 'required|date',
             'billing_address' => 'required|string',
             'billing_location' => 'required|string|max:100',
@@ -173,6 +224,7 @@ class QuotationController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',
+            'items.*.proposed_unit_price' => 'required|numeric|min:0',
             'items.*.discount_percentage' => 'required|numeric|min:0|max:100',
             'items.*.tax_percentage' => 'required|numeric|min:0|max:100',
             'notes' => 'nullable|string',
@@ -196,6 +248,7 @@ class QuotationController extends Controller
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
+                    'proposed_unit_price' => $item['proposed_unit_price'],
                     'discount_percentage' => $item['discount_percentage'],
                     'tax_percentage' => $item['tax_percentage'],
                 ]);
@@ -362,6 +415,99 @@ class QuotationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Failed to reject quotation: ' . $e->getMessage());
+        }
+    }
+
+    public function files(Quotation $quotation)
+    {
+        // Get quotation-specific files
+        $quotationFiles = $quotation->media()
+            ->with(['creator'])
+            ->orderBy('sort_order')
+            ->get();
+
+        // Get common files that can be used across quotations
+        $commonFiles = QuotationMedia::with(['creator'])
+            ->whereNull('quotation_id')
+            ->where('category', 'logo')
+            ->where('category', $quotation->category)
+            ->orderBy('sort_order')
+            ->get();
+
+        // Transform the data to ensure all required fields are present
+        return Inertia::render('quotations/files', [
+            'quotation' => [
+                'id' => $quotation->id,
+                'title' => $quotation->title,
+                'reference' => $quotation->reference,
+            ],
+            'quotationFiles' => $quotationFiles->map(fn($file) => [
+                'id' => $file->id,
+                'name' => $file->name,
+                'category' => $file->category,
+                'file_size' => $file->file_size,
+                'full_url' => $file->full_url,
+                'creator' => $file->creator ? [
+                    'id' => $file->creator->id,
+                    'name' => $file->creator->name,
+                ] : null,
+            ])->values(),
+            'commonFiles' => $commonFiles->map(fn($file) => [
+                'id' => $file->id,
+                'name' => $file->name,
+                'category' => $file->category,
+                'file_size' => $file->file_size,
+                'full_url' => $file->full_url,
+                'creator' => $file->creator ? [
+                    'id' => $file->creator->id,
+                    'name' => $file->creator->name,
+                ] : null,
+            ])->values(),
+        ]);
+    }
+
+    public function filesStore(Request $request, Quotation $quotation)
+    {
+
+        $validated = $request->validate([
+            'file' => 'required|file|mimes:jpg,jpeg,png,gif,svg|max:5120'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $file = $request->file('file');
+            $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $filePath = 'quotation-images/' . $quotation->id;
+            $fullPath = "{$filePath}/{$fileName}";
+
+            // Store the main file
+            if (!Storage::disk('public')->put($fullPath, file_get_contents($file->getRealPath()))) {
+                throw new \Exception('Failed to store the file');
+            }
+
+            // Create media record
+            QuotationMedia::create([
+                'quotation_id' => $quotation->id,
+                'category' => 'quotation',
+                'name' => $fileName,
+                'file_name' => $fileName,
+                'file_path' => $filePath,
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                'is_active' => true,
+                'created_by' => $request->user()->id,
+                'updated_by' => $request->user()->id,
+            ]);
+
+            DB::commit();
+            return redirect()->route('quotations.files', $quotation->id)
+                ->with('success', 'File uploaded successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Storage::disk('public')->delete($fullPath);
+            return back()->with('error', 'Failed to upload file: ' . $e->getMessage());
         }
     }
 

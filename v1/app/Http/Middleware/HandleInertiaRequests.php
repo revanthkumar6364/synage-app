@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Category;
 use App\Models\Account;
 use App\Models\Product;
+use App\Models\QuotationMedia;
 use App\Models\User;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
@@ -64,6 +65,10 @@ class HandleInertiaRequests extends Middleware
                     'products' => [
                         'viewAny' => $request->user()?->can('viewAny', Product::class),
                         'create' => $request->user()?->can('create', Product::class),
+                    ],
+                    'quotationMedia' => [
+                        'viewAny' => $request->user()?->can('viewAny', QuotationMedia::class),
+                        'create' => $request->user()?->can('create', QuotationMedia::class),
                     ],
                 ],
             ],

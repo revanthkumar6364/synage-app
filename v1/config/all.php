@@ -70,4 +70,25 @@ return [
         'wholesale' => 'Wholesale',
         'service' => 'Service',
     ],
+    'box_size' => [
+        'width' => 320,
+        'height' => 160,
+    ],
+    'box_size_unit' => 'mm',
+    'quotation_images_categories' => [
+        'logo' => 'Logo',
+        'signature' => 'Signature',
+        'unilumin' => 'Unilumin',
+        'absen' => 'Absen',
+        'radiant_synage' => 'Radiant Synage',
+        'custom' => 'Custom',
+    ],
+
+    'terms_and_conditions' => [
+        'taxes_terms' => 'The above price is inclusive of all taxes and duties',
+        'warranty_terms' => 'Warranty is 3 Years for all the products quoted100% Payment along with the order',
+        'delivery_terms' => 'Delivery is Immediate.',
+        'payment_terms' => '100% Payment along with the order',
+        'electrical_terms' => 'Installation and Commissioning to be done by our Team',
+    ],
 ];

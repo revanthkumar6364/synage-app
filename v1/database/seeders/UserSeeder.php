@@ -35,12 +35,12 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'User',
-            'email' => 'user@gmail.com',
+            'name' => 'Sales',
+            'email' => 'sales@gmail.com',
             'country_code' => '+91',
             'mobile' => '9876543202',
             'password' => Hash::make('password'),
-            'role' => 'user',
+            'role' => 'sales',
             'status' => 'active',
         ]);
     }

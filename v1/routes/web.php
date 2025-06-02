@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\QuotationMediaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -43,6 +44,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('quotations.approve');
     Route::post('/quotations/{quotation}/reject', [QuotationController::class, 'reject'])
         ->name('quotations.reject');
+    Route::get('quotations/{quotation}/files', [QuotationController::class, 'files'])->name('quotations.files');
+    Route::post('quotations/{quotation}/files', [QuotationController::class, 'filesStore'])->name('quotations.files.store');
+
+});
+
+// Quotation Media Management
+Route::middleware(['auth'])->group(function () {
+    Route::resource('quotation-media', QuotationMediaController::class);
+    Route::post('quotation-media/sort', [QuotationMediaController::class, 'updateSortOrder'])->name('quotation-media.sort');
+    Route::post('quotation-media', [QuotationMediaController::class, 'store'])->name('quotation-media.store');
+    Route::patch('quotation-media/{id}/attach', [QuotationMediaController::class, 'attach'])->name('quotation-media.attach');
+    Route::patch('quotation-media/{id}/detach', [QuotationMediaController::class, 'detach'])->name('quotation-media.detach');
+    Route::delete('quotation-media/{id}', [QuotationMediaController::class, 'destroy'])->name('quotation-media.destroy');
 });
 
 require __DIR__.'/settings.php';

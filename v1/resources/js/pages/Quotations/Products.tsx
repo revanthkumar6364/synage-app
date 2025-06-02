@@ -23,10 +23,24 @@ interface QuotationItem {
     product_id: number;
     quantity: number;
     unit_price: number;
+    proposed_unit_price: number;
     discount_percentage: number;
     tax_percentage: number;
     notes: string | null;
 }
+
+interface SelectedProduct {
+    id: number;
+    quantity: number;
+    unit_price: number;
+    proposed_unit_price: number;
+    discount_percentage: number;
+    tax_percentage: number;
+    notes: string;
+    priceError?: string;
+}
+
+type ProductField = keyof SelectedProduct;
 
 interface Props {
     quotation: {
@@ -39,15 +53,7 @@ interface Props {
 }
 
 export default function QuotationProducts({ quotation, products }: Props) {
-    const [selectedProducts, setSelectedProducts] = useState<{
-        id: number;
-        quantity: number;
-        unit_price: number;
-        discount_percentage: number;
-        tax_percentage: number;
-        notes: string;
-        priceError?: string;
-    }[]>([]);
+    const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -69,6 +75,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                 id: item.product_id,
                 quantity: item.quantity,
                 unit_price: item.unit_price,
+                proposed_unit_price: item.unit_price,
                 discount_percentage: item.discount_percentage,
                 tax_percentage: item.tax_percentage,
                 notes: item.notes || ''
@@ -82,6 +89,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
             product_id: product.id,
             quantity: product.quantity,
             unit_price: product.unit_price,
+            proposed_unit_price: product.proposed_unit_price,
             discount_percentage: product.discount_percentage,
             tax_percentage: product.tax_percentage,
             notes: product.notes
@@ -94,6 +102,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
             id: product.id,
             quantity: 1,
             unit_price: product.price,
+            proposed_unit_price: product.price,
             discount_percentage: 0,
             tax_percentage: product.gst_percentage || 0,
             notes: ''
@@ -108,32 +117,41 @@ export default function QuotationProducts({ quotation, products }: Props) {
         setSelectedProducts(newProducts);
     };
 
-    const handleProductChange = (index: number, field: string, value: any) => {
+    const handleProductChange = (index: number, field: ProductField, value: string | number) => {
         const newProducts = [...selectedProducts];
         const product = products.find(p => p.id === newProducts[index].id);
 
-        if (field === 'unit_price' && product) {
-            const minPrice = product.min_price || 0;
-            const maxPrice = product.max_price || Infinity;
+        let finalValue: any = value;
 
-            // Remove any previous error
-            delete newProducts[index].priceError;
+        if (field === 'proposed_unit_price') {
+            if (product) {
+                const minPrice = product.min_price || 0;
+                const maxPrice = product.max_price || Infinity;
+                const numericValue = typeof value === 'string' ? parseFloat(value) : value;
 
-            // Check price limits and set error if outside range
-            if (value < minPrice || value > maxPrice) {
-                newProducts[index].priceError = `Price must be between ₹${minPrice} and ₹${maxPrice}`;
+                // Remove any previous error
+                delete newProducts[index].priceError;
+
+                // Check price limits and set error if outside range
+                if (numericValue < minPrice || (maxPrice !== Infinity && numericValue > maxPrice)) {
+                    newProducts[index].priceError = `Price must be between ₹${minPrice} and ₹${maxPrice}`;
+                }
+
+                finalValue = numericValue;
             }
+        } else if (field === 'quantity') {
+            finalValue = typeof value === 'string' ? parseInt(value) : value;
         }
 
         newProducts[index] = {
             ...newProducts[index],
-            [field]: value
+            [field]: finalValue
         };
         setSelectedProducts(newProducts);
     };
 
     const calculateSubtotal = (product: any) => {
-        const subtotal = product.quantity * product.unit_price;
+        const subtotal = product.quantity * product.proposed_unit_price;
         const discountAmount = (subtotal * product.discount_percentage) / 100;
         const taxAmount = ((subtotal - discountAmount) * product.tax_percentage) / 100;
         return (subtotal - discountAmount + taxAmount).toFixed(2);
@@ -153,7 +171,8 @@ export default function QuotationProducts({ quotation, products }: Props) {
             if (productDetails) {
                 const minPrice = productDetails.min_price || 0;
                 const maxPrice = productDetails.max_price || Infinity;
-                return product.unit_price < minPrice || product.unit_price > maxPrice;
+                const proposedPrice = parseFloat(product.proposed_unit_price);
+                return proposedPrice < minPrice || (maxPrice !== Infinity && proposedPrice > maxPrice);
             }
             return false;
         });
@@ -187,6 +206,12 @@ export default function QuotationProducts({ quotation, products }: Props) {
                         onClick={() => router.visit(route('quotations.edit', quotation.id))}
                     >
                         Details
+                    </Button>
+                    <Button
+                        variant='outline'
+                        onClick={() => router.visit(route('quotations.files', quotation.id))}
+                    >
+                        Files
                     </Button>
                     <Button
                         variant='default'
@@ -252,6 +277,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                         <TableHead>Product Description</TableHead>
                                         <TableHead>HSN Code</TableHead>
                                         <TableHead>Unit Price (₹)</TableHead>
+                                        <TableHead>Proposed Price (₹)</TableHead>
                                         <TableHead>Quantity</TableHead>
                                         <TableHead>Total W/O GST (₹)</TableHead>
                                         <TableHead>GST %</TableHead>
@@ -274,13 +300,23 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     {productDetails?.hsn_code}
                                                 </TableCell>
                                                 <TableCell>
+                                                    <Input
+                                                        type="number"
+                                                        step="0.01"
+                                                        className="w-28"
+                                                        value={product.unit_price}
+                                                        readOnly
+                                                        disabled
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
                                                     <div className="space-y-1">
                                                         <Input
                                                             type="number"
                                                             step="0.01"
                                                             className={`w-28 ${product.priceError ? 'border-red-500' : ''}`}
-                                                            value={product.unit_price}
-                                                            onChange={(e) => handleProductChange(index, 'unit_price', parseFloat(e.target.value))}
+                                                            value={product.proposed_unit_price}
+                                                            onChange={(e) => handleProductChange(index, 'proposed_unit_price', e.target.value)}
                                                         />
                                                         {product.priceError && (
                                                             <div className="text-xs text-red-500">{product.priceError}</div>
@@ -293,11 +329,11 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                         min="1"
                                                         className="w-20"
                                                         value={product.quantity}
-                                                        onChange={(e) => handleProductChange(index, 'quantity', parseInt(e.target.value))}
+                                                        onChange={(e) => handleProductChange(index, 'quantity', e.target.value)}
                                                     />
                                                 </TableCell>
                                                 <TableCell>
-                                                    ₹{(product.quantity * product.unit_price).toFixed(2)}
+                                                    ₹{(product.quantity * product.proposed_unit_price).toFixed(2)}
                                                 </TableCell>
                                                 <TableCell>
                                                     {product.tax_percentage}%

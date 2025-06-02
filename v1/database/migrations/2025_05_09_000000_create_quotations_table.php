@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('proposed_size_width');
             $table->string('proposed_size_height');
             $table->string('proposed_size_unit');
+            $table->string('quantity');
+            $table->string('max_quantity')->nullable();
             $table->string('available_size_width_mm');
             $table->string('available_size_height_mm');
             $table->string('proposed_size_width_mm');
@@ -36,6 +38,7 @@ return new class extends Migration
 
             $table->text('description');
             $table->date('estimate_date');
+            $table->string('category')->nullable();
 
             // Billing Details
             $table->text('billing_address');
