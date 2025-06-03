@@ -58,9 +58,13 @@ interface Props {
         search: string;
         status: string;
     };
+    statuses: Array<{
+        value: string;
+        label: string;
+    }>;
 }
 
-export default function Index({ quotations, filters }: Props) {
+export default function Index({ quotations, filters, statuses }: Props) {
     const { auth } = usePage<{ auth: any }>().props;
     const { data, setData } = useForm({
         search: filters.search || '',
@@ -75,11 +79,13 @@ export default function Index({ quotations, filters }: Props) {
         });
     };
 
-    const getFilteredQuotations = (status: string) => {
-        if (status === 'all') {
-            return quotations.data;
-        }
-        return quotations.data.filter(quotation => quotation.status === status);
+    const handleStatusChange = (status: string) => {
+        const newData = { ...data, status };
+        setData(newData);
+        router.get(route('quotations.index'), newData, {
+            preserveState: true,
+            preserveScroll: true,
+        });
     };
 
     const getStatusColor = (status: string) => {
@@ -144,141 +150,84 @@ export default function Index({ quotations, filters }: Props) {
                             </div>
                         </form>
 
-                        <Tabs defaultValue="all" className="w-full">
-                            <TabsList className="w-full grid grid-cols-3 md:grid-cols-5">
-                                <TabsTrigger value="all">All</TabsTrigger>
-                                <TabsTrigger value="draft">Draft</TabsTrigger>
-                                <TabsTrigger value="pending">Pending</TabsTrigger>
-                                <TabsTrigger value="approved">Approved</TabsTrigger>
-                                <TabsTrigger value="rejected">Rejected</TabsTrigger>
-                            </TabsList>
+                        <div className="mb-4">
+                            <div className="flex flex-wrap gap-2">
+                                {statuses.map((status) => (
+                                    <Button
+                                        key={status.value}
+                                        variant={data.status === status.value ? "default" : "outline"}
+                                        onClick={() => handleStatusChange(status.value)}
+                                    >
+                                        {status.label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
 
-                            <TabsContent value="all">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Reference</TableHead>
-                                            <TableHead>Title</TableHead>
-                                            <TableHead>Customer</TableHead>
-                                            <TableHead>Date</TableHead>
-                                            <TableHead>Total</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead>Created By</TableHead>
-                                            <TableHead>Sales Person</TableHead>
-                                            <TableHead>Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {getFilteredQuotations('all').map((quotation: Quotation) => (
-                                            <TableRow key={quotation.id}>
-                                                <TableCell>
-                                                    {quotation.reference}
-                                                    {quotation.parent_id && (
-                                                        <span className="ml-2 text-xs text-muted-foreground">
-                                                            (Version {quotation.reference.split('-V')[1]})
-                                                        </span>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>{quotation.title}</TableCell>
-                                                <TableCell>{quotation.account?.business_name}</TableCell>
-                                                <TableCell>{new Date(quotation.estimate_date).toLocaleDateString()}</TableCell>
-                                                <TableCell>{formatAmount(quotation.total_amount)}</TableCell>
-                                                <TableCell>
-                                                    <Badge className={getStatusColor(quotation.status)}>
-                                                        {quotation.status}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>{quotation.creator?.name}</TableCell>
-                                                <TableCell>{quotation.salesUser?.name}</TableCell>
-                                                <TableCell>
-                                                    <div className="inline-flex gap-2">
-                                                        {quotation.can?.approve ? (
-                                                            <Link href={route('quotations.show', quotation.id)}>
-                                                                <Button variant="outline" size="icon">
-                                                                    <CheckIcon className="h-4 w-4" />
-                                                                </Button>
-                                                            </Link>
-                                                        ) : (
-                                                            <Link href={route('quotations.show', quotation.id)}>
-                                                                <Button variant="outline" size="icon">
-                                                                    <EyeIcon className="h-4 w-4" />
-                                                                </Button>
-                                                            </Link>
-                                                        )}
-                                                        {quotation.can?.update && (
-                                                            <Link href={route('quotations.edit', quotation.id)}>
-                                                                <Button variant="outline" size="icon">
-                                                                    <PencilIcon className="h-4 w-4" />
-                                                                </Button>
-                                                            </Link>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TabsContent>
-
-                            <TabsContent value="draft">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Reference</TableHead>
-                                            <TableHead>Title</TableHead>
-                                            <TableHead>Customer</TableHead>
-                                            <TableHead>Date</TableHead>
-                                            <TableHead>Total</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead>Created By</TableHead>
-                                            <TableHead>Sales Person</TableHead>
-                                            <TableHead>Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {getFilteredQuotations('draft').map((quotation: Quotation) => (
-                                            <TableRow key={quotation.id}>
-                                                <TableCell>
-                                                    {quotation.reference}
-                                                    {quotation.parent_id && (
-                                                        <span className="ml-2 text-xs text-muted-foreground">
-                                                            (Version {quotation.reference.split('-V')[1]})
-                                                        </span>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>{quotation.title}</TableCell>
-                                                <TableCell>{quotation.account?.business_name}</TableCell>
-                                                <TableCell>{new Date(quotation.estimate_date).toLocaleDateString()}</TableCell>
-                                                <TableCell>{formatAmount(quotation.total_amount)}</TableCell>
-                                                <TableCell>
-                                                    <Badge className={getStatusColor(quotation.status)}>
-                                                        {quotation.status}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>{quotation.creator?.name}</TableCell>
-                                                <TableCell>{quotation.salesUser?.name}</TableCell>
-                                                <TableCell>
-                                                    <div className="inline-flex gap-2">
-                                                        <Link href={route('quotations.show', quotation.id)}>
-                                                            <Button variant="outline" size="icon">
-                                                                <EyeIcon className="h-4 w-4" />
-                                                            </Button>
-                                                        </Link>
-                                                        {quotation.can?.update && (
-                                                            <Link href={route('quotations.edit', quotation.id)}>
-                                                                <Button variant="outline" size="icon">
-                                                                    <PencilIcon className="h-4 w-4" />
-                                                                </Button>
-                                                            </Link>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TabsContent>
-                        </Tabs>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Reference</TableHead>
+                                    <TableHead>Title</TableHead>
+                                    <TableHead>Customer</TableHead>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Total</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Created By</TableHead>
+                                    <TableHead>Sales Person</TableHead>
+                                    <TableHead>Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {quotations.data.map((quotation: Quotation) => (
+                                    <TableRow key={quotation.id}>
+                                        <TableCell>
+                                            {quotation.reference}
+                                            {quotation.parent_id && (
+                                                <span className="ml-2 text-xs text-muted-foreground">
+                                                    (Version {quotation.reference.split('-V')[1]})
+                                                </span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>{quotation.title}</TableCell>
+                                        <TableCell>{quotation.account?.business_name}</TableCell>
+                                        <TableCell>{new Date(quotation.estimate_date).toLocaleDateString()}</TableCell>
+                                        <TableCell>{formatAmount(quotation.total_amount)}</TableCell>
+                                        <TableCell>
+                                            <Badge className={getStatusColor(quotation.status)}>
+                                                {quotation.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>{quotation.creator?.name}</TableCell>
+                                        <TableCell>{quotation.salesUser?.name}</TableCell>
+                                        <TableCell>
+                                            <div className="inline-flex gap-2">
+                                                {quotation.can?.approve ? (
+                                                    <Link href={route('quotations.show', quotation.id)}>
+                                                        <Button variant="outline" size="icon">
+                                                            <CheckIcon className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+                                                ) : (
+                                                    <Link href={route('quotations.show', quotation.id)}>
+                                                        <Button variant="outline" size="icon">
+                                                            <EyeIcon className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                                {quotation.can?.update && (
+                                                    <Link href={route('quotations.edit', quotation.id)}>
+                                                        <Button variant="outline" size="icon">
+                                                            <PencilIcon className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
 
                         <Pagination>
                             <PaginationContent>

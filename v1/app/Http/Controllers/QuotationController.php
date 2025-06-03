@@ -22,10 +22,12 @@ class QuotationController extends Controller
         $query = Quotation::with(['account', 'account_contact', 'creator', 'salesUser'])
             ->when($request->search, fn($q, $search) => $q->search($search))
             ->when($request->status && $request->status !== 'all', fn($q, $status) => $q->where('status', $status));
+
         $authUser = auth()->user()->role;
         if ($authUser == 'sales') {
             $query->where('created_by', auth()->user()->id);
         }
+
         $quotations = $query->latest()->paginate(config('all.pagination.per_page'));
 
         // Add debugging to check the data
@@ -38,7 +40,13 @@ class QuotationController extends Controller
         return Inertia::render('quotations/index', [
             'quotations' => $quotations,
             'filters' => $request->only(['search', 'status']),
-            'statuses' => config('all.statuses'),
+            'statuses' => [
+                ['value' => 'all', 'label' => 'All'],
+                ['value' => 'draft', 'label' => 'Draft'],
+                ['value' => 'pending', 'label' => 'Pending'],
+                ['value' => 'approved', 'label' => 'Approved'],
+                ['value' => 'rejected', 'label' => 'Rejected'],
+            ],
         ]);
     }
 
