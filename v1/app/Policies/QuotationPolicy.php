@@ -40,7 +40,28 @@ class QuotationPolicy
         return in_array($user->role, ['admin', 'manager', 'sales']) && $quotation->editable;
     }
 
+    public function approve(User $user, Quotation $quotation): bool
+    {
+        return in_array($user->role, ['admin', 'manager']);
+    }
 
+    public function reject(User $user, Quotation $quotation): bool
+    {
+        return in_array($user->role, ['admin', 'manager']);
+    }
 
+    public function editTerms(User $user, Quotation $quotation): bool
+    {
+        return in_array($user->role, ['admin', 'manager']);
+    }
 
+    public function editFiles(User $user, Quotation $quotation): bool
+    {
+        return in_array($user->role, ['admin', 'manager', 'sales']);
+    }
+
+    public function delete(User $user, Quotation $quotation): bool
+    {
+        return in_array($user->role, ['admin', 'manager']);
+    }
 }

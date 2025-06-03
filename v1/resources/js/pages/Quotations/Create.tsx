@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { Account, BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -18,6 +18,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface Props {
     accounts: Account[];
+    salesUsers: {
+        id: number;
+        name: string;
+    }[];
 }
 
 interface FormData {
@@ -26,6 +30,7 @@ interface FormData {
     title: string;
     account_id: string;
     account_contact_id: string;
+    sales_user_id: string;
     available_size_width: string;
     available_size_height: string;
     available_size_unit: string;
@@ -67,13 +72,15 @@ const CATEGORIES = {
     custom: 'Custom',
 } as const;
 
-export default function Create({ accounts = [] }: Props) {
+export default function Create({ accounts = [], salesUsers = [] }: Props) {
+    const { auth } = usePage<{ auth: any }>().props;
     const { data, setData, post, processing, errors } = useForm<Record<string, any>>({
         reference: generateReference(),
         quotation_number: "",
         title: "",
         account_id: "",
         account_contact_id: "",
+        sales_user_id: "",
         available_size_width: "",
         available_size_height: "",
         available_size_unit: "mm",
@@ -525,6 +532,31 @@ export default function Create({ accounts = [] }: Props) {
                                     />
                                 </div>
                             </div>
+
+                            {/* Sales Person Selection - Only for admin and manager */}
+                            {auth.user.role !== 'sales' && (
+                                <div className="grid gap-2">
+                                    <Label htmlFor="sales_user_id">Sales Person</Label>
+                                    <Select
+                                        value={data.sales_user_id}
+                                        onValueChange={(value) => setData('sales_user_id', value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select sales person" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {salesUsers.map((user) => (
+                                                <SelectItem key={user.id} value={user.id.toString()}>
+                                                    {user.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.sales_user_id && (
+                                        <p className="text-sm text-red-500">{errors.sales_user_id}</p>
+                                    )}
+                                </div>
+                            )}
 
                             <div className="flex justify-end gap-4">
                                 <Button type="button" variant="outline" onClick={() => window.history.back()}>

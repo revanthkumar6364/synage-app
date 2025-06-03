@@ -6,8 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { Search, RefreshCcw, Plus, EyeIcon, PencilIcon } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Search, RefreshCcw, Plus, EyeIcon, PencilIcon, CheckIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -25,8 +25,21 @@ interface Quotation {
     estimate_date: string;
     total_amount: number | null;
     status: 'draft' | 'pending' | 'approved' | 'rejected';
+    parent_id?: number;
+    creator?: {
+        name: string;
+    };
+    salesUser?: {
+        name: string;
+    };
     can?: {
-        edit: boolean;
+        update: boolean;
+        approve: boolean;
+        reject: boolean;
+        view: boolean;
+        editTerms: boolean;
+        canEditFiles: boolean;
+        delete: boolean;
     };
 }
 
@@ -48,6 +61,7 @@ interface Props {
 }
 
 export default function Index({ quotations, filters }: Props) {
+    const { auth } = usePage<{ auth: any }>().props;
     const { data, setData } = useForm({
         search: filters.search || '',
         status: filters.status || 'all',
@@ -91,12 +105,14 @@ export default function Index({ quotations, filters }: Props) {
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-2xl font-bold tracking-tight">Quotations</CardTitle>
-                            <Link href={route('quotations.create')}>
-                                <Button>
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Add Quotation
-                                </Button>
-                            </Link>
+                            {auth.can.quotations.create && (
+                                <Link href={route('quotations.create')}>
+                                    <Button>
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Add Quotation
+                                    </Button>
+                                </Link>
+                            )}
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -147,13 +163,22 @@ export default function Index({ quotations, filters }: Props) {
                                             <TableHead>Date</TableHead>
                                             <TableHead>Total</TableHead>
                                             <TableHead>Status</TableHead>
+                                            <TableHead>Created By</TableHead>
+                                            <TableHead>Sales Person</TableHead>
                                             <TableHead>Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {getFilteredQuotations('all').map((quotation: Quotation) => (
                                             <TableRow key={quotation.id}>
-                                                <TableCell>{quotation.reference}</TableCell>
+                                                <TableCell>
+                                                    {quotation.reference}
+                                                    {quotation.parent_id && (
+                                                        <span className="ml-2 text-xs text-muted-foreground">
+                                                            (Version {quotation.reference.split('-V')[1]})
+                                                        </span>
+                                                    )}
+                                                </TableCell>
                                                 <TableCell>{quotation.title}</TableCell>
                                                 <TableCell>{quotation.account?.business_name}</TableCell>
                                                 <TableCell>{new Date(quotation.estimate_date).toLocaleDateString()}</TableCell>
@@ -163,14 +188,24 @@ export default function Index({ quotations, filters }: Props) {
                                                         {quotation.status}
                                                     </Badge>
                                                 </TableCell>
+                                                <TableCell>{quotation.creator?.name}</TableCell>
+                                                <TableCell>{quotation.salesUser?.name}</TableCell>
                                                 <TableCell>
                                                     <div className="inline-flex gap-2">
-                                                        <Link href={route('quotations.show', quotation.id)}>
-                                                            <Button variant="outline" size="icon">
-                                                                <EyeIcon className="h-4 w-4" />
-                                                            </Button>
-                                                        </Link>
-                                                        {quotation.can?.edit && (
+                                                        {quotation.can?.approve ? (
+                                                            <Link href={route('quotations.show', quotation.id)}>
+                                                                <Button variant="outline" size="icon">
+                                                                    <CheckIcon className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                        ) : (
+                                                            <Link href={route('quotations.show', quotation.id)}>
+                                                                <Button variant="outline" size="icon">
+                                                                    <EyeIcon className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                        )}
+                                                        {quotation.can?.update && (
                                                             <Link href={route('quotations.edit', quotation.id)}>
                                                                 <Button variant="outline" size="icon">
                                                                     <PencilIcon className="h-4 w-4" />
@@ -195,13 +230,22 @@ export default function Index({ quotations, filters }: Props) {
                                             <TableHead>Date</TableHead>
                                             <TableHead>Total</TableHead>
                                             <TableHead>Status</TableHead>
+                                            <TableHead>Created By</TableHead>
+                                            <TableHead>Sales Person</TableHead>
                                             <TableHead>Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {getFilteredQuotations('draft').map((quotation: Quotation) => (
                                             <TableRow key={quotation.id}>
-                                                <TableCell>{quotation.reference}</TableCell>
+                                                <TableCell>
+                                                    {quotation.reference}
+                                                    {quotation.parent_id && (
+                                                        <span className="ml-2 text-xs text-muted-foreground">
+                                                            (Version {quotation.reference.split('-V')[1]})
+                                                        </span>
+                                                    )}
+                                                </TableCell>
                                                 <TableCell>{quotation.title}</TableCell>
                                                 <TableCell>{quotation.account?.business_name}</TableCell>
                                                 <TableCell>{new Date(quotation.estimate_date).toLocaleDateString()}</TableCell>
@@ -211,6 +255,8 @@ export default function Index({ quotations, filters }: Props) {
                                                         {quotation.status}
                                                     </Badge>
                                                 </TableCell>
+                                                <TableCell>{quotation.creator?.name}</TableCell>
+                                                <TableCell>{quotation.salesUser?.name}</TableCell>
                                                 <TableCell>
                                                     <div className="inline-flex gap-2">
                                                         <Link href={route('quotations.show', quotation.id)}>
@@ -218,7 +264,7 @@ export default function Index({ quotations, filters }: Props) {
                                                                 <EyeIcon className="h-4 w-4" />
                                                             </Button>
                                                         </Link>
-                                                        {quotation.can?.edit && (
+                                                        {quotation.can?.update && (
                                                             <Link href={route('quotations.edit', quotation.id)}>
                                                                 <Button variant="outline" size="icon">
                                                                     <PencilIcon className="h-4 w-4" />

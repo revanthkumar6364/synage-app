@@ -13,12 +13,13 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use App\Models\QuotationMedia;
 use Str;
+use App\Models\User;
 
 class QuotationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Quotation::with(['account', 'account_contact'])
+        $query = Quotation::with(['account', 'account_contact', 'creator', 'salesUser'])
             ->when($request->search, fn($q, $search) => $q->search($search))
             ->when($request->status && $request->status !== 'all', fn($q, $status) => $q->where('status', $status));
         $authUser = auth()->user()->role;
@@ -27,9 +28,15 @@ class QuotationController extends Controller
         }
         $quotations = $query->latest()->paginate(config('all.pagination.per_page'));
 
+        // Add debugging to check the data
+        \Log::info('Quotations data:', [
+            'first_quotation' => $quotations->first(),
+            'sales_user_relation' => $quotations->first()?->salesUser,
+            'total_quotations' => $quotations->count(),
+        ]);
 
         return Inertia::render('quotations/index', [
-            'quotations' => QuotationResource::collection($quotations),
+            'quotations' => $quotations,
             'filters' => $request->only(['search', 'status']),
             'statuses' => config('all.statuses'),
         ]);
@@ -39,6 +46,7 @@ class QuotationController extends Controller
     {
         return Inertia::render('quotations/create', [
             'accounts' => Account::with('contacts')->get(),
+            'salesUsers' => User::where('role', 'sales')->get(),
         ]);
     }
 
@@ -50,6 +58,7 @@ class QuotationController extends Controller
             'title' => 'required|string|max:255',
             'account_id' => 'required|exists:accounts,id',
             'account_contact_id' => 'nullable|exists:account_contacts,id',
+            'sales_user_id' => auth()->user()->role === 'sales' ? 'nullable' : 'required|exists:users,id',
             'available_size_width' => 'required|string|max:100',
             'available_size_height' => 'required|string|max:100',
             'available_size_unit' => 'required|in:mm,ft',
@@ -98,6 +107,10 @@ class QuotationController extends Controller
             $validated['created_by'] = $request->user()->id;
             $validated['updated_by'] = $request->user()->id;
             $validated['last_action'] = 'created';
+            // Set sales_user_id to current user if role is sales
+            if (auth()->user()->role === 'sales') {
+                $validated['sales_user_id'] = auth()->user()->id;
+            }
             $validated['taxes_terms'] = config('all.terms_and_conditions.taxes_terms');
             $validated['warranty_terms'] = config('all.terms_and_conditions.warranty_terms');
             $validated['delivery_terms'] = config('all.terms_and_conditions.delivery_terms');
@@ -147,10 +160,18 @@ class QuotationController extends Controller
         }
     }
 
-    public function show(Quotation $quotation)
+    public function show(Request $request, $quotationId)
     {
+        $quotation = Quotation::with(['items', 'account'])->find($quotationId);
+        $logo = QuotationMedia::where('category', 'logo')->first();
+        $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
+        $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->get();
         return Inertia::render('quotations/show', [
-            'quotation' => $quotation->load(['items', 'account']),
+            'quotation' => $quotation,
+            'commonFiles' => $commonFiles,
+            'logo' => $logo,
+            'quotationFiles' => $quotationFiles,
+            'products' => Product::select('id', 'name', 'description', 'price', 'gst_percentage')->get(),
         ]);
     }
 
@@ -269,13 +290,21 @@ class QuotationController extends Controller
         }
     }
 
-    public function preview(Quotation $quotation)
+    public function preview(Request $request, $quotationId)
     {
+        $quotation = Quotation::with(['items', 'account'])->find($quotationId);
+        $logo = QuotationMedia::where('category', 'logo')->first();
+        $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
+        $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->get();
         return Inertia::render('quotations/preview', [
-            'quotation' => $quotation->load(['items', 'account']),
+            'quotation' => $quotation,
+            'commonFiles' => $commonFiles,
+            'logo' => $logo,
+            'quotationFiles' => $quotationFiles,
             'products' => Product::select('id', 'name', 'description', 'price', 'gst_percentage')->get(),
         ]);
     }
+
 
     public function updateOverview(Request $request, Quotation $quotation)
     {
@@ -418,8 +447,58 @@ class QuotationController extends Controller
         }
     }
 
-    public function files(Quotation $quotation)
+    public function createVersion(Request $request, Quotation $quotation)
     {
+        try {
+            DB::beginTransaction();
+
+            // Create a new quotation as a copy of the current one
+            $newQuotation = $quotation->replicate();
+            $newQuotation->parent_id = $quotation->id;
+            $newQuotation->status = 'draft';
+            $newQuotation->editable = true;
+            $newQuotation->quotation_number = $newQuotation->generateQuotationNumber();
+            $newQuotation->reference = $quotation->reference . '-V' . ($quotation->versions()->count() + 1);
+            $newQuotation->created_by = $request->user()->id;
+            $newQuotation->updated_by = $request->user()->id;
+            $newQuotation->last_action = 'created_version';
+            $newQuotation->approved_at = null;
+            $newQuotation->approved_by = null;
+            $newQuotation->rejected_at = null;
+            $newQuotation->rejected_by = null;
+            $newQuotation->rejection_reason = null;
+            $newQuotation->save();
+
+            // Copy all quotation items
+            foreach ($quotation->items as $item) {
+                $newItem = $item->replicate();
+                $newItem->quotation_id = $newQuotation->id;
+                $newItem->save();
+            }
+
+            // Copy all quotation media
+            foreach ($quotation->media as $media) {
+                $newMedia = $media->replicate();
+                $newMedia->quotation_id = $newQuotation->id;
+                $newMedia->save();
+            }
+
+            DB::commit();
+
+            return redirect()->route('quotations.edit', $newQuotation->id)
+                ->with('success', 'New version created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to create new version: ' . $e->getMessage());
+        }
+    }
+
+    public function files(Request $request, $quotationId)
+    {
+        $quotation = Quotation::find($quotationId);
+        if ($request->user()->cannot('view', $quotation)) {
+            abort(403);
+        }
         // Get quotation-specific files
         $quotationFiles = $quotation->media()
             ->with(['creator'])
@@ -427,42 +506,15 @@ class QuotationController extends Controller
             ->get();
 
         // Get common files that can be used across quotations
-        $commonFiles = QuotationMedia::with(['creator'])
-            ->whereNull('quotation_id')
-            ->where('category', 'logo')
+        $commonFiles = QuotationMedia::whereNull('quotation_id')
             ->where('category', $quotation->category)
             ->orderBy('sort_order')
             ->get();
-
         // Transform the data to ensure all required fields are present
         return Inertia::render('quotations/files', [
-            'quotation' => [
-                'id' => $quotation->id,
-                'title' => $quotation->title,
-                'reference' => $quotation->reference,
-            ],
-            'quotationFiles' => $quotationFiles->map(fn($file) => [
-                'id' => $file->id,
-                'name' => $file->name,
-                'category' => $file->category,
-                'file_size' => $file->file_size,
-                'full_url' => $file->full_url,
-                'creator' => $file->creator ? [
-                    'id' => $file->creator->id,
-                    'name' => $file->creator->name,
-                ] : null,
-            ])->values(),
-            'commonFiles' => $commonFiles->map(fn($file) => [
-                'id' => $file->id,
-                'name' => $file->name,
-                'category' => $file->category,
-                'file_size' => $file->file_size,
-                'full_url' => $file->full_url,
-                'creator' => $file->creator ? [
-                    'id' => $file->creator->id,
-                    'name' => $file->creator->name,
-                ] : null,
-            ])->values(),
+            'quotation' => $quotation,
+            'quotationFiles' => $quotationFiles,
+            'commonFiles' => $commonFiles,
         ]);
     }
 

@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PlusIcon } from 'lucide-react';
 import { type FC } from 'react';
 
@@ -34,6 +34,11 @@ interface Product {
     category: {
         name: string;
     };
+    can: {
+        view: boolean;
+        update: boolean;
+        delete: boolean;
+    };
 }
 
 interface IndexProps {
@@ -45,6 +50,7 @@ interface IndexProps {
 }
 
 const Index: FC<IndexProps> = ({ products }) => {
+    const { auth } = usePage<{ auth: any }>().props;
     const formatPrice = (price: number | string | null | undefined): string => {
         if (!price) return 'N/A';
         const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
@@ -63,11 +69,13 @@ const Index: FC<IndexProps> = ({ products }) => {
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-2xl font-bold tracking-tight">Products</CardTitle>
-                            <Link href={route('products.create')}>
-                                <Button>
-                                    <PlusIcon className="h-4 w-4" /> Add Product
-                                </Button>
-                            </Link>
+                            {auth.can.products.create && (
+                                <Link href={route('products.create')}>
+                                    <Button>
+                                        <PlusIcon className="h-4 w-4" /> Add Product
+                                    </Button>
+                                </Link>
+                            )}
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -111,11 +119,20 @@ const Index: FC<IndexProps> = ({ products }) => {
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Link href={route('products.edit', product.id)}>
+                                            {product.can.view && (
+                                            <Link href={route('products.show', product.id)}>
                                                 <Button variant="outline" size="sm">
-                                                    Edit
-                                                </Button>
-                                            </Link>
+                                                    View
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                            {product.can.update && (
+                                                <Link href={route('products.edit', product.id)}>
+                                                    <Button variant="outline" size="sm">
+                                                        Edit
+                                                    </Button>
+                                                </Link>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -151,7 +168,6 @@ const Index: FC<IndexProps> = ({ products }) => {
                                         </PaginationLink>
                                     </PaginationItem>
                                 ))}
-
                                 {products.current_page < products.last_page && (
                                     <PaginationItem>
                                         <PaginationNext

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->foreignId('account_id')->constrained('accounts'); // Made required
             $table->foreignId('account_contact_id')->nullable()->constrained('account_contacts');
+            $table->foreignId('sales_user_id')->constrained('users'); // Sales person assigned
             $table->string('available_size_width');
             $table->string('available_size_height');
             $table->string('available_size_unit');

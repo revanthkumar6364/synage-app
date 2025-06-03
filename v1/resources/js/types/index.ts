@@ -59,6 +59,7 @@ export interface QuotationItem {
     product_id: number;
     quantity: string | number;
     unit_price: string | number;
+    proposed_unit_price?: string | number;
     discount_percentage: string | number;
     tax_percentage: string | number;
     notes?: string;
@@ -131,6 +132,13 @@ export interface Quotation {
     account?: Account;
     account_contact?: AccountContact;
     items: QuotationItem[];
+    can: {
+        update: boolean;
+        delete: boolean;
+        view: boolean;
+        editTerms: boolean;
+        editFiles: boolean;
+    };
 }
 
 export interface BreadcrumbItem {
@@ -140,6 +148,7 @@ export interface BreadcrumbItem {
 
 export interface QuotationMedia {
     id: number;
+    quotation_id: number|null;
     category: string;
     name: string;
     file_name: string;
@@ -156,6 +165,11 @@ export interface QuotationMedia {
     full_url: string;
     creator?: User;
     updater?: User;
+    can: {
+        view: boolean;
+        update: boolean;
+        delete: boolean;
+    };
 }
 
 export interface User {

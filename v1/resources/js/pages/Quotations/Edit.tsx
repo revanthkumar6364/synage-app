@@ -277,6 +277,7 @@ export default function Edit({ quotation, accounts }: Props) {
                     <CardHeader>
                         <CardTitle className="text-2xl font-bold tracking-tight">Edit Quotation</CardTitle>
                     </CardHeader>
+
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

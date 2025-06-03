@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Gate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -78,6 +79,7 @@ class Quotation extends Model
         'rejected_at',
         'rejected_by',
         'rejection_reason',
+        'sales_user_id',
     ];
 
     protected $casts = [
@@ -97,7 +99,20 @@ class Quotation extends Model
     ];
 
     protected $with = ['account', 'account_contact'];
+    protected $appends = ['can'];
 
+    public function getCanAttribute()
+    {
+        return [
+            'view' => Gate::allows('view', $this),
+            'update' => Gate::allows('update', $this),
+            'delete' => Gate::allows('delete', $this),
+            'approve' => Gate::allows('approve', $this),
+            'reject' => Gate::allows('reject', $this),
+            'editTerms' => Gate::allows('editTerms', $this),
+            'editFiles' => Gate::allows('editFiles', $this),
+        ];
+    }
     // Relationships
     public function items()
     {
@@ -117,6 +132,26 @@ class Quotation extends Model
     public function account_contact(): BelongsTo
     {
         return $this->belongsTo(AccountContact::class);
+    }
+
+    public function salesUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sales_user_id');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function versions(): HasMany
+    {
+        return $this->hasMany(Quotation::class, 'parent_id');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Quotation::class, 'parent_id');
     }
 
     // Totals calculation

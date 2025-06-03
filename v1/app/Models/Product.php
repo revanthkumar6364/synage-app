@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Gate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,6 +36,8 @@ class Product extends Model
         'gst_percentage' => 'decimal:2'
     ];
 
+    protected $appends = ['price_range', 'can'];
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -59,5 +62,14 @@ class Product extends Model
             return "₹{$this->min_price} - ₹{$this->max_price}";
         }
         return "₹{$this->price}";
+    }
+
+    public function getCanAttribute()
+    {
+        return [
+            'update' => Gate::allows('update', $this),
+            'delete' => Gate::allows('delete', $this),
+            'view' => Gate::allows('view', $this),
+        ];
     }
 }

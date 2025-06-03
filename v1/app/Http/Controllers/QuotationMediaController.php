@@ -94,11 +94,13 @@ class QuotationMediaController extends Controller
         }
     }
 
-    public function edit(Request $request, QuotationMedia $quotationMedia)
+    public function edit(Request $request, $quotationMediaId)
     {
+        $quotationMedia = QuotationMedia::find($quotationMediaId);
         if ($request->user()->cannot('update', $quotationMedia)) {
             abort(403);
         }
+
         return Inertia::render('quotation-media/edit', [
             'media' => $quotationMedia,
             'categories' => config('all.quotation_images_categories'),
@@ -150,8 +152,9 @@ class QuotationMediaController extends Controller
         }
     }
 
-    public function destroy(Request $request, QuotationMedia $quotationMedia)
+    public function destroy(Request $request, $quotationMediaId)
     {
+        $quotationMedia = QuotationMedia::find($quotationMediaId);
         if ($request->user()->cannot('delete', $quotationMedia)) {
             abort(403);
         }

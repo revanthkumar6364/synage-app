@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Gate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -31,7 +32,7 @@ class QuotationMedia extends Model
         'sort_order' => 'integer',
     ];
 
-    protected $appends = ['full_url'];
+    protected $appends = ['full_url', 'can'];
 
     public function quotation()
     {
@@ -71,5 +72,14 @@ class QuotationMedia extends Model
     public function scopeGeneralFiles($query)
     {
         return $query->whereNull('quotation_id');
+    }
+
+    public function getCanAttribute()
+    {
+        return [
+            'view' => Gate::allows('view', $this),
+            'update' => Gate::allows('update', $this),
+            'delete' => Gate::allows('delete', $this),
+        ];
     }
 }

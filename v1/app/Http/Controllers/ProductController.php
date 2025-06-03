@@ -62,6 +62,13 @@ class ProductController extends Controller
             ->with('success', 'Product created successfully.');
     }
 
+    public function show(Product $product)
+    {
+        return Inertia::render('products/show', [
+            'product' => $product
+        ]);
+    }
+
     public function edit(Product $product)
     {
         $categories = Category::all();

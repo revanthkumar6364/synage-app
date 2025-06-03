@@ -44,6 +44,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('quotations.approve');
     Route::post('/quotations/{quotation}/reject', [QuotationController::class, 'reject'])
         ->name('quotations.reject');
+    Route::post('/quotations/{quotation}/create-version', [QuotationController::class, 'createVersion'])
+        ->name('quotations.create-version');
     Route::get('quotations/{quotation}/files', [QuotationController::class, 'files'])->name('quotations.files');
     Route::post('quotations/{quotation}/files', [QuotationController::class, 'filesStore'])->name('quotations.files.store');
 

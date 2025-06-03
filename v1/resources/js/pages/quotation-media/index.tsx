@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { QuotationMedia } from '@/types/index';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatBytes } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type BreadcrumbItem } from '@/types';
-import { PlusIcon, SearchIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, TrashIcon, PencilIcon } from 'lucide-react';
 import {
     Pagination,
     PaginationContent,
@@ -32,6 +32,18 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { toast, Toaster } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -56,6 +68,7 @@ interface Props {
 }
 
 export default function Index({ media, filters, categories }: Props) {
+    const { auth } = usePage<{ auth: any }>().props;
     const [search, setSearch] = useState(filters.search || '');
     const [category, setCategory] = useState(filters.category || 'all');
 
@@ -75,6 +88,17 @@ export default function Index({ media, filters, categories }: Props) {
             { search, category: value },
             { preserveState: true, preserveScroll: true }
         );
+    };
+
+    const handleDelete = (id: number) => {
+        router.delete(route('quotation-media.destroy', id), {
+            onSuccess: () => {
+                toast.success('Media deleted successfully');
+            },
+            onError: () => {
+                toast.error('Failed to delete media');
+            },
+        });
     };
 
     const renderPagination = () => {
@@ -154,12 +178,14 @@ export default function Index({ media, filters, categories }: Props) {
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-2xl font-bold tracking-tight">Quotation Media</CardTitle>
-                            <Link href={route('quotation-media.create')}>
-                                <Button>
-                                    <PlusIcon className="mr-2 h-4 w-4" />
-                                    Add New Media
-                                </Button>
-                            </Link>
+                            {auth.can.quotationMedia.create && (
+                                <Link href={route('quotation-media.create')}>
+                                    <Button>
+                                        <PlusIcon className="mr-2 h-4 w-4" />
+                                        Add New Media
+                                    </Button>
+                                </Link>
+                            )}
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -235,13 +261,41 @@ export default function Index({ media, filters, categories }: Props) {
                                                 {item.is_active ? 'Active' : 'Inactive'}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-right">
-                                            <Link
-                                                href={route('quotation-media.edit', item.id)}
-                                                className="text-blue-600 hover:text-blue-800"
-                                            >
-                                                Edit
-                                            </Link>
+                                        <TableCell className="text-right space-x-2">
+                                            {item.can.update && (
+                                                <Link
+                                                    href={route('quotation-media.edit', item.id)}
+                                                >
+                                                    <Button variant="outline" size="sm">
+                                                        <PencilIcon className="h-4 w-4 mr-1" />
+                                                        Edit
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                            {item.can.delete && (
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="destructive" size="sm">
+                                                            <TrashIcon className="h-4 w-4 mr-1" />
+                                                            Delete
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Delete Media</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Are you sure you want to delete this media? This action cannot be undone.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => handleDelete(item.id)}>
+                                                                Delete
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -262,6 +316,8 @@ export default function Index({ media, filters, categories }: Props) {
                     </CardContent>
                 </Card>
             </div>
+            <Toaster />
         </AppLayout>
     );
 }
+

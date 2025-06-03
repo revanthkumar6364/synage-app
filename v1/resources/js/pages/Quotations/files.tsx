@@ -24,6 +24,13 @@ interface Props {
         id: number;
         title: string;
         reference: string;
+        can: {
+            update: boolean;
+            delete: boolean;
+            view: boolean;
+            editTerms: boolean;
+            editFiles: boolean;
+        };
     };
     quotationFiles: QuotationMedia[];
     commonFiles: QuotationMedia[];
@@ -149,28 +156,29 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
                                     </TableHeader>
                                     <TableBody>
                                         {/* Upload Row */}
-                                        <TableRow>
-                                            <TableCell>
-                                                <div className="w-16 h-16 rounded border-2 border-dashed border-gray-300 flex items-center justify-center">
-                                                    <FileIcon className="h-6 w-6 text-gray-400" />
-                                                </div>
-                                            </TableCell>
-                                            <TableCell colSpan={4}>
-                                                <Input
-                                                    type="file"
-                                                    onChange={handleFileChange}
-                                                    disabled={uploading}
-                                                    className="max-w-xs"
-                                                />
-                                                <p className="mt-1 text-sm text-gray-500">
-                                                    Upload a new file directly to this quotation
-                                                </p>
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                {uploading && <span className="text-sm text-gray-500">Uploading...</span>}
-                                            </TableCell>
-                                        </TableRow>
-
+                                        {quotation.can.editFiles && (
+                                            <TableRow>
+                                                <TableCell>
+                                                    <div className="w-16 h-16 rounded border-2 border-dashed border-gray-300 flex items-center justify-center">
+                                                        <FileIcon className="h-6 w-6 text-gray-400" />
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell colSpan={4}>
+                                                    <Input
+                                                        type="file"
+                                                        onChange={handleFileChange}
+                                                        disabled={uploading}
+                                                        className="max-w-xs"
+                                                    />
+                                                    <p className="mt-1 text-sm text-gray-500">
+                                                        Upload a new file directly to this quotation
+                                                    </p>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    {uploading && <span className="text-sm text-gray-500">Uploading...</span>}
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
                                         {/* Existing Files */}
                                         {quotationFiles?.map((file) => (
                                             <TableRow key={file.id}>
