@@ -317,6 +317,10 @@ export default function Show({ quotation, logo, commonFiles, quotationFiles }: P
                                     </tfoot>
                                 </table>
 
+                                <div className="rounded-lg border p-4">
+                                    <p className="text-sm text-muted-foreground whitespace-pre-line"><span className="font-medium">Note:</span> {quotation.notes}</p>
+                                </div>
+
                                 <Separator className="my-6" />
 
                                 {/* Terms and Conditions */}

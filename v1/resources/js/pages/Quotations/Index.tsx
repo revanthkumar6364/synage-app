@@ -125,12 +125,12 @@ export default function Index({ quotations, filters, statuses }: Props) {
                         <form onSubmit={handleSearch} className="mb-4 space-y-4">
                             <div className="flex flex-col gap-4 md:flex-row">
                                 <div className="relative w-full md:w-auto flex-1 max-w-sm">
-                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 pointer-events-none" />
                                     <Input
-                                        placeholder="Search by name"
+                                        placeholder="Search quotations..."
                                         value={data.search}
                                         onChange={(e) => setData('search', e.target.value)}
-                                        className="md:max-w-sm"
+                                        className="pl-9 md:max-w-sm"
                                     />
                                 </div>
                                 <Button type="submit">
@@ -151,17 +151,19 @@ export default function Index({ quotations, filters, statuses }: Props) {
                         </form>
 
                         <div className="mb-4">
-                            <div className="flex flex-wrap gap-2">
-                                {statuses.map((status) => (
-                                    <Button
-                                        key={status.value}
-                                        variant={data.status === status.value ? "default" : "outline"}
-                                        onClick={() => handleStatusChange(status.value)}
-                                    >
-                                        {status.label}
-                                    </Button>
-                                ))}
-                            </div>
+                            <Tabs value={data.status} onValueChange={handleStatusChange} className="w-full">
+                                <TabsList className="w-full sm:w-auto">
+                                    {statuses.map((status) => (
+                                        <TabsTrigger
+                                            key={status.value}
+                                            value={status.value}
+                                            className="flex-1 sm:flex-none"
+                                        >
+                                            {status.label}
+                                        </TabsTrigger>
+                                    ))}
+                                </TabsList>
+                            </Tabs>
                         </div>
 
                         <Table>
@@ -229,29 +231,94 @@ export default function Index({ quotations, filters, statuses }: Props) {
                             </TableBody>
                         </Table>
 
-                        <Pagination>
-                            <PaginationContent>
-                                {Array.isArray(quotations.links) && quotations.links.map((link, i) => (
-                                    <PaginationItem key={i}>
-                                        <PaginationLink
-                                            href="#"
-                                            isActive={link.active}
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                if (link.url) {
-                                                    router.get(link.url, {
+                        <div className="mt-6 flex items-center justify-between">
+                            <p className="text-sm text-muted-foreground">
+                                Showing page {quotations.current_page} of {quotations.last_page}
+                            </p>
+                            <Pagination>
+                                <PaginationContent>
+                                    {quotations.current_page > 1 && (
+                                        <PaginationItem>
+                                            <PaginationLink
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    router.get(route('quotations.index'), {
                                                         ...data,
+                                                        page: quotations.current_page - 1
+                                                    }, {
                                                         preserveState: true,
                                                         preserveScroll: true
                                                     });
-                                                }
-                                            }}
-                                            dangerouslySetInnerHTML={{ __html: link.label }}
-                                        />
-                                    </PaginationItem>
-                                ))}
-                            </PaginationContent>
-                        </Pagination>
+                                                }}
+                                            >
+                                                Previous
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    )}
+
+                                    {Array.from({ length: quotations.last_page }, (_, i) => i + 1).map((page) => {
+                                        // Show first page, last page, current page, and pages around current
+                                        const shouldShow = page === 1 ||
+                                            page === quotations.last_page ||
+                                            Math.abs(page - quotations.current_page) <= 1;
+
+                                        if (!shouldShow) {
+                                            // Show ellipsis for skipped pages, but only once
+                                            if (page === 2 || page === quotations.last_page - 1) {
+                                                return (
+                                                    <PaginationItem key={page}>
+                                                        <span className="px-4 py-2">...</span>
+                                                    </PaginationItem>
+                                                );
+                                            }
+                                            return null;
+                                        }
+
+                                        return (
+                                            <PaginationItem key={page}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    isActive={page === quotations.current_page}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        router.get(route('quotations.index'), {
+                                                            ...data,
+                                                            page
+                                                        }, {
+                                                            preserveState: true,
+                                                            preserveScroll: true
+                                                        });
+                                                    }}
+                                                >
+                                                    {page}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        );
+                                    })}
+
+                                    {quotations.current_page < quotations.last_page && (
+                                        <PaginationItem>
+                                            <PaginationLink
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    router.get(route('quotations.index'), {
+                                                        ...data,
+                                                        page: quotations.current_page + 1
+                                                    }, {
+                                                        preserveState: true,
+                                                        preserveScroll: true
+                                                    });
+                                                }}
+                                            >
+                                                Next
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    )}
+                                </PaginationContent>
+                            </Pagination>
+                        </div>
                     </CardContent>
                 </Card>
             </div>

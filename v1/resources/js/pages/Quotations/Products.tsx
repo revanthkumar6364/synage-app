@@ -75,7 +75,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                 id: item.product_id,
                 quantity: item.quantity,
                 unit_price: item.unit_price,
-                proposed_unit_price: item.unit_price,
+                proposed_unit_price: item.proposed_unit_price || item.unit_price,
                 discount_percentage: item.discount_percentage,
                 tax_percentage: item.tax_percentage,
                 notes: item.notes || ''
@@ -171,7 +171,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
             if (productDetails) {
                 const minPrice = productDetails.min_price || 0;
                 const maxPrice = productDetails.max_price || Infinity;
-                const proposedPrice = parseFloat(product.proposed_unit_price);
+                const proposedPrice = parseFloat(product.proposed_unit_price.toString());
                 return proposedPrice < minPrice || (maxPrice !== Infinity && proposedPrice > maxPrice);
             }
             return false;

@@ -327,40 +327,37 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
                                 <div>
                                     <Label>Available Size <span className="text-red-500">*</span></Label>
                                     <div className="grid grid-cols-3 gap-2">
-                                        <Input
-                                            placeholder="Width"
-                                            value={data.available_size_width}
-                                            onChange={(e) => setData('available_size_width', e.target.value)}
-                                            required
-                                        />
-                                        <Input
-                                            placeholder="Height"
-                                            value={data.available_size_height}
-                                            onChange={(e) => setData('available_size_height', e.target.value)}
-                                            required
-                                        />
-                                        <Select value={data.available_size_unit} onValueChange={(val) => setData('available_size_unit', val)}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Unit" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="mm">mm</SelectItem>
-                                                <SelectItem value="ft">ft</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <div>
+                                            <Label>Width</Label>
+                                            <Input
+                                                value={data.available_size_width}
+                                                onChange={(e) => setData('available_size_width', e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Height</Label>
+                                            <Input
+                                                value={data.available_size_height}
+                                                onChange={(e) => setData('available_size_height', e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Unit</Label>
+                                            <Select value={data.available_size_unit} onValueChange={(val) => setData('available_size_unit', val)}>
+                                                <SelectTrigger>
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="mm">mm</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
                                     </div>
                                     <div className="mt-2 text-sm text-gray-500">
-                                        {data.available_size_unit === 'mm' ? (
-                                            <>
-                                                {data.available_size_width_ft} ft x {data.available_size_height_ft} ft
-                                                ({data.available_size_sqft} sq.ft)
-                                            </>
-                                        ) : (
-                                            <>
-                                                {data.available_size_width_mm} mm x {data.available_size_height_mm} mm
-                                                ({data.available_size_sqft} sq.ft)
-                                            </>
-                                        )}
+                                        {data.available_size_width_ft} ft x {data.available_size_height_ft} ft
+                                        ({data.available_size_sqft} sq.ft)
                                     </div>
                                 </div>
 
@@ -391,33 +388,31 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
                             <div>
                                 <Label>Proposed Size (Auto-calculated)</Label>
                                 <div className="grid grid-cols-3 gap-2">
-                                    <Input
-                                        placeholder="Width"
-                                        value={data.proposed_size_width}
-                                        readOnly
-                                    />
-                                    <Input
-                                        placeholder="Height"
-                                        value={data.proposed_size_height}
-                                        readOnly
-                                    />
-                                    <Input
-                                        value={data.proposed_size_unit}
-                                        readOnly
-                                    />
+                                    <div>
+                                        <Label>Width</Label>
+                                        <Input
+                                            value={data.proposed_size_width}
+                                            readOnly
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label>Height</Label>
+                                        <Input
+                                            value={data.proposed_size_height}
+                                            readOnly
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label>Unit</Label>
+                                        <Input
+                                            value={data.proposed_size_unit}
+                                            readOnly
+                                        />
+                                    </div>
                                 </div>
                                 <div className="mt-2 text-sm text-gray-500">
-                                    {data.proposed_size_unit === 'mm' ? (
-                                        <>
-                                            {data.proposed_size_width_ft} ft x {data.proposed_size_height_ft} ft
-                                            ({data.proposed_size_sqft} sq.ft)
-                                        </>
-                                    ) : (
-                                        <>
-                                            {data.proposed_size_width_mm} mm x {data.proposed_size_height_mm} mm
-                                            ({data.proposed_size_sqft} sq.ft)
-                                        </>
-                                    )}
+                                    {data.proposed_size_width_ft} ft x {data.proposed_size_height_ft} ft
+                                    ({data.proposed_size_sqft} sq.ft)
                                 </div>
                             </div>
 

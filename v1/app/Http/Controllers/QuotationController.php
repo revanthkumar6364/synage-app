@@ -267,10 +267,14 @@ class QuotationController extends Controller
             $quotation->update([
                 'notes' => $validated['notes'] ?? null,
                 'client_scope' => $validated['client_scope'] ?? null,
+                'updated_by' => $request->user()->id,
+                'last_action' => 'updated'
             ]);
 
+            // Delete existing items
             $quotation->items()->delete();
 
+            // Create new items with calculations based on proposed_unit_price
             foreach ($validated['items'] as $item) {
                 $quotationItem = new QuotationItem([
                     'quotation_id' => $quotation->id,
@@ -280,15 +284,17 @@ class QuotationController extends Controller
                     'proposed_unit_price' => $item['proposed_unit_price'],
                     'discount_percentage' => $item['discount_percentage'],
                     'tax_percentage' => $item['tax_percentage'],
+                    'notes' => $item['notes'] ?? null
                 ]);
 
+                // Calculate totals based on proposed_unit_price
                 $quotationItem->calculateTotals();
-                $quotation->items()->save($quotationItem);
+                $quotationItem->save();
             }
-            $quotation->updated_by = $request->user()->id;
-            $quotation->last_action = 'updated';
+
+            // Recalculate quotation totals
             $quotation->calculateTotals();
-            $quotation->save();
+
             DB::commit();
 
             return back()->with('success', 'Quotation products updated successfully.');

@@ -106,17 +106,10 @@ export default function Edit({ quotation, accounts }: Props) {
 
             let width_mm, height_mm, width_ft, height_ft, sqft;
 
-            if (unit === 'mm') {
-                width_mm = width;
-                height_mm = height;
-                width_ft = width / 304.8;
-                height_ft = height / 304.8;
-            } else { // ft
-                width_ft = width;
-                height_ft = height;
-                width_mm = width * 304.8;
-                height_mm = height * 304.8;
-            }
+            width_mm = width;
+            height_mm = height;
+            width_ft = width / 304.8;
+            height_ft = height / 304.8;
 
             sqft = width_ft * height_ft;
 
@@ -452,9 +445,9 @@ export default function Edit({ quotation, accounts }: Props) {
                                     <Label>Available Size</Label>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div>
+                                            <Label>Width</Label>
                                             <Input
                                                 type="number"
-                                                placeholder="Width"
                                                 value={data.available_size_width}
                                                 onChange={e => setData('available_size_width', e.target.value)}
                                                 className={errors.available_size_width ? 'border-red-500' : ''}
@@ -462,9 +455,9 @@ export default function Edit({ quotation, accounts }: Props) {
                                             {errors.available_size_width && <span className="text-red-500 text-sm">{errors.available_size_width}</span>}
                                         </div>
                                         <div>
+                                            <Label>Height</Label>
                                             <Input
                                                 type="number"
-                                                placeholder="Height"
                                                 value={data.available_size_height}
                                                 onChange={e => setData('available_size_height', e.target.value)}
                                                 className={errors.available_size_height ? 'border-red-500' : ''}
@@ -472,23 +465,15 @@ export default function Edit({ quotation, accounts }: Props) {
                                             {errors.available_size_height && <span className="text-red-500 text-sm">{errors.available_size_height}</span>}
                                         </div>
                                         <div>
-                                            <Select
-                                                value={data.available_size_unit}
-                                                onValueChange={(value) => setData('available_size_unit', value)}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Unit" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="mm">mm</SelectItem>
-                                                    <SelectItem value="ft">ft</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+                                            <Label>Unit</Label>
+                                            <Input
+                                                value="mm"
+                                                readOnly
+                                            />
                                         </div>
                                     </div>
                                     <div className="mt-2 text-sm text-gray-500">
-                                        Calculated: {data.available_size_width_mm}mm x {data.available_size_height_mm}mm |
-                                        {data.available_size_width_ft}ft x {data.available_size_height_ft}ft |
+                                        Calculated: {data.available_size_width_mm}mm x {data.available_size_height_mm}mm ({data.available_size_width_ft}ft x {data.available_size_height_ft}ft) |
                                         Area: {data.available_size_sqft} sq.ft
                                     </div>
                                 </div>
@@ -519,24 +504,30 @@ export default function Edit({ quotation, accounts }: Props) {
                                 <div>
                                     <Label>Proposed Size (Auto-calculated)</Label>
                                     <div className="grid grid-cols-3 gap-4">
-                                        <Input
-                                            placeholder="Width"
-                                            value={data.proposed_size_width}
-                                            readOnly
-                                        />
-                                        <Input
-                                            placeholder="Height"
-                                            value={data.proposed_size_height}
-                                            readOnly
-                                        />
-                                        <Input
-                                            value={data.proposed_size_unit}
-                                            readOnly
-                                        />
+                                        <div>
+                                            <Label>Width</Label>
+                                            <Input
+                                                value={data.proposed_size_width}
+                                                readOnly
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Height</Label>
+                                            <Input
+                                                value={data.proposed_size_height}
+                                                readOnly
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label>Unit</Label>
+                                            <Input
+                                                value={data.proposed_size_unit}
+                                                readOnly
+                                            />
+                                        </div>
                                     </div>
                                     <div className="mt-2 text-sm text-gray-500">
-                                        Calculated: {data.proposed_size_width_mm}mm x {data.proposed_size_height_mm}mm |
-                                        {data.proposed_size_width_ft}ft x {data.proposed_size_height_ft}ft |
+                                        Calculated: {data.proposed_size_width_mm}mm x {data.proposed_size_height_mm}mm ({data.proposed_size_width_ft}ft x {data.proposed_size_height_ft}ft) |
                                         Area: {data.proposed_size_sqft} sq.ft
                                     </div>
                                 </div>

@@ -155,20 +155,25 @@ class Quotation extends Model
     }
 
     // Totals calculation
-    public function calculateTotals(): void
+    public function calculateTotals()
     {
-        $subtotal = $this->items->sum('subtotal');
-        $discountAmount = $this->items->sum('discount_amount');
-        $taxAmount = $this->items->sum('tax_amount');
-        $total = $subtotal - $discountAmount + $taxAmount;
+        // Initialize totals
+        $this->subtotal = 0;
+        $this->discount_amount = 0;
+        $this->tax_amount = 0;
+        $this->total_amount = 0;
 
-        $this->update([
-            'subtotal' => $subtotal,
-            'discount_amount' => $discountAmount,
-            'tax_amount' => $taxAmount,
-            'total_amount' => $total,
-            'grand_total' => $total,
-        ]);
+        // Calculate totals from items using proposed_unit_price
+        foreach ($this->items as $item) {
+            $this->subtotal += $item->quantity * $item->proposed_unit_price;
+            $this->discount_amount += $item->discount_amount;
+            $this->tax_amount += $item->tax_amount;
+            $this->total_amount += $item->total;
+        }
+
+        $this->save();
+
+        return $this;
     }
 
     // Number generation

@@ -21,6 +21,7 @@ class QuotationItem extends Model
         'proposed_unit_price',
         'discount_percentage',
         'discount_amount',
+        'taxable_amount',
         'tax_percentage',
         'tax_amount',
         'subtotal',
@@ -35,6 +36,7 @@ class QuotationItem extends Model
         'discount_percentage' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'tax_percentage' => 'decimal:2',
+        'taxable_amount' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'total' => 'decimal:2',
@@ -50,27 +52,23 @@ class QuotationItem extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function calculateTotals(): void
+    public function calculateTotals()
     {
-        // Calculate subtotal using proposed_unit_price
+        // Calculate subtotal based on proposed_unit_price
         $this->subtotal = $this->quantity * $this->proposed_unit_price;
 
-        // Calculate discount amount if percentage is provided
-        if ($this->discount_percentage > 0) {
-            $this->discount_amount = ($this->subtotal * $this->discount_percentage) / 100;
-        }
+        // Calculate discount amount
+        $this->discount_amount = ($this->subtotal * $this->discount_percentage) / 100;
 
-        // Calculate amount after discount
-        $amountAfterDiscount = $this->subtotal - $this->discount_amount;
+        // Calculate taxable amount (after discount)
+        $this->taxable_amount = $this->subtotal - $this->discount_amount;
 
-        // Calculate tax amount if percentage is provided
-        if ($this->tax_percentage > 0) {
-            $this->tax_amount = ($amountAfterDiscount * $this->tax_percentage) / 100;
-        }
+        // Calculate tax amount
+        $this->tax_amount = ($this->taxable_amount * $this->tax_percentage) / 100;
 
-        // Calculate final total
-        $this->total = $amountAfterDiscount + $this->tax_amount;
+        // Calculate total
+        $this->total = $this->taxable_amount + $this->tax_amount;
 
-        $this->save();
+        return $this;
     }
 }
