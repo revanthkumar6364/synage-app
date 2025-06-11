@@ -19,23 +19,25 @@ class QuotationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Quotation::with(['account', 'account_contact', 'creator', 'salesUser'])
-            ->when($request->search, fn($q, $search) => $q->search($search))
-            ->when($request->status && $request->status !== 'all', fn($q, $status) => $q->where('status', $status));
+        $query = Quotation::with(['account', 'account_contact', 'creator', 'salesUser']);
 
+        // Apply search filter if provided
+        if ($request->filled('search')) {
+            $query->search($request->search);
+        }
+
+        // Apply status filter if provided and not 'all'
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Apply role-based filtering
         $authUser = auth()->user()->role;
-        if ($authUser == 'sales') {
-            $query->where('created_by', auth()->user()->id);
+        if ($authUser === 'sales') {
+            $query->where('sales_user_id', auth()->user()->id);
         }
 
         $quotations = $query->latest()->paginate(config('all.pagination.per_page'));
-
-        // Add debugging to check the data
-        \Log::info('Quotations data:', [
-            'first_quotation' => $quotations->first(),
-            'sales_user_relation' => $quotations->first()?->salesUser,
-            'total_quotations' => $quotations->count(),
-        ]);
 
         return Inertia::render('quotations/index', [
             'quotations' => $quotations,
@@ -171,13 +173,11 @@ class QuotationController extends Controller
     public function show(Request $request, $quotationId)
     {
         $quotation = Quotation::with(['items', 'account'])->find($quotationId);
-        $logo = QuotationMedia::where('category', 'logo')->first();
         $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
         $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->get();
         return Inertia::render('quotations/show', [
             'quotation' => $quotation,
             'commonFiles' => $commonFiles,
-            'logo' => $logo,
             'quotationFiles' => $quotationFiles,
             'products' => Product::select('id', 'name', 'description', 'price', 'gst_percentage')->get(),
         ]);
@@ -307,13 +307,11 @@ class QuotationController extends Controller
     public function preview(Request $request, $quotationId)
     {
         $quotation = Quotation::with(['items', 'account'])->find($quotationId);
-        $logo = QuotationMedia::where('category', 'logo')->first();
         $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
         $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->get();
         return Inertia::render('quotations/preview', [
             'quotation' => $quotation,
             'commonFiles' => $commonFiles,
-            'logo' => $logo,
             'quotationFiles' => $quotationFiles,
             'products' => Product::select('id', 'name', 'description', 'price', 'gst_percentage')->get(),
         ]);
@@ -481,6 +479,7 @@ class QuotationController extends Controller
             $newQuotation->rejected_at = null;
             $newQuotation->rejected_by = null;
             $newQuotation->rejection_reason = null;
+            $newQuotation->sales_user_id = $quotation->sales_user_id;
             $newQuotation->save();
 
             // Copy all quotation items
@@ -575,6 +574,37 @@ class QuotationController extends Controller
             Storage::disk('public')->delete($fullPath);
             return back()->with('error', 'Failed to upload file: ' . $e->getMessage());
         }
+    }
+
+    public function downloadPdf(Quotation $quotation)
+    {
+        $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
+        $quotationFiles = QuotationMedia::where('quotation_id', $quotation->id)->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.quotation', [
+            'quotation' => $quotation->load(['items.product', 'account', 'account_contact']),
+            'commonFiles' => $commonFiles,
+            'quotationFiles' => $quotationFiles
+        ]);
+
+        // Set paper size to A4 and portrait orientation
+        $pdf->setPaper('a4', 'portrait');
+
+        // Set better rendering options
+        $pdf->setOption('isHtml5ParserEnabled', true);
+        $pdf->setOption('isPhpEnabled', true);
+        $pdf->setOption('isRemoteEnabled', true);
+        $pdf->setOption('dpi', 150);
+        $pdf->setOption('defaultFont', 'DejaVu Sans');
+
+        // Increase memory limit for large PDFs with images
+        ini_set('memory_limit', '256M');
+
+        // Sanitize filename
+        $filename = str_replace(['/', '\\'], '_', $quotation->reference);
+        $filename = preg_replace('/[^a-zA-Z0-9_-]/', '', $filename);
+
+        return $pdf->download("quotation_{$filename}.pdf");
     }
 
 }

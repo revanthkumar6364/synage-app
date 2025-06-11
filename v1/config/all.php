@@ -76,8 +76,6 @@ return [
     ],
     'box_size_unit' => 'mm',
     'quotation_images_categories' => [
-        'logo' => 'Logo',
-        'signature' => 'Signature',
         'unilumin' => 'Unilumin',
         'absen' => 'Absen',
         'radiant_synage' => 'Radiant Synage',

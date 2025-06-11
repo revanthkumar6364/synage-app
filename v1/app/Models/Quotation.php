@@ -98,7 +98,7 @@ class Quotation extends Model
         'rejected_at' => 'datetime',
     ];
 
-    protected $with = ['account', 'account_contact'];
+    protected $with = ['account', 'account_contact', 'salesUser'];
     protected $appends = ['can'];
 
     public function getCanAttribute()
@@ -136,7 +136,7 @@ class Quotation extends Model
 
     public function salesUser(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'sales_user_id');
+        return $this->belongsTo(User::class, 'sales_user_id','id');
     }
 
     public function creator(): BelongsTo

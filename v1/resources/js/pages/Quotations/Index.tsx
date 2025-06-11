@@ -26,12 +26,8 @@ interface Quotation {
     total_amount: number | null;
     status: 'draft' | 'pending' | 'approved' | 'rejected';
     parent_id?: number;
-    creator?: {
-        name: string;
-    };
-    salesUser?: {
-        name: string;
-    };
+    creator?: any;
+    sales_user?: any;
     can?: {
         update: boolean;
         approve: boolean;
@@ -82,7 +78,10 @@ export default function Index({ quotations, filters, statuses }: Props) {
     const handleStatusChange = (status: string) => {
         const newData = { ...data, status };
         setData(newData);
-        router.get(route('quotations.index'), newData, {
+        router.get(route('quotations.index'), {
+            ...newData,
+            page: 1 // Reset to first page when changing status
+        }, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -201,21 +200,23 @@ export default function Index({ quotations, filters, statuses }: Props) {
                                             </Badge>
                                         </TableCell>
                                         <TableCell>{quotation.creator?.name}</TableCell>
-                                        <TableCell>{quotation.salesUser?.name}</TableCell>
+                                        <TableCell>{quotation.sales_user?.name}</TableCell>
                                         <TableCell>
                                             <div className="inline-flex gap-2">
-                                                {quotation.can?.approve ? (
-                                                    <Link href={route('quotations.show', quotation.id)}>
-                                                        <Button variant="outline" size="icon">
-                                                            <CheckIcon className="h-4 w-4" />
-                                                        </Button>
-                                                    </Link>
-                                                ) : (
+                                                {quotation.status === 'approved' || quotation.status === 'rejected' ? (
                                                     <Link href={route('quotations.show', quotation.id)}>
                                                         <Button variant="outline" size="icon">
                                                             <EyeIcon className="h-4 w-4" />
                                                         </Button>
                                                     </Link>
+                                                ) : (
+                                                    quotation.can?.approve && (
+                                                        <Link href={route('quotations.show', quotation.id)}>
+                                                            <Button variant="outline" size="icon">
+                                                                <CheckIcon className="h-4 w-4" />
+                                                            </Button>
+                                                        </Link>
+                                                    )
                                                 )}
                                                 {quotation.can?.update && (
                                                     <Link href={route('quotations.edit', quotation.id)}>

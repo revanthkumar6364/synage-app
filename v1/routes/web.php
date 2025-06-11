@@ -48,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('quotations.create-version');
     Route::get('quotations/{quotation}/files', [QuotationController::class, 'files'])->name('quotations.files');
     Route::post('quotations/{quotation}/files', [QuotationController::class, 'filesStore'])->name('quotations.files.store');
+    Route::get('quotations/{quotation}/pdf', [QuotationController::class, 'downloadPdf'])->name('quotations.pdf');
 
 });
 

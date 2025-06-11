@@ -36,12 +36,11 @@ interface QuotationItem {
 interface Props {
     quotation: Quotation;
     products: Product[];
-    logo: QuotationMedia | null;
     commonFiles: QuotationMedia[];
     quotationFiles: QuotationMedia[];
 }
 
-export default function Preview({ quotation, logo, commonFiles, quotationFiles }: Props) {
+export default function Preview({ quotation, commonFiles, quotationFiles }: Props) {
     const { auth } = usePage<{ auth: any }>().props;
     const contentRef = useRef<HTMLDivElement>(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -155,7 +154,7 @@ export default function Preview({ quotation, logo, commonFiles, quotationFiles }
                                 <div className="flex items-start justify-between pb-6">
                                     <div className="flex items-start space-x-6">
                                         <div className="flex flex-col items-start gap-3">
-                                            <img src={logo?.full_url} alt="Radiant Synage Logo" className="h-14 object-contain" />
+                                            <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-14 object-contain" />
                                         </div>
                                     </div>
                                     <div className="text-right">
@@ -223,7 +222,7 @@ export default function Preview({ quotation, logo, commonFiles, quotationFiles }
                                             </p>
                                         </div>
                                         <div className="flex justify-end">
-                                            <img src={logo?.full_url} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50" />
+                                            <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50" />
                                         </div>
                                     </div>
                                 </div>
@@ -362,7 +361,7 @@ export default function Preview({ quotation, logo, commonFiles, quotationFiles }
                                             <p className="text-sm text-muted-foreground">For any information or clarifications</p>
                                             <p className="text-sm font-medium">Contact: 8884491377</p>
                                         </div>
-                                        <img src={logo?.full_url} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50" />
+                                        <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50" />
                                     </div>
                                     <Separator />
                                     <div className="flex items-end justify-between">
@@ -375,7 +374,7 @@ export default function Preview({ quotation, logo, commonFiles, quotationFiles }
                                                 width="60"
                                                 src="/placeholder.svg?height=40&width=60"
                                             />
-                                            <img src={logo?.full_url} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50 mt-2" />
+                                            <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50 mt-2" />
                                             <p className="text-sm font-semibold text-primary">{auth.user.name}</p>
                                         </div>
                                         <div className="text-right">
@@ -392,7 +391,7 @@ export default function Preview({ quotation, logo, commonFiles, quotationFiles }
                                         {commonFiles.length > 0 && (
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between">
-                                                    <img src={logo?.full_url} alt="Radiant Synage Logo" className="h-6 object-contain opacity-30" />
+                                                    <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-6 object-contain opacity-30" />
                                                 </div>
                                                 <div className="grid grid-cols-3 gap-4">
                                                     {commonFiles.map((file) => (
@@ -411,7 +410,7 @@ export default function Preview({ quotation, logo, commonFiles, quotationFiles }
                                                 <Separator />
                                                 <div className="space-y-4">
                                                     <div className="flex items-center justify-between">
-                                                        <img src={logo?.full_url} alt="Radiant Synage Logo" className="h-6 object-contain opacity-30" />
+                                                        <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-6 object-contain opacity-30" />
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-4">
                                                         {quotationFiles.map((file) => (
