@@ -15,8 +15,8 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
+            'name' => 'Ganesh Hs',
+            'email' => 'admin@gullygroup.in',
             'country_code' => '+91',
             'mobile' => '9876543210',
             'password' => Hash::make('password'),
@@ -25,8 +25,8 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Manager',
-            'email' => 'manager@gmail.com',
+            'name' => 'Rajesh Kumar',
+            'email' => 'manager@gullygroup.in',
             'country_code' => '+91',
             'mobile' => '9876543201',
             'password' => Hash::make('password'),
@@ -35,8 +35,8 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Sales',
-            'email' => 'sales@gmail.com',
+            'name' => 'Rohit Kumar',
+            'email' => 'sales@gullygroup.in',
             'country_code' => '+91',
             'mobile' => '9876543202',
             'password' => Hash::make('password'),
