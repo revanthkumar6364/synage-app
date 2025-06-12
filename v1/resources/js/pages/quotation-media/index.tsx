@@ -72,20 +72,24 @@ export default function Index({ media, filters, categories }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [category, setCategory] = useState(filters.category || 'all');
 
-    const handleSearch = (value: string) => {
-        setSearch(value);
-        router.get(
-            route('quotation-media.index'),
-            { search: value, category },
-            { preserveState: true, preserveScroll: true }
-        );
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        applyFilters();
     };
 
     const handleCategoryChange = (value: string) => {
         setCategory(value);
+        applyFilters();
+    };
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value);
+    };
+
+    const applyFilters = () => {
         router.get(
             route('quotation-media.index'),
-            { search, category: value },
+            { search, category },
             { preserveState: true, preserveScroll: true }
         );
     };
@@ -189,11 +193,11 @@ export default function Index({ media, filters, categories }: Props) {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="mb-4 flex gap-4">
+                        <form onSubmit={handleSearch} className="mb-4 flex gap-4">
                             <Input
                                 placeholder="Search media..."
                                 value={search}
-                                onChange={(e) => handleSearch(e.target.value)}
+                                onChange={handleSearchChange}
                                 className="max-w-sm"
                             />
                             <Select value={category} onValueChange={handleCategoryChange}>
@@ -209,10 +213,10 @@ export default function Index({ media, filters, categories }: Props) {
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <Button onClick={() => handleSearch(search)}>
+                            <Button type="submit">
                                 <SearchIcon className="mr-2 h-4 w-4" />Search
                             </Button>
-                        </div>
+                        </form>
 
                         <Table>
                             <TableHeader>

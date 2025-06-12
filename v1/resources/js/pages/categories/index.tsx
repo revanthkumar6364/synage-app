@@ -38,7 +38,23 @@ export default function CategoriesIndex({ categories, filters, statuses }: {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get(route('categories.index'), data, {
+        applyFilters();
+    };
+
+    const handleStatusChange = (value: string) => {
+        setData('status', value);
+        applyFilters();
+    };
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setData('search', e.target.value);
+    };
+
+    const applyFilters = () => {
+        router.get(route('categories.index'), {
+            search: data.search,
+            status: data.status
+        }, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -83,10 +99,10 @@ export default function CategoriesIndex({ categories, filters, statuses }: {
                                 <Input
                                     placeholder="Search by name"
                                     value={data.search}
-                                    onChange={(e) => setData('search', e.target.value)}
+                                    onChange={handleSearchChange}
                                     className="md:max-w-sm"
                                 />
-                                <Select value={data.status} onValueChange={(value) => setData('status', value)}>
+                                <Select value={data.status} onValueChange={handleStatusChange}>
                                     <SelectTrigger className="md:w-[180px]">
                                         <SelectValue placeholder="Filter by status" />
                                     </SelectTrigger>
