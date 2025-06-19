@@ -59,8 +59,8 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'string', 'in:admin,manager,user'],
-            'status' => ['required', 'string', 'in:active,inactive'],
+            'role' => ['required', 'string', 'in:' . implode(',', array_keys(config('all.roles')))],
+            'status' => ['required', 'string', 'in:' . implode(',', array_keys(config('all.statuses')))],
             'country_code' => ['required', 'string'],
             'mobile' => ['required', 'string', 'max:10', 'unique:users'],
         ]);
