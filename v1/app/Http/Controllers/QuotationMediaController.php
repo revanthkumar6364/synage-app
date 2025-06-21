@@ -17,13 +17,16 @@ class QuotationMediaController extends Controller
         if ($request->user()->cannot('viewAny', QuotationMedia::class)) {
             abort(403);
         }
+
         $query = QuotationMedia::query()
-            ->when($request->search, function($q, $search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%");
+            ->when($request->filled('search'), function($q, $search) use ($request) {
+                $q->where(function($subQuery) use ($request) {
+                    $subQuery->where('name', 'like', "%{$request->search}%")
+                             ->orWhere('category', 'like', "%{$request->search}%");
+                });
             })
-            ->when($request->category, function($q, $category) {
-                $q->byCategory($category);
+            ->when($request->filled('category') && $request->category !== 'all', function($q, $category) use ($request) {
+                $q->byCategory($request->category);
             })
             ->active();
 

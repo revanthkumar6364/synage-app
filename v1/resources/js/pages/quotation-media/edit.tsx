@@ -61,7 +61,15 @@ const Edit: FC<Props> = ({ media, categories }) => {
     };
 
     const handleDelete = () => {
-        router.delete(route('quotation-media.destroy', media.id));
+        router.delete(route('quotation-media.destroy', media.id), {
+            onSuccess: () => {
+                // Redirect to index page after successful deletion
+                router.visit(route('quotation-media.index'));
+            },
+            onError: () => {
+                // Handle error if needed
+            }
+        });
     };
 
     return (

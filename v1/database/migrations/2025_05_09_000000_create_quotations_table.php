@@ -15,9 +15,9 @@ return new class extends Migration
             $table->string('reference')->unique();
             $table->string('quotation_number')->unique()->nullable(); // Made nullable since we generate it
             $table->string('title');
-            $table->foreignId('account_id')->constrained('accounts'); // Made required
-            $table->foreignId('account_contact_id')->nullable()->constrained('account_contacts');
-            $table->foreignId('sales_user_id')->constrained('users'); // Sales person assigned
+            $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
+            $table->foreignId('account_contact_id')->nullable()->constrained('account_contacts')->onDelete('set null');
+            $table->foreignId('sales_user_id')->constrained('users')->onDelete('restrict');
             $table->string('available_size_width');
             $table->string('available_size_height');
             $table->string('available_size_unit');

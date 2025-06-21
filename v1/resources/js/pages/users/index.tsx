@@ -11,6 +11,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { MoreVertical, PencilIcon, PlusIcon, TrashIcon, UserCogIcon, KeyIcon, SearchIcon } from 'lucide-react';
 import { useState } from 'react';
+import { toast, Toaster } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -59,6 +60,7 @@ export default function UsersIndex({ users, filters, roles, statuses }: {
                 onSuccess: () => {
                     setDeleteDialogOpen(false);
                     setSelectedUser(null);
+                    toast.success('User deleted successfully');
                 },
             });
         }
@@ -76,6 +78,7 @@ export default function UsersIndex({ users, filters, roles, statuses }: {
                 onSuccess: () => {
                     setRoleDialogOpen(false);
                     setSelectedUser(null);
+                    toast.success('User role changed successfully');
                 },
             });
         }
@@ -299,6 +302,7 @@ export default function UsersIndex({ users, filters, roles, statuses }: {
                     </DialogContent>
                 </Dialog>
             </div>
+            <Toaster />
         </AppLayout>
     );
 }

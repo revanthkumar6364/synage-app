@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatBytes } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type BreadcrumbItem } from '@/types';
-import { PlusIcon, SearchIcon, TrashIcon, PencilIcon } from 'lucide-react';
+import { PlusIcon, SearchIcon, TrashIcon, PencilIcon, XIcon } from 'lucide-react';
 import {
     Pagination,
     PaginationContent,
@@ -79,11 +79,22 @@ export default function Index({ media, filters, categories }: Props) {
 
     const handleCategoryChange = (value: string) => {
         setCategory(value);
-        applyFilters();
+        // Don't apply filters automatically - wait for search button
     };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value);
+        // Don't apply filters automatically - wait for search button
+    };
+
+    const handleClear = () => {
+        setSearch('');
+        setCategory('all');
+        router.get(
+            route('quotation-media.index'),
+            {},
+            { preserveState: true, preserveScroll: true }
+        );
     };
 
     const applyFilters = () => {
@@ -215,6 +226,9 @@ export default function Index({ media, filters, categories }: Props) {
                             </Select>
                             <Button type="submit">
                                 <SearchIcon className="mr-2 h-4 w-4" />Search
+                            </Button>
+                            <Button type="button" variant="outline" onClick={handleClear}>
+                                <XIcon className="mr-2 h-4 w-4" />Clear
                             </Button>
                         </form>
 

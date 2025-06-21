@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { MoreVertical, PencilIcon, PlusIcon, TrashIcon, UsersIcon, SearchIcon, EyeIcon } from 'lucide-react';
+import { MoreVertical, PencilIcon, PlusIcon, TrashIcon, UsersIcon, SearchIcon, EyeIcon, X } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -25,14 +25,33 @@ export default function AccountsIndex({ accounts, filters, statuses }: {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedAccount, setSelectedAccount] = useState<any>(null);
 
-    const { data, setData } = useForm({
-        search: filters.search || '',
-        status: filters.status || 'all',
-    });
+    const [search, setSearch] = useState(filters.search || '');
+    const [status, setStatus] = useState(filters.status || 'all');
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get(route('accounts.index'), data, {
+        applyFilters();
+    };
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value);
+    };
+
+    const handleStatusChange = (value: string) => {
+        setStatus(value);
+    };
+
+    const handleReset = () => {
+        setSearch('');
+        setStatus('all');
+        router.get(route('accounts.index'), {}, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const applyFilters = () => {
+        router.get(route('accounts.index'), { search, status }, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -76,11 +95,11 @@ export default function AccountsIndex({ accounts, filters, statuses }: {
                             <div className="flex flex-col gap-4 md:flex-row">
                                 <Input
                                     placeholder="Search by business name or GST number"
-                                    value={data.search}
-                                    onChange={(e) => setData('search', e.target.value)}
+                                    value={search}
+                                    onChange={handleSearchChange}
                                     className="md:max-w-sm"
                                 />
-                                <Select value={data.status} onValueChange={(value) => setData('status', value)}>
+                                <Select value={status} onValueChange={handleStatusChange}>
                                     <SelectTrigger className="md:w-[180px]">
                                         <SelectValue placeholder="Filter by status" />
                                     </SelectTrigger>
@@ -95,6 +114,9 @@ export default function AccountsIndex({ accounts, filters, statuses }: {
                                 </Select>
                                 <Button type="submit">
                                     <SearchIcon className="mr-2 h-4 w-4" />Search
+                                </Button>
+                                <Button type="button" variant="outline" onClick={handleReset}>
+                                    <X className="mr-2 h-4 w-4" />Reset
                                 </Button>
                             </div>
                         </form>

@@ -36,6 +36,12 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
+        // Allow users to update their own profile
+        if ($user->id === $model->id) {
+            return true;
+        }
+
+        // Allow admins to update any user
         return $user->hasRole('admin');
     }
 

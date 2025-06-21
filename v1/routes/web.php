@@ -19,8 +19,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::resource('users', UserController::class)->except(['show']);
-    Route::get('users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
-    Route::post('users/{user}/change-password', [UserController::class, 'updatePassword'])->name('users.update-password');
+    Route::get('users/{id}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
+    Route::post('users/{id}/change-password', [UserController::class, 'updatePassword'])->name('users.update-password');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::resource('accounts', AccountController::class);

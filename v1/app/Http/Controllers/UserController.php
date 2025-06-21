@@ -93,33 +93,42 @@ class UserController extends Controller
         ]);
     }
 
-    public function changePassword(User $user)
+    public function changePassword($id)
     {
+        $user = User::findOrFail($id);
+
         if (request()->user()->cannot('update', $user)) {
             abort(403);
         }
 
         return Inertia::render('users/change-password', [
-            'user' => new UserResource($user),
+            'user' => $user->toArray(),
         ]);
     }
 
-    public function updatePassword(Request $request, User $user)
+    public function updatePassword(Request $request, $id)
     {
+        $user = User::findOrFail($id);
+
         if ($request->user()->cannot('update', $user)) {
             abort(403);
         }
 
         $request->validate([
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password_confirmation' => ['required', 'string'],
+        ], [
+            'password.required' => 'The password field is required.',
+            'password.min' => 'The password must be at least 8 characters.',
+            'password.confirmed' => 'The password confirmation does not match.',
+            'password_confirmation.required' => 'The password confirmation field is required.',
         ]);
 
         $user->update([
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('users.index')
-            ->with('success', 'Password updated successfully.');
+        return back()->with('success', 'Password updated successfully.');
     }
 
     public function update(Request $request, User $user)

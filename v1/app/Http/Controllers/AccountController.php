@@ -14,7 +14,11 @@ class AccountController extends Controller
     {
         $accounts = Account::with('contacts')
             ->when($request->input('search'), function ($query, $search) {
-                $query->where('business_name', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('business_name', 'like', "%{$search}%")
+                      ->orWhere('gst_number', 'like', "%{$search}%")
+                      ->orWhere('business_id', 'like', "%{$search}%");
+                });
             })
             ->when($request->input('status'), function ($query, $status) {
                 if ($status != 'all') {

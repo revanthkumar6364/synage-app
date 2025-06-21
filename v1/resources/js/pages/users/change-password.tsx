@@ -4,9 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeftIcon } from 'lucide-react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
+import { ArrowLeftIcon, LoaderCircle } from 'lucide-react';
 import { type FC } from 'react';
+import { toast, Toaster } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,14 +29,29 @@ interface ChangePasswordProps {
 }
 
 const ChangePassword: FC<ChangePasswordProps> = ({ user }) => {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         password: '',
         password_confirmation: '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('users.change-password', user.id));
+
+        if (!user?.id) {
+            console.error('User ID not available:', user);
+            return;
+        }
+
+        post(route('users.update-password', user.id), {
+            onSuccess: () => {
+                reset();
+                toast.success('Password changed successfully');
+                router.visit(route('users.index'));
+            },
+            onError: (errors) => {
+                // Errors will be displayed automatically
+            },
+        });
     };
 
     return (
@@ -82,12 +98,14 @@ const ChangePassword: FC<ChangePasswordProps> = ({ user }) => {
                             </div>
 
                             <Button type="submit" disabled={processing}>
+                                {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
                                 Change Password
                             </Button>
                         </form>
                     </CardContent>
                 </Card>
             </div>
+            <Toaster />
         </AppLayout>
     );
 };

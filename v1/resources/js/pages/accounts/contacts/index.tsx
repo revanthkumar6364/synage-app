@@ -33,7 +33,15 @@ export default function AccountContactIndex({ account, contacts }: AccountContac
 
     const handleDeleteConfirm = () => {
         if (contactToDelete) {
-            router.delete(route('accounts.contacts.destroy', [account.id, contactToDelete.id]));
+            router.delete(route('accounts.contacts.destroy', [account.id, contactToDelete.id]), {
+                onSuccess: () => {
+                    setDeleteDialogOpen(false);
+                    setContactToDelete(null);
+                },
+                onError: () => {
+                    // Keep dialog open if there's an error
+                }
+            });
         }
     };
 

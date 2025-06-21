@@ -26,7 +26,14 @@ export default function AccountShow({ account }: AccountShowProps) {
     };
 
     const handleDeleteConfirm = () => {
-        router.delete(route('accounts.destroy', account.data.id));
+        router.delete(route('accounts.destroy', account.data.id), {
+            onSuccess: () => {
+                setDeleteDialogOpen(false);
+            },
+            onError: () => {
+                // Keep dialog open if there's an error
+            }
+        });
     };
 
     return (
