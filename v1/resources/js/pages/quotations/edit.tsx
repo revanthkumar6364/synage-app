@@ -517,9 +517,9 @@ export default function Edit({ quotation, accounts }: Props) {
                                         required
                                     />
                                     <p className="mt-2 text-sm text-gray-500">
-                                        Box size: 320mm x 160mm
+                                        Unit size: 320mm x 160mm
                                         {data.max_quantity && (
-                                            <> | Maximum possible quantity: {data.max_quantity} boxes</>
+                                            <> | Maximum possible quantity: {data.max_quantity} units</>
                                         )}
                                     </p>
                                 </div>

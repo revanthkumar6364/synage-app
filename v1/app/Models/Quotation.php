@@ -197,7 +197,17 @@ class Quotation extends Model
         // Format: QT-YYYYMM-XXXX
         return sprintf('%s-%s%s-%s', $prefix, $year, $month, $paddedSequence);
     }
+    private function validateStatusTransition(string $newStatus): bool
+    {
+        $validTransitions = [
+            self::STATUS_DRAFT => [self::STATUS_PENDING, self::STATUS_REJECTED],
+            self::STATUS_PENDING => [self::STATUS_APPROVED, self::STATUS_REJECTED],
+            self::STATUS_APPROVED => [self::STATUS_REJECTED],
+            self::STATUS_REJECTED => [self::STATUS_DRAFT],
+        ];
 
+        return in_array($newStatus, $validTransitions[$this->status] ?? []);
+    }
     // Reference number generation
     public function generateReferenceNumber(): string
     {
@@ -275,18 +285,6 @@ class Quotation extends Model
         });
     }
 
-    // Status transition validation
-    private function validateStatusTransition(string $newStatus): bool
-    {
-        $validTransitions = [
-            self::STATUS_DRAFT => [self::STATUS_PENDING, self::STATUS_REJECTED],
-            self::STATUS_PENDING => [self::STATUS_APPROVED, self::STATUS_REJECTED],
-            self::STATUS_APPROVED => [self::STATUS_REJECTED],
-            self::STATUS_REJECTED => [self::STATUS_DRAFT],
-        ];
-
-        return in_array($newStatus, $validTransitions[$this->status] ?? []);
-    }
 
     // Status transition methods
     public function markAsPending(): bool

@@ -605,4 +605,6 @@ class QuotationController extends Controller
         return $pdf->download("quotation_{$filename}.pdf");
     }
 
+
+
 }
