@@ -67,8 +67,14 @@ return [
     */
     'industry_types' => [
         'retail' => 'Retail',
-        'wholesale' => 'Wholesale',
-        'service' => 'Service',
+        'healthcare' => 'Healthcare',
+        'hospitality' => 'Hospitality',
+        'entertainment' => 'Entertainment',
+        'education' => 'Education',
+        'government' => 'Government',
+        'corporate' => 'Corporate',
+        'industrial' => 'Industrial',
+        'museum' => 'Museum'
     ],
     'box_size' => [
         'width' => 320,

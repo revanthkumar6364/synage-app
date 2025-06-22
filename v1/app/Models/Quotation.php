@@ -183,18 +183,41 @@ class Quotation extends Model
         $year = date('Y');
         $month = date('m');
 
-        $lastQuotation = self::whereYear('created_at', $year)
+        // Count quotations for current month and year
+        $count = self::whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
-            ->orderBy('id', 'desc')
-            ->first();
+            ->count();
 
-        $sequence = $lastQuotation ? (int)substr($lastQuotation->quotation_number, -4) + 1 : 1;
+        // Start from 1 (001) for the first quotation of the month
+        $sequence = $count + 1;
 
         // Ensure the sequence is padded with leading zeros
         $paddedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
 
         // Format: QT-YYYYMM-XXXX
         return sprintf('%s-%s%s-%s', $prefix, $year, $month, $paddedSequence);
+    }
+
+    // Reference number generation
+    public function generateReferenceNumber(): string
+    {
+        $prefix = 'RSPL';
+        $month = date('M');
+        $year = date('Y');
+
+        // Count quotations for current month and year
+        $count = self::whereYear('created_at', $year)
+            ->whereMonth('created_at', date('m'))
+            ->count();
+
+        // Start from 1 (001) for the first quotation of the month
+        $sequence = $count + 1;
+
+        // Ensure the sequence is padded with leading zeros
+        $paddedSequence = str_pad($sequence, 3, '0', STR_PAD_LEFT);
+
+        // Format: RSPL/MON/YYYY-XXX
+        return sprintf('%s/%s/%s-%s', $prefix, strtoupper($month), $year, $paddedSequence);
     }
 
     // Scopes
@@ -244,12 +267,6 @@ class Quotation extends Model
     protected static function boot()
     {
         parent::boot();
-
-        static::creating(function ($quotation) {
-            if (empty($quotation->quotation_number)) {
-                $quotation->quotation_number = $quotation->generateQuotationNumber();
-            }
-        });
 
         static::saving(function ($quotation) {
             if (!$quotation->isValidStatus($quotation->status)) {

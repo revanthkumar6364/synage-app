@@ -181,14 +181,18 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
             const maxQuantity = parseInt(data.max_quantity) || 0;
             const availableWidth = parseFloat(data.available_size_width_mm) || 0;
 
-            if (quantity <= 0 || maxQuantity <= 0 || availableWidth <= 0) return;
+            if (quantity <= 0 || maxQuantity <= 0 || availableWidth <= 0) {
+                return;
+            }
 
             const boxWidth = 320; // mm
             const boxHeight = 160; // mm
 
             // Calculate minimum number of boxes in width and height needed
             const boxesInWidth = Math.floor(availableWidth / boxWidth);
-            if (boxesInWidth <= 0) return;
+            if (boxesInWidth <= 0) {
+                return;
+            }
 
             // Calculate required rows based on quantity
             const requiredRows = Math.ceil(quantity / boxesInWidth);
@@ -197,23 +201,40 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
             const proposedWidth = boxWidth * boxesInWidth;
             const proposedHeight = boxHeight * requiredRows;
 
-            setData((prev: FormData) => ({
-                ...prev,
-                proposed_size_width: proposedWidth.toString(),
-                proposed_size_height: proposedHeight.toString(),
-                proposed_size_unit: "mm",
-                proposed_size_width_mm: proposedWidth.toFixed(2),
-                proposed_size_height_mm: proposedHeight.toFixed(2),
-                proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
-                proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
-                proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2),
-                quantity: quantity.toString(),
-                max_quantity: maxQuantity.toString()
-            }));
+            setData((prev: FormData) => {
+                const newData = {
+                    ...prev,
+                    proposed_size_width: proposedWidth.toString(),
+                    proposed_size_height: proposedHeight.toString(),
+                    proposed_size_unit: "mm",
+                    proposed_size_width_mm: proposedWidth.toFixed(2),
+                    proposed_size_height_mm: proposedHeight.toFixed(2),
+                    proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
+                    proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
+                    proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2),
+                    quantity: quantity.toString(),
+                    max_quantity: maxQuantity.toString()
+                };
+
+                return newData;
+            });
         };
 
         calculateProposedSize();
     }, [data.quantity, data.max_quantity, data.available_size_width_mm]);
+
+    // Update shipping address when billing address changes and same_as_billing is true
+    useEffect(() => {
+        if (data.same_as_billing) {
+            setData({
+                ...data,
+                shipping_address: data.billing_address,
+                shipping_location: data.billing_location,
+                shipping_city: data.billing_city,
+                shipping_zip_code: data.billing_zip_code,
+            });
+        }
+    }, [data.billing_address, data.billing_location, data.billing_city, data.billing_zip_code, data.same_as_billing]);
 
     const handleAccountChange = (val: string) => {
         const account = accounts.find(acc => acc.id.toString() === val);
@@ -271,7 +292,7 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
                     </CardHeader>
                     <CardContent>
                         <div className="mb-6">
-                            <p className="text-sm text-gray-500">Reference ID: {data.reference}</p>
+                            <p className="text-sm text-gray-500">Reference ID: {data.reference} (Auto-generate last 3 digits after submission)</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
@@ -531,7 +552,7 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
                             {/* Sales Person Selection - Only for admin and manager */}
                             {auth.user.role !== 'sales' && (
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sales_user_id">Sales Person</Label>
+                                    <Label htmlFor="sales_user_id">Sales Person <span className="text-red-500">*</span></Label>
                                     <Select
                                         value={data.sales_user_id}
                                         onValueChange={(value) => setData('sales_user_id', value)}
@@ -573,6 +594,5 @@ function generateReference() {
     const date = new Date();
     const month = date.toLocaleString('default', { month: 'short' }).toUpperCase();
     const year = date.getFullYear();
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `RSPL/${month}/${year}-${random}`;
+    return `RSPL/${month}/${year}-XXX`;
 }

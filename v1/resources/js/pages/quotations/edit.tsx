@@ -23,6 +23,7 @@ interface Props {
 }
 
 interface FormData extends Record<string, any> {
+    reference: string;
     title: string;
     account_id: number;
     account_contact_id: number | undefined;
@@ -62,6 +63,7 @@ export default function Edit({ quotation, accounts }: Props) {
     const [accountContacts, setAccountContacts] = useState<AccountContact[]>([]);
 
     const { data, setData, put, processing, errors } = useForm<FormData>({
+        reference: quotation.reference,
         title: quotation.title,
         account_id: quotation.account_id,
         account_contact_id: quotation.account_contact_id,
@@ -275,6 +277,16 @@ export default function Edit({ quotation, accounts }: Props) {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
+                                    <Label>Reference ID</Label>
+                                    <Input
+                                        value={data.reference}
+                                        onChange={e => setData('reference', e.target.value)}
+                                        className={errors.reference ? 'border-red-500' : ''}
+                                    />
+                                    {errors.reference && <span className="text-red-500 text-sm">{errors.reference}</span>}
+                                </div>
+
+                                <div>
                                     <Label>Title</Label>
                                     <Input
                                         value={data.title}
@@ -315,13 +327,24 @@ export default function Edit({ quotation, accounts }: Props) {
                                             <SelectValue placeholder="Select a contact" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {accountContacts.map((contact) => (
-                                                <SelectItem key={contact.id} value={contact.id.toString()}>
-                                                    {contact.name}
-                                                </SelectItem>
-                                            ))}
+                                            {accountContacts.length > 0 ? (
+                                                accountContacts.map((contact) => (
+                                                    <SelectItem key={contact.id} value={contact.id.toString()}>
+                                                        {contact.name}
+                                                    </SelectItem>
+                                                ))
+                                            ) : (
+                                                <div className="px-2 py-1 text-sm text-gray-500">
+                                                    No contacts found for this account. Add contacts first.
+                                                </div>
+                                            )}
                                         </SelectContent>
                                     </Select>
+                                    {accountContacts.length === 0 && data.account_id && (
+                                        <p className="text-sm text-amber-600 mt-1">
+                                            No contacts found in this account. Please add contacts first for this account then select.
+                                        </p>
+                                    )}
                                     {errors.account_contact_id && <span className="text-red-500 text-sm">{errors.account_contact_id}</span>}
                                 </div>
 

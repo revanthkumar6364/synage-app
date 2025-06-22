@@ -89,7 +89,7 @@ class QuotationController extends Controller
             'max_quantity' => 'required|string|max:100',
             'description' => 'required|string',
             'category' => 'required|string|in:unilumin,absen,radiant_synage,custom',
-            'estimate_date' => 'required|date|after_or_equal:today',
+            'estimate_date' => 'required|date',
             'billing_address' => 'required|string',
             'billing_location' => 'required|string|max:100',
             'billing_city' => 'required|string|max:100',
@@ -108,11 +108,8 @@ class QuotationController extends Controller
         try {
             DB::beginTransaction();
 
-            // Generate quotation number if not provided
-            if (empty($validated['quotation_number'])) {
-                $quotation = new Quotation();
-                $validated['quotation_number'] = $quotation->generateQuotationNumber();
-            }
+            $quotation = new Quotation();
+            $validated['reference'] = $quotation->generateReferenceNumber();
             $validated['status'] = 'draft';
             $validated['created_by'] = $request->user()->id;
             $validated['updated_by'] = $request->user()->id;
@@ -158,7 +155,7 @@ class QuotationController extends Controller
 
             DB::commit();
 
-            return redirect()->route('quotations.edit', $quotation)
+            return redirect()->route('quotations.files', $quotation)
                 ->with('success', 'Quotation created successfully. Now add products.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -196,6 +193,7 @@ class QuotationController extends Controller
     public function update(Request $request, Quotation $quotation)
     {
         $validated = $request->validate([
+            'reference' => 'required|string|unique:quotations,reference,' . $quotation->id,
             'title' => 'required|string|max:255',
             'account_id' => 'required|exists:accounts,id',
             'account_contact_id' => 'nullable|exists:account_contacts,id',
