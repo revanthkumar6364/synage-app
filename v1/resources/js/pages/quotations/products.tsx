@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { Product, type BreadcrumbItem } from '@/types';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { toast, Toaster } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -53,6 +53,7 @@ interface Props {
 }
 
 export default function QuotationProducts({ quotation, products }: Props) {
+    const { auth } = usePage<{ auth: any }>().props;
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -125,16 +126,23 @@ export default function QuotationProducts({ quotation, products }: Props) {
 
         if (field === 'proposed_unit_price') {
             if (product) {
+                const numericValue = typeof value === 'string' ? parseFloat(value) : value;
                 const minPrice = product.min_price || 0;
                 const maxPrice = product.max_price || Infinity;
-                const numericValue = typeof value === 'string' ? parseFloat(value) : value;
 
                 // Remove any previous error
                 delete newProducts[index].priceError;
 
-                // Check price limits and set error if outside range
-                if (numericValue < minPrice || (maxPrice !== Infinity && numericValue > maxPrice)) {
-                    newProducts[index].priceError = `Price must be between ₹${minPrice} and ₹${maxPrice}`;
+                // For managers, show suggested range but don't enforce validation
+                if (auth.user.role === 'manager') {
+                    if (numericValue < minPrice || (maxPrice !== Infinity && numericValue > maxPrice)) {
+                        newProducts[index].priceError = `Suggested range: ₹${minPrice} - ₹${maxPrice} (You can set any price as manager)`;
+                    }
+                } else {
+                    // For other users, enforce validation
+                    if (numericValue < minPrice || (maxPrice !== Infinity && numericValue > maxPrice)) {
+                        newProducts[index].priceError = `Price must be between ₹${minPrice} and ₹${maxPrice}`;
+                    }
                 }
 
                 finalValue = numericValue;
@@ -165,21 +173,23 @@ export default function QuotationProducts({ quotation, products }: Props) {
             return;
         }
 
-        // Check for any price errors before submitting
-        const hasErrors = selectedProducts.some(product => {
-            const productDetails = products.find(p => p.id === product.id);
-            if (productDetails) {
-                const minPrice = productDetails.min_price || 0;
-                const maxPrice = productDetails.max_price || Infinity;
-                const proposedPrice = parseFloat(product.proposed_unit_price.toString());
-                return proposedPrice < minPrice || (maxPrice !== Infinity && proposedPrice > maxPrice);
-            }
-            return false;
-        });
+        // Check for any price errors before submitting (only for non-manager users)
+        if (auth.user.role !== 'manager') {
+            const hasErrors = selectedProducts.some(product => {
+                const productDetails = products.find(p => p.id === product.id);
+                if (productDetails) {
+                    const minPrice = productDetails.min_price || 0;
+                    const maxPrice = productDetails.max_price || Infinity;
+                    const proposedPrice = parseFloat(product.proposed_unit_price.toString());
+                    return proposedPrice < minPrice || (maxPrice !== Infinity && proposedPrice > maxPrice);
+                }
+                return false;
+            });
 
-        if (hasErrors) {
-            toast.error("Please fix the price errors before submitting");
-            return;
+            if (hasErrors) {
+                toast.error("Please fix the price errors before submitting");
+                return;
+            }
         }
 
         form.post(route('quotations.update.products', quotation.id), {
@@ -270,6 +280,15 @@ export default function QuotationProducts({ quotation, products }: Props) {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
+                            {auth.user.role === 'manager' && (
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                    <div className="flex items-center">
+                                        <div className="text-blue-800 text-sm">
+                                            <strong>Manager Note:</strong> You can set any price for products. The system will show suggested price ranges (₹min - ₹max) when you enter prices outside the normal range, but you are not restricted by these limits.
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -310,18 +329,18 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     />
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="space-y-1">
-                                                        <Input
-                                                            type="number"
-                                                            step="0.01"
-                                                            className={`w-28 ${product.priceError ? 'border-red-500' : ''}`}
-                                                            value={product.proposed_unit_price}
-                                                            onChange={(e) => handleProductChange(index, 'proposed_unit_price', e.target.value)}
-                                                        />
-                                                        {product.priceError && (
-                                                            <div className="text-xs text-red-500">{product.priceError}</div>
-                                                        )}
-                                                    </div>
+                                                    <Input
+                                                        type="number"
+                                                        step="0.01"
+                                                        className={`w-28 ${product.priceError ? 'border-red-500' : ''}`}
+                                                        value={product.proposed_unit_price}
+                                                        onChange={(e) => handleProductChange(index, 'proposed_unit_price', e.target.value)}
+                                                    />
+                                                    {product.priceError && (
+                                                        <div className="mt-1 w-48 text-xs text-red-500">
+                                                            {product.priceError}
+                                                        </div>
+                                                    )}
                                                 </TableCell>
                                                 <TableCell>
                                                     <Input
