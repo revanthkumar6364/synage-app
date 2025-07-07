@@ -68,8 +68,9 @@ class QuotationController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'reference' => 'required|string|unique:quotations',
+        // Base validation rules
+        $validationRules = [
+            'reference' => 'nullable|string|unique:quotations', // Made nullable, will auto-generate if not provided
             'quotation_number' => 'nullable|string|unique:quotations',
             'title' => 'required|string|max:255',
             'account_id' => 'required|exists:accounts,id',
@@ -77,24 +78,6 @@ class QuotationController extends Controller
             'sales_user_id' => auth()->user()->role === 'sales' ? 'nullable' : 'required|exists:users,id',
             'product_type' => 'required|in:indoor,outdoor,standard_led',
             'selected_product_id' => 'required|exists:products,id',
-            'available_size_width' => 'required|string|max:100',
-            'available_size_height' => 'required|string|max:100',
-            'available_size_unit' => 'required|in:mm,ft',
-            'proposed_size_width' => 'required|string|max:100',
-            'proposed_size_height' => 'required|string|max:100',
-            'proposed_size_unit' => 'required|in:mm,ft',
-            'available_size_width_mm' => 'required|string|max:100',
-            'available_size_height_mm' => 'required|string|max:100',
-            'available_size_width_ft' => 'required|string|max:100',
-            'available_size_height_ft' => 'required|string|max:100',
-            'available_size_sqft' => 'required|string|max:100',
-            'proposed_size_width_mm' => 'required|string|max:100',
-            'proposed_size_height_mm' => 'required|string|max:100',
-            'proposed_size_width_ft' => 'required|string|max:100',
-            'proposed_size_height_ft' => 'required|string|max:100',
-            'proposed_size_sqft' => 'required|string|max:100',
-            'quantity' => 'required|string|max:100',
-            'max_quantity' => 'required|string|max:100',
             'description' => 'required|string',
             'category' => 'required|string|in:unilumin,absen,radiant_synage,custom',
             'estimate_date' => 'required|date',
@@ -112,7 +95,56 @@ class QuotationController extends Controller
             'client_scope' => 'nullable|string',
             'facade_type' => 'required|string|in:facade,cashback,standalone,uni_pole,custom',
             'facade_notes' => 'nullable|string',
-        ]);
+            'show_hsn_code' => 'boolean',
+        ];
+
+        // Add size-related validation rules based on product_type
+        if ($request->product_type !== 'standard_led') {
+            $validationRules = array_merge($validationRules, [
+                'available_size_width' => 'required|string|max:100',
+                'available_size_height' => 'required|string|max:100',
+                'available_size_unit' => 'required|in:mm,ft',
+                'proposed_size_width' => 'required|string|max:100',
+                'proposed_size_height' => 'required|string|max:100',
+                'proposed_size_unit' => 'required|in:mm,ft',
+                'available_size_width_mm' => 'required|string|max:100',
+                'available_size_height_mm' => 'required|string|max:100',
+                'available_size_width_ft' => 'required|string|max:100',
+                'available_size_height_ft' => 'required|string|max:100',
+                'available_size_sqft' => 'required|string|max:100',
+                'proposed_size_width_mm' => 'required|string|max:100',
+                'proposed_size_height_mm' => 'required|string|max:100',
+                'proposed_size_width_ft' => 'required|string|max:100',
+                'proposed_size_height_ft' => 'required|string|max:100',
+                'proposed_size_sqft' => 'required|string|max:100',
+                'quantity' => 'required|string|max:100',
+                'max_quantity' => 'required|string|max:100',
+            ]);
+        } else {
+            // For standard_led, make size fields nullable
+            $validationRules = array_merge($validationRules, [
+                'available_size_width' => 'nullable|string|max:100',
+                'available_size_height' => 'nullable|string|max:100',
+                'available_size_unit' => 'nullable|in:mm,ft',
+                'proposed_size_width' => 'nullable|string|max:100',
+                'proposed_size_height' => 'nullable|string|max:100',
+                'proposed_size_unit' => 'nullable|in:mm,ft',
+                'available_size_width_mm' => 'nullable|string|max:100',
+                'available_size_height_mm' => 'nullable|string|max:100',
+                'available_size_width_ft' => 'nullable|string|max:100',
+                'available_size_height_ft' => 'nullable|string|max:100',
+                'available_size_sqft' => 'nullable|string|max:100',
+                'proposed_size_width_mm' => 'nullable|string|max:100',
+                'proposed_size_height_mm' => 'nullable|string|max:100',
+                'proposed_size_width_ft' => 'nullable|string|max:100',
+                'proposed_size_height_ft' => 'nullable|string|max:100',
+                'proposed_size_sqft' => 'nullable|string|max:100',
+                'quantity' => 'nullable|string|max:100',
+                'max_quantity' => 'nullable|string|max:100',
+            ]);
+        }
+
+        $validated = $request->validate($validationRules);
 
         try {
             DB::beginTransaction();
@@ -131,6 +163,15 @@ class QuotationController extends Controller
             $validated['delivery_terms'] = config('all.terms_and_conditions.delivery_terms');
             $validated['payment_terms'] = config('all.terms_and_conditions.payment_terms');
             $validated['electrical_terms'] = config('all.terms_and_conditions.electrical_terms');
+
+            // Auto-generate reference if not provided
+            if (empty($validated['reference'])) {
+                // Create a temporary quotation instance to generate reference
+                $tempQuotation = new Quotation();
+                $tempQuotation->account_id = $validated['account_id'];
+                $validated['reference'] = $tempQuotation->generateReferenceNumber();
+            }
+
             $quotation = Quotation::create($validated);
 
             // Handle file uploads if any
@@ -205,31 +246,14 @@ class QuotationController extends Controller
 
     public function update(Request $request, Quotation $quotation)
     {
-        $validated = $request->validate([
+        // Base validation rules
+        $validationRules = [
             'reference' => 'required|string|unique:quotations,reference,' . $quotation->id,
             'title' => 'required|string|max:255',
             'account_id' => 'required|exists:accounts,id',
             'account_contact_id' => 'nullable|exists:account_contacts,id',
             'product_type' => 'required|in:indoor,outdoor,standard_led',
             'selected_product_id' => 'required|exists:products,id',
-            'available_size_width' => 'required|string|max:100',
-            'available_size_height' => 'required|string|max:100',
-            'available_size_unit' => 'required|in:mm,ft',
-            'proposed_size_width' => 'required|string|max:100',
-            'proposed_size_height' => 'required|string|max:100',
-            'proposed_size_unit' => 'required|in:mm,ft',
-            'available_size_width_mm' => 'required|string|max:100',
-            'available_size_height_mm' => 'required|string|max:100',
-            'available_size_width_ft' => 'required|string|max:100',
-            'available_size_height_ft' => 'required|string|max:100',
-            'available_size_sqft' => 'required|string|max:100',
-            'proposed_size_width_mm' => 'required|string|max:100',
-            'proposed_size_height_mm' => 'required|string|max:100',
-            'proposed_size_width_ft' => 'required|string|max:100',
-            'proposed_size_height_ft' => 'required|string|max:100',
-            'proposed_size_sqft' => 'required|string|max:100',
-            'quantity' => 'required|string|max:100',
-            'max_quantity' => 'required|string|max:100',
             'description' => 'required|string',
             'category' => 'required|string|in:unilumin,absen,radiant_synage,custom',
             'estimate_date' => 'required|date',
@@ -244,7 +268,56 @@ class QuotationController extends Controller
             'same_as_billing' => 'boolean',
             'facade_type' => 'required|string|in:facade,cashback,standalone,uni_pole,custom',
             'facade_notes' => 'nullable|string',
-        ]);
+            'show_hsn_code' => 'boolean',
+        ];
+
+        // Add size-related validation rules based on product_type
+        if ($request->product_type !== 'standard_led') {
+            $validationRules = array_merge($validationRules, [
+                'available_size_width' => 'required|string|max:100',
+                'available_size_height' => 'required|string|max:100',
+                'available_size_unit' => 'required|in:mm,ft',
+                'proposed_size_width' => 'required|string|max:100',
+                'proposed_size_height' => 'required|string|max:100',
+                'proposed_size_unit' => 'required|in:mm,ft',
+                'available_size_width_mm' => 'required|string|max:100',
+                'available_size_height_mm' => 'required|string|max:100',
+                'available_size_width_ft' => 'required|string|max:100',
+                'available_size_height_ft' => 'required|string|max:100',
+                'available_size_sqft' => 'required|string|max:100',
+                'proposed_size_width_mm' => 'required|string|max:100',
+                'proposed_size_height_mm' => 'required|string|max:100',
+                'proposed_size_width_ft' => 'required|string|max:100',
+                'proposed_size_height_ft' => 'required|string|max:100',
+                'proposed_size_sqft' => 'required|string|max:100',
+                'quantity' => 'required|string|max:100',
+                'max_quantity' => 'required|string|max:100',
+            ]);
+        } else {
+            // For standard_led, make size fields nullable
+            $validationRules = array_merge($validationRules, [
+                'available_size_width' => 'nullable|string|max:100',
+                'available_size_height' => 'nullable|string|max:100',
+                'available_size_unit' => 'nullable|in:mm,ft',
+                'proposed_size_width' => 'nullable|string|max:100',
+                'proposed_size_height' => 'nullable|string|max:100',
+                'proposed_size_unit' => 'nullable|in:mm,ft',
+                'available_size_width_mm' => 'nullable|string|max:100',
+                'available_size_height_mm' => 'nullable|string|max:100',
+                'available_size_width_ft' => 'nullable|string|max:100',
+                'available_size_height_ft' => 'nullable|string|max:100',
+                'available_size_sqft' => 'nullable|string|max:100',
+                'proposed_size_width_mm' => 'nullable|string|max:100',
+                'proposed_size_height_mm' => 'nullable|string|max:100',
+                'proposed_size_width_ft' => 'nullable|string|max:100',
+                'proposed_size_height_ft' => 'nullable|string|max:100',
+                'proposed_size_sqft' => 'nullable|string|max:100',
+                'quantity' => 'nullable|string|max:100',
+                'max_quantity' => 'nullable|string|max:100',
+            ]);
+        }
+
+        $validated = $request->validate($validationRules);
 
         $validated['updated_by'] = $request->user()->id;
         $validated['last_action'] = 'updated';

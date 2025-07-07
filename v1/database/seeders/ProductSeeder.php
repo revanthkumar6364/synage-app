@@ -122,28 +122,28 @@ class ProductSeeder extends Seeder
             $data['unit']            = 'INR';
             $data['description']     = $data['name'] . ' – high-quality ' . strtolower($data['type']);
 
-            // parse size ⇒ h_mm & w_mm (mm or inch)
-            $data['h_mm'] = null;
+            // parse size ⇒ w_mm & h_mm (mm or inch)
             $data['w_mm'] = null;
+            $data['h_mm'] = null;
             $data['size_inch'] = null;
             if ($data['product_type'] === 'tv_screens' || $data['product_type'] === 'kiosk') {
-                // For TV screens and kiosks, only set size_inch, leave h_mm and w_mm null
+                // For TV screens and kiosks, only set size_inch, leave w_mm and h_mm null
                 if (preg_match('/([\d\.]+)\s*Inch/i', $data['size'], $i)) {
                     $data['size_inch'] = (float)$i[1];
                 }
             } else {
                 if (preg_match('/([\d\.]+)\s*mm\s*X\s*([\d\.]+)\s*mm/i', $data['size'], $m)) {
-                    $data['h_mm'] = (float)$m[1];
-                    $data['w_mm'] = (float)$m[2];
+                    $data['w_mm'] = (float)$m[1];
+                    $data['h_mm'] = (float)$m[2];
                 } elseif (preg_match('/([\d\.]+)\s*Inch\s*X\s*([\d\.]+)\s*Inch/i', $data['size'], $i)) {
                     // e.g. 43 Inch X 24 Inch
-                    $data['h_mm'] = round((float)$i[1] * 25.4, 2);
-                    $data['w_mm'] = round((float)$i[2] * 25.4, 2);
-                    $data['size_inch'] = (float)$i[1]; // store only the number
+                    $data['w_mm'] = round((float)$i[1] * 25.4, 2);
+                    $data['h_mm'] = round((float)$i[2] * 25.4, 2);
+                    $data['size_inch'] = (float)$i[1];
                 } elseif (preg_match('/([\d\.]+)\s*Inch/i', $data['size'], $i)) {
-                    $data['h_mm'] = round((float)$i[1] * 25.4, 2);
-                    $data['w_mm'] = null;
-                    $data['size_inch'] = (float)$i[1]; // store only the number
+                    $data['w_mm'] = round((float)$i[1] * 25.4, 2);
+                    $data['h_mm'] = null;
+                    $data['size_inch'] = (float)$i[1];
                 }
             }
 

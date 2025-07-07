@@ -41,9 +41,9 @@ class Product extends Model
         'max_price' => 'decimal:2',
         'price_per_sqft' => 'decimal:2',
         'gst_percentage' => 'decimal:2',
-        'h_mm' => 'integer',
-        'w_mm' => 'integer',
-        'upto_pix' => 'integer'
+        'h_mm' => 'decimal:2',
+        'w_mm' => 'decimal:2',
+        'upto_pix' => 'decimal:2'
     ];
 
     protected $appends = ['price_range', 'can', 'unit_size'];
@@ -53,10 +53,7 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function images(): HasMany
-    {
-        return $this->hasMany(ProductImage::class);
-    }
+
 
     // Helper method to generate SKU
     public static function generateSKU(): string

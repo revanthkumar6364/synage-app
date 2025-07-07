@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type Product } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeftIcon } from 'lucide-react';
 import { type FC } from 'react';
@@ -22,37 +22,19 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface ShowProps {
-    product: {
-        id: number;
-        category_id: number;
-        name: string;
-        sku: string;
-        description: string;
-        price: number;
-        min_price: number | null;
-        max_price: number | null;
-        price_per_sqft: number | null;
-        brand: string;
-        type: string | null;
-        gst_percentage: number | null;
-        hsn_code: string | null;
-        status: 'active' | 'inactive';
-        category?: {
-            name: string;
-        };
-        can: {
-            update: boolean;
-            delete: boolean;
-        };
-    };
+    product: Product;
 }
 
 const Show: FC<ShowProps> = ({ product }) => {
-    const formatPrice = (price: number | null): string => {
+    const formatPrice = (price: number | null | undefined): string => {
         if (!price) return 'N/A';
-        // Convert price to number to ensure toFixed works
         const numPrice = typeof price === 'string' ? parseFloat(price) : price;
         return `₹${numPrice.toFixed(2)}`;
+    };
+
+    const formatProductType = (type: string | undefined): string => {
+        if (!type) return 'N/A';
+        return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
     };
 
     return (
@@ -79,20 +61,25 @@ const Show: FC<ShowProps> = ({ product }) => {
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Basic Information */}
                             <div>
-                                <h3 className="font-semibold">Basic Information</h3>
-                                <div className="mt-2 space-y-2">
+                                <h3 className="font-semibold text-lg mb-3">Basic Information</h3>
+                                <div className="space-y-3">
                                     <div>
                                         <span className="text-sm text-gray-500">Name:</span>
-                                        <p>{product.name}</p>
+                                        <p className="font-medium">{product.name}</p>
                                     </div>
                                     <div>
                                         <span className="text-sm text-gray-500">SKU:</span>
-                                        <p>{product.sku}</p>
+                                        <p>{product.sku || 'N/A'}</p>
                                     </div>
                                     <div>
                                         <span className="text-sm text-gray-500">Category:</span>
                                         <p>{product.category?.name || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm text-gray-500">Product Type:</span>
+                                        <p>{formatProductType(product.product_type)}</p>
                                     </div>
                                     <div>
                                         <span className="text-sm text-gray-500">Status:</span>
@@ -107,12 +94,13 @@ const Show: FC<ShowProps> = ({ product }) => {
                                 </div>
                             </div>
 
+                            {/* Pricing Information */}
                             <div>
-                                <h3 className="font-semibold">Pricing</h3>
-                                <div className="mt-2 space-y-2">
+                                <h3 className="font-semibold text-lg mb-3">Pricing</h3>
+                                <div className="space-y-3">
                                     <div>
                                         <span className="text-sm text-gray-500">Base Price:</span>
-                                        <p>{formatPrice(product.price)}</p>
+                                        <p className="font-medium">{formatPrice(product.price)}</p>
                                     </div>
                                     {(product.min_price || product.max_price) && (
                                         <div>
@@ -126,12 +114,17 @@ const Show: FC<ShowProps> = ({ product }) => {
                                             <p>{formatPrice(product.price_per_sqft)}</p>
                                         </div>
                                     )}
+                                    <div>
+                                        <span className="text-sm text-gray-500">Unit:</span>
+                                        <p>{product.unit || 'N/A'}</p>
+                                    </div>
                                 </div>
                             </div>
 
+                            {/* Product Details */}
                             <div>
-                                <h3 className="font-semibold">Additional Details</h3>
-                                <div className="mt-2 space-y-2">
+                                <h3 className="font-semibold text-lg mb-3">Product Details</h3>
+                                <div className="space-y-3">
                                     <div>
                                         <span className="text-sm text-gray-500">Brand:</span>
                                         <p>{product.brand || 'N/A'}</p>
@@ -151,12 +144,69 @@ const Show: FC<ShowProps> = ({ product }) => {
                                 </div>
                             </div>
 
-                            {product.description && (
+                            {/* Dimensions */}
+                            <div>
+                                <h3 className="font-semibold text-lg mb-3">Dimensions</h3>
+                                <div className="space-y-3">
+                                    <div>
+                                        <span className="text-sm text-gray-500">Size:</span>
+                                        <p>{product.size || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm text-gray-500">Size (Inches):</span>
+                                        <p>{product.size_inch || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm text-gray-500">Height (mm):</span>
+                                        <p>{product.h_mm || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm text-gray-500">Width (mm):</span>
+                                        <p>{product.w_mm || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm text-gray-500">Up to Pixels:</span>
+                                        <p>{product.upto_pix || 'N/A'}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Unit Size (Calculated) */}
+                            {product.unit_size && (
                                 <div className="md:col-span-2">
-                                    <h3 className="font-semibold">Description</h3>
-                                    <p className="mt-2 whitespace-pre-wrap">{product.description}</p>
+                                    <h3 className="font-semibold text-lg mb-3">Unit Size</h3>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div>
+                                            <span className="text-sm text-gray-500">Width (mm):</span>
+                                            <p>{product.unit_size.width_mm}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-sm text-gray-500">Height (mm):</span>
+                                            <p>{product.unit_size.height_mm}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-sm text-gray-500">Width (ft):</span>
+                                            <p>{product.unit_size.width_ft}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-sm text-gray-500">Height (ft):</span>
+                                            <p>{product.unit_size.height_ft}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
+
+                            {/* Description */}
+                            {product.description && (
+                                <div className="md:col-span-2">
+                                    <h3 className="font-semibold text-lg mb-3">Description</h3>
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <p className="whitespace-pre-wrap">{product.description}</p>
+                                    </div>
+                                </div>
+                            )}
+
+
                         </div>
                     </CardContent>
                 </Card>

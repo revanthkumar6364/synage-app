@@ -17,10 +17,17 @@ class CategoryResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'slug' => $this->slug,
             'description' => $this->description,
             'status' => $this->status,
             'parent_id' => $this->parent_id,
             'parent' => $this->parent,
+            'sort_order' => $this->sort_order,
+            'full_path' => $this->full_path,
+            'has_children' => $this->hasChildren(),
+            'has_parent' => $this->hasParent(),
+            'children_count' => $this->children()->count(),
+            'products_count' => $this->products()->count(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'can' => [

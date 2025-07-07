@@ -28,19 +28,36 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface EditProps {
     product: {
         id: number;
-        category_id: number;
-        name: string;
-        sku: string;
-        description: string;
-        price: number;
-        min_price: number | null;
-        max_price: number | null;
-        price_per_sqft: number | null;
-        brand: string;
-        type: string | null;
-        gst_percentage: number | null;
-        hsn_code: string | null;
-        status: 'active' | 'inactive';
+        category_id?: number;
+        product_type?: string;
+        name?: string;
+        sku?: string;
+        description?: string;
+        size?: string;
+        h_mm?: number;
+        w_mm?: number;
+        size_inch?: string;
+        upto_pix?: number;
+        price?: number;
+        unit?: string;
+        price_per_sqft?: number;
+        brand?: string;
+        type?: string;
+        gst_percentage?: number;
+        hsn_code?: string;
+        min_price?: number;
+        max_price?: number;
+        status?: 'active' | 'inactive';
+        category?: {
+            id: number;
+            name: string;
+            slug?: string;
+        };
+        can?: {
+            update: boolean;
+            delete: boolean;
+            view: boolean;
+        };
     };
     categories: Array<{
         id: number;
@@ -49,20 +66,29 @@ interface EditProps {
 }
 
 const Edit: FC<EditProps> = ({ product, categories }) => {
+
+
     const { data, setData, put, processing, errors } = useForm({
-        category_id: product.category_id.toString(),
-        name: product.name,
-        sku: product.sku,
-        description: product.description,
-        price: product.price.toString(),
-        min_price: product.min_price?.toString() || '',
-        max_price: product.max_price?.toString() || '',
+        category_id: product.category_id?.toString() || '',
+        product_type: product.product_type || '',
+        name: product.name || '',
+        sku: product.sku || '',
+        description: product.description || '',
+        size: product.size || '',
+        h_mm: product.h_mm?.toString() || '',
+        w_mm: product.w_mm?.toString() || '',
+        size_inch: product.size_inch || '',
+        upto_pix: product.upto_pix?.toString() || '',
+        price: product.price?.toString() || '',
+        unit: product.unit || '',
         price_per_sqft: product.price_per_sqft?.toString() || '',
-        brand: product.brand,
+        brand: product.brand || '',
         type: product.type || '',
         gst_percentage: product.gst_percentage?.toString() || '',
         hsn_code: product.hsn_code || '',
-        status: product.status,
+        min_price: product.min_price?.toString() || '',
+        max_price: product.max_price?.toString() || '',
+        status: product.status || 'active',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -109,6 +135,26 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 </div>
 
                                 <div className="space-y-2">
+                                    <Label htmlFor="product_type">Product Type</Label>
+                                    <Select
+                                        value={data.product_type}
+                                        onValueChange={(value) => setData('product_type', value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select product type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="indoor_led">Indoor LED</SelectItem>
+                                            <SelectItem value="outdoor_led">Outdoor LED</SelectItem>
+                                            <SelectItem value="kiosk">Kiosk</SelectItem>
+                                            <SelectItem value="controllers">Controllers</SelectItem>
+                                            <SelectItem value="tv_screens">TV Screens</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.product_type && <p className="text-sm text-red-500">{errors.product_type}</p>}
+                                </div>
+
+                                <div className="space-y-2">
                                     <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>
                                     <Input
                                         id="name"
@@ -135,6 +181,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     <Input
                                         id="price"
                                         type="number"
+                                        step="0.01"
                                         value={data.price}
                                         onChange={(e) => setData('price', e.target.value)}
                                         placeholder="Enter price"
@@ -143,10 +190,22 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 </div>
 
                                 <div className="space-y-2">
+                                    <Label htmlFor="unit">Unit</Label>
+                                    <Input
+                                        id="unit"
+                                        value={data.unit}
+                                        onChange={(e) => setData('unit', e.target.value)}
+                                        placeholder="Enter unit (e.g., piece, sqft)"
+                                    />
+                                    {errors.unit && <p className="text-sm text-red-500">{errors.unit}</p>}
+                                </div>
+
+                                <div className="space-y-2">
                                     <Label htmlFor="min_price">Min Price</Label>
                                     <Input
                                         id="min_price"
                                         type="number"
+                                        step="0.01"
                                         value={data.min_price}
                                         onChange={(e) => setData('min_price', e.target.value)}
                                         placeholder="Enter min price"
@@ -159,6 +218,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     <Input
                                         id="max_price"
                                         type="number"
+                                        step="0.01"
                                         value={data.max_price}
                                         onChange={(e) => setData('max_price', e.target.value)}
                                         placeholder="Enter max price"
@@ -171,6 +231,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     <Input
                                         id="price_per_sqft"
                                         type="number"
+                                        step="0.01"
                                         value={data.price_per_sqft}
                                         onChange={(e) => setData('price_per_sqft', e.target.value)}
                                         placeholder="Enter price per square foot"
@@ -205,6 +266,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     <Input
                                         id="gst_percentage"
                                         type="number"
+                                        step="0.01"
                                         value={data.gst_percentage}
                                         onChange={(e) => setData('gst_percentage', e.target.value)}
                                         placeholder="Enter GST percentage"
@@ -241,6 +303,73 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 </div>
                             </div>
 
+                            {/* Dimensions Section */}
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-semibold">Dimensions</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="size">Size</Label>
+                                        <Input
+                                            id="size"
+                                            value={data.size}
+                                            onChange={(e) => setData('size', e.target.value)}
+                                            placeholder="Enter size (e.g., 320x160)"
+                                        />
+                                        {errors.size && <p className="text-sm text-red-500">{errors.size}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="size_inch">Size (Inches)</Label>
+                                        <Input
+                                            id="size_inch"
+                                            value={data.size_inch}
+                                            onChange={(e) => setData('size_inch', e.target.value)}
+                                            placeholder="Enter size in inches"
+                                        />
+                                        {errors.size_inch && <p className="text-sm text-red-500">{errors.size_inch}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="h_mm">Height (mm)</Label>
+                                        <Input
+                                            id="h_mm"
+                                            type="number"
+                                            step="0.01"
+                                            value={data.h_mm}
+                                            onChange={(e) => setData('h_mm', e.target.value)}
+                                            placeholder="Enter height in mm"
+                                        />
+                                        {errors.h_mm && <p className="text-sm text-red-500">{errors.h_mm}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="w_mm">Width (mm)</Label>
+                                        <Input
+                                            id="w_mm"
+                                            type="number"
+                                            step="0.01"
+                                            value={data.w_mm}
+                                            onChange={(e) => setData('w_mm', e.target.value)}
+                                            placeholder="Enter width in mm"
+                                        />
+                                        {errors.w_mm && <p className="text-sm text-red-500">{errors.w_mm}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="upto_pix">Up to Pixels</Label>
+                                        <Input
+                                            id="upto_pix"
+                                            type="number"
+                                            step="0.01"
+                                            value={data.upto_pix}
+                                            onChange={(e) => setData('upto_pix', e.target.value)}
+                                            placeholder="Enter up to pixels"
+                                        />
+                                        {errors.upto_pix && <p className="text-sm text-red-500">{errors.upto_pix}</p>}
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
                                 <Label htmlFor="description">Description</Label>
                                 <Textarea
@@ -248,6 +377,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     value={data.description || ''}
                                     onChange={(e) => setData('description', e.target.value)}
                                     placeholder="Enter product description"
+                                    rows={4}
                                 />
                                 {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
                             </div>

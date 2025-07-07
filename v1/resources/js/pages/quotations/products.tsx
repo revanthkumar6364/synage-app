@@ -9,7 +9,7 @@ import { Product, type BreadcrumbItem } from '@/types';
 import { Head, useForm, router, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { toast, Toaster } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input as SearchInput } from "@/components/ui/input";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -246,6 +246,9 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                 <DialogContent className="sm:max-w-[425px]">
                                     <DialogHeader>
                                         <DialogTitle>Add Product</DialogTitle>
+                                        <DialogDescription>
+                                            Search and select products to add to this quotation. Click on a product to add it to the list.
+                                        </DialogDescription>
                                     </DialogHeader>
                                     <div className="grid gap-4 py-4">
                                         <SearchInput

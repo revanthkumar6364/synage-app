@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type Product } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PlusIcon } from 'lucide-react';
 import { type FC } from 'react';
@@ -19,28 +19,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface Product {
-    id: number;
-    name: string;
-    sku: string;
-    price: number | string;
-    min_price: number | null;
-    max_price: number | null;
-    unit: string;
-    brand: string;
-    type: string | null;
-    gst_percentage: number | null;
-    status: string;
-    category: {
-        name: string;
-    };
-    can: {
-        view: boolean;
-        update: boolean;
-        delete: boolean;
-    };
-}
-
 interface IndexProps {
     products: {
         data: Product[];
@@ -51,10 +29,16 @@ interface IndexProps {
 
 const Index: FC<IndexProps> = ({ products }) => {
     const { auth } = usePage<{ auth: any }>().props;
+
     const formatPrice = (price: number | string | null | undefined): string => {
         if (!price) return 'N/A';
         const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
         return `₹${numericPrice.toFixed(2)}`;
+    };
+
+    const formatProductType = (type: string | undefined): string => {
+        if (!type) return '-';
+        return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
     };
 
     const handlePageChange = (page: number) => {
@@ -85,10 +69,10 @@ const Index: FC<IndexProps> = ({ products }) => {
                                     <TableHead>Name</TableHead>
                                     <TableHead>SKU</TableHead>
                                     <TableHead>Category</TableHead>
-                                    <TableHead>Price</TableHead>
-                                    <TableHead>Brand</TableHead>
                                     <TableHead>Type</TableHead>
-                                    <TableHead>GST %</TableHead>
+                                    <TableHead>Price</TableHead>
+                                    <TableHead>Unit</TableHead>
+                                    <TableHead>Brand</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
@@ -96,17 +80,17 @@ const Index: FC<IndexProps> = ({ products }) => {
                             <TableBody>
                                 {products.data.map((product) => (
                                     <TableRow key={product.id}>
-                                        <TableCell>{product.name}</TableCell>
-                                        <TableCell>{product.sku}</TableCell>
-                                        <TableCell>{product.category.name}</TableCell>
+                                        <TableCell className="font-medium">{product.name}</TableCell>
+                                        <TableCell>{product.sku || '-'}</TableCell>
+                                        <TableCell>{product.category?.name || '-'}</TableCell>
+                                        <TableCell>{formatProductType(product.product_type)}</TableCell>
                                         <TableCell>
                                             {product.min_price && product.max_price
                                                 ? `${formatPrice(product.min_price)} - ${formatPrice(product.max_price)}`
                                                 : formatPrice(product.price)}
                                         </TableCell>
-                                        <TableCell>{product.brand}</TableCell>
-                                        <TableCell>{product.type || '-'}</TableCell>
-                                        <TableCell>{product.gst_percentage ? `${product.gst_percentage}%` : '-'}</TableCell>
+                                        <TableCell>{product.unit || '-'}</TableCell>
+                                        <TableCell>{product.brand || '-'}</TableCell>
                                         <TableCell>
                                             <span
                                                 className={`rounded-full px-2 py-1 text-xs ${
@@ -119,20 +103,22 @@ const Index: FC<IndexProps> = ({ products }) => {
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {product.can.view && (
-                                            <Link href={route('products.show', product.id)}>
-                                                <Button variant="outline" size="sm">
-                                                    View
-                                                    </Button>
-                                                </Link>
-                                            )}
-                                            {product.can.update && (
-                                                <Link href={route('products.edit', product.id)}>
-                                                    <Button variant="outline" size="sm">
-                                                        Edit
-                                                    </Button>
-                                                </Link>
-                                            )}
+                                            <div className="flex justify-end gap-2">
+                                                {product.can.view && (
+                                                    <Link href={route('products.show', product.id)}>
+                                                        <Button variant="outline" size="sm">
+                                                            View
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                                {product.can.update && (
+                                                    <Link href={route('products.edit', product.id)}>
+                                                        <Button variant="outline" size="sm">
+                                                            Edit
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}

@@ -33,7 +33,6 @@ interface Props {
 }
 
 interface FormData {
-    reference: string;
     quotation_number: string;
     title: string;
     account_id: string;
@@ -71,6 +70,7 @@ interface FormData {
     shipping_city: string;
     shipping_zip_code: string;
     same_as_billing: boolean;
+    show_hsn_code: boolean;
     status: 'draft';
     facade_type?: string;
     facade_notes?: string;
@@ -87,7 +87,6 @@ const CATEGORIES = {
 export default function Create({ accounts = [], salesUsers = [], facadeTypes = {}, productsByType }: Props) {
     const { auth } = usePage<{ auth: any }>().props;
     const { data, setData, post, processing, errors } = useForm<Record<string, any>>({
-        reference: generateReference(),
         quotation_number: "",
         title: "",
         account_id: "",
@@ -125,6 +124,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
         shipping_city: "",
         shipping_zip_code: "",
         same_as_billing: false,
+        show_hsn_code: false,
         status: 'draft',
         facade_type: undefined,
         facade_notes: undefined,
@@ -244,16 +244,10 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
         setData('account_id', val);
         setData('account_contact_id', '');
 
-        // Generate suggested reference number and populate billing address based on selected account
+        // Populate billing address based on selected account
         if (val) {
             const selectedAccount = accounts.find(acc => acc.id.toString() === val);
             if (selectedAccount) {
-                // Generate suggested reference number
-                const clientName = selectedAccount.business_name.substring(0, 4).toUpperCase();
-                const today = new Date().toISOString().split('T')[0];
-                const suggestedReference = `RSPL/${clientName}/MUM - ${today}/001`;
-                setData('reference', suggestedReference);
-
                 // Populate billing address
                 setData('billing_address', selectedAccount.billing_address || '');
                 setData('billing_location', selectedAccount.billing_location || '');
@@ -305,10 +299,6 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="mb-6">
-                            <p className="text-sm text-gray-500">Reference ID: {data.reference} (Auto-generate last 3 digits after submission)</p>
-                        </div>
-
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -453,126 +443,131 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                 </div>
                             )}
 
-                            <div>
-                                <Label>Size available at location <span className="text-red-500">*</span></Label>
-                                <div className="grid grid-cols-3 gap-2">
+                            {/* Size fields - only show for indoor and outdoor LED */}
+                            {data.product_type !== 'standard_led' && (
+                                <>
                                     <div>
-                                        <Label>Width</Label>
-                                        <Input
-                                            value={data.available_size_width}
-                                            onChange={(e) => setData('available_size_width', e.target.value)}
-                                            required
-                                        />
+                                        <Label>Size available at location <span className="text-red-500">*</span></Label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <Label>Width</Label>
+                                                <Input
+                                                    value={data.available_size_width}
+                                                    onChange={(e) => setData('available_size_width', e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>Height</Label>
+                                                <Input
+                                                    value={data.available_size_height}
+                                                    onChange={(e) => setData('available_size_height', e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>Unit</Label>
+                                                <Select value={data.available_size_unit} onValueChange={(val) => setData('available_size_unit', val)}>
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="mm">mm</SelectItem>
+                                                        <SelectItem value="ft">ft</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                        <div className="mt-2 text-sm text-gray-500">
+                                            {parseFloat(data.available_size_width_ft) || 0} ft x {parseFloat(data.available_size_height_ft) || 0} ft
+                                            ({parseFloat(data.available_size_sqft) || 0} sq.ft)
+                                            {data.available_size_unit === 'ft' && (
+                                                <>
+                                                    <br />
+                                                    <span className="text-xs text-gray-400">
+                                                        ({parseFloat(data.available_size_width_mm) || 0} mm × {parseFloat(data.available_size_height_mm) || 0} mm)
+                                                    </span>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
+
                                     <div>
-                                        <Label>Height</Label>
-                                        <Input
-                                            value={data.available_size_height}
-                                            onChange={(e) => setData('available_size_height', e.target.value)}
-                                            required
-                                        />
+                                        <Label>Suggested Size (Auto-calculated)</Label>
+                                        <p className="mt-2 text-sm text-gray-500">
+                                            Unit size: {getSelectedProduct()?.unit_size?.width_mm || 320}mm x {getSelectedProduct()?.unit_size?.height_mm || 160}mm
+                                            {data.max_quantity && (
+                                                <> | Total quantity: {data.max_quantity} units</>
+                                            )}
+                                        </p>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <Label>Width</Label>
+                                                <Input
+                                                    value={data.proposed_size_width}
+                                                    readOnly
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>Height</Label>
+                                                <Input
+                                                    value={data.proposed_size_height}
+                                                    readOnly
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>Unit</Label>
+                                                <Input
+                                                    value={data.proposed_size_unit}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="mt-2 text-sm text-gray-500">
+                                            {parseFloat(data.proposed_size_width_ft) || 0} ft x {parseFloat(data.proposed_size_height_ft) || 0} ft
+                                            ({parseFloat(data.proposed_size_sqft) || 0} sq.ft)
+                                        </div>
                                     </div>
-                                    <div>
-                                        <Label>Unit</Label>
-                                        <Select value={data.available_size_unit} onValueChange={(val) => setData('available_size_unit', val)}>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="mm">mm</SelectItem>
-                                                <SelectItem value="ft">ft</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                                <div className="mt-2 text-sm text-gray-500">
-                                    {data.available_size_width_ft} ft x {data.available_size_height_ft} ft
-                                    ({data.available_size_sqft} sq.ft)
-                                    {data.available_size_unit === 'ft' && (
-                                        <>
-                                            <br />
-                                            <span className="text-xs text-gray-400">
-                                                ({data.available_size_width_mm} mm × {data.available_size_height_mm} mm)
+
+                                    {/* Visual Size Comparison */}
+                                    <div className="flex flex-col md:flex-row gap-8 items-center justify-center mt-6">
+                                        <div className="flex flex-col items-center">
+                                            <span className="mb-2 text-sm font-semibold">Size available at location</span>
+                                            <svg width={160} height={160} style={{ border: '1px solid #ccc', background: '#f9f9f9' }}>
+                                                <rect
+                                                    x={10}
+                                                    y={10}
+                                                    width={Math.max(40, Math.min(140, (parseFloat(data.available_size_width_mm) || 0) / 10))}
+                                                    height={Math.max(40, Math.min(140, (parseFloat(data.available_size_height_mm) || 0) / 10))}
+                                                    fill="#b3e5fc"
+                                                    stroke="#0288d1"
+                                                    strokeWidth={2}
+                                                />
+                                            </svg>
+                                            <span className="mt-1 text-xs text-gray-500">
+                                                {parseFloat(data.available_size_width_mm) || 0}mm × {parseFloat(data.available_size_height_mm) || 0}mm
                                             </span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div>
-                                <Label>Suggested Size (Auto-calculated)</Label>
-                                <p className="mt-2 text-sm text-gray-500">
-                                    Unit size: {getSelectedProduct()?.unit_size?.width_mm || 320}mm x {getSelectedProduct()?.unit_size?.height_mm || 160}mm
-                                    {data.max_quantity && (
-                                        <> | Total quantity: {data.max_quantity} units</>
-                                    )}
-                                </p>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div>
-                                        <Label>Width</Label>
-                                        <Input
-                                            value={data.proposed_size_width}
-                                            readOnly
-                                        />
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <span className="mb-2 text-sm font-semibold">Proposed Size</span>
+                                            <svg width={160} height={160} style={{ border: '1px solid #ccc', background: '#f9f9f9' }}>
+                                                <rect
+                                                    x={10}
+                                                    y={10}
+                                                    width={Math.max(40, Math.min(140, (parseFloat(data.proposed_size_width) || 0) / 10))}
+                                                    height={Math.max(40, Math.min(140, (parseFloat(data.proposed_size_height) || 0) / 10))}
+                                                    fill="#c8e6c9"
+                                                    stroke="#388e3c"
+                                                    strokeWidth={2}
+                                                />
+                                            </svg>
+                                            <span className="mt-1 text-xs text-gray-500">
+                                                {parseFloat(data.proposed_size_width) || 0}mm × {parseFloat(data.proposed_size_height) || 0}mm
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <Label>Height</Label>
-                                        <Input
-                                            value={data.proposed_size_height}
-                                            readOnly
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Unit</Label>
-                                        <Input
-                                            value={data.proposed_size_unit}
-                                            readOnly
-                                        />
-                                    </div>
-                                </div>
-                                <div className="mt-2 text-sm text-gray-500">
-                                    {data.proposed_size_width_ft} ft x {data.proposed_size_height_ft} ft
-                                    ({data.proposed_size_sqft} sq.ft)
-                                </div>
-                            </div>
-
-                            {/* Visual Size Comparison */}
-                            <div className="flex flex-col md:flex-row gap-8 items-center justify-center mt-6">
-                                <div className="flex flex-col items-center">
-                                    <span className="mb-2 text-sm font-semibold">Size available at location</span>
-                                    <svg width={160} height={160} style={{ border: '1px solid #ccc', background: '#f9f9f9' }}>
-                                        <rect
-                                            x={10}
-                                            y={10}
-                                            width={Math.max(40, Math.min(140, (parseFloat(data.available_size_width_mm) / 10)))}
-                                            height={Math.max(40, Math.min(140, (parseFloat(data.available_size_height_mm) / 10)))}
-                                            fill="#b3e5fc"
-                                            stroke="#0288d1"
-                                            strokeWidth={2}
-                                        />
-                                    </svg>
-                                    <span className="mt-1 text-xs text-gray-500">
-                                        {data.available_size_width_mm}mm × {data.available_size_height_mm}mm
-                                    </span>
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    <span className="mb-2 text-sm font-semibold">Proposed Size</span>
-                                    <svg width={160} height={160} style={{ border: '1px solid #ccc', background: '#f9f9f9' }}>
-                                        <rect
-                                            x={10}
-                                            y={10}
-                                            width={Math.max(40, Math.min(140, (parseFloat(data.proposed_size_width) / 10)))}
-                                            height={Math.max(40, Math.min(140, (parseFloat(data.proposed_size_height) / 10)))}
-                                            fill="#c8e6c9"
-                                            stroke="#388e3c"
-                                            strokeWidth={2}
-                                        />
-                                    </svg>
-                                    <span className="mt-1 text-xs text-gray-500">
-                                        {data.proposed_size_width}mm × {data.proposed_size_height}mm
-                                    </span>
-                                </div>
-                            </div>
+                                </>
+                            )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -656,6 +651,15 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                     onCheckedChange={handleSameAsBillingChange}
                                 />
                                 <Label htmlFor="same_as_billing">Same as Billing Address</Label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="show_hsn_code"
+                                    checked={data.show_hsn_code}
+                                    onCheckedChange={(checked) => setData('show_hsn_code', checked as boolean)}
+                                />
+                                <Label htmlFor="show_hsn_code">Show HSN Code in Printout</Label>
                             </div>
 
                             <div className="space-y-4">
@@ -761,9 +765,4 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
     );
 }
 
-function generateReference() {
-    const date = new Date();
-    const month = date.toLocaleString('default', { month: 'short' }).toUpperCase();
-    const year = date.getFullYear();
-    return `RSPL/${month}/${year}-XXX`;
-}
+

@@ -35,11 +35,13 @@ const CreateCategory: FC<CreateCategoryProps> = ({ statuses, categories }) => {
         description: string;
         status: string;
         parent_id: string | null;
+        sort_order: number;
     }>({
         name: '',
         description: '',
         status: 'active',
         parent_id: null,
+        sort_order: 0,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -96,7 +98,7 @@ const CreateCategory: FC<CreateCategoryProps> = ({ statuses, categories }) => {
                                 {errors.parent_id && <p className="text-sm text-red-500">{errors.parent_id}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="description">Description <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="description">Description</Label>
                                 <Textarea
                                     id="description"
                                     value={data.description || ''}
@@ -104,6 +106,19 @@ const CreateCategory: FC<CreateCategoryProps> = ({ statuses, categories }) => {
                                     placeholder="Enter category description"
                                 />
                                 {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="sort_order">Sort Order</Label>
+                                <Input
+                                    id="sort_order"
+                                    type="number"
+                                    min="0"
+                                    value={data.sort_order}
+                                    onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
+                                    placeholder="Enter sort order"
+                                />
+                                {errors.sort_order && <p className="text-sm text-red-500">{errors.sort_order}</p>}
                             </div>
 
                             <div className="space-y-2">

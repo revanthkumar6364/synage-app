@@ -33,31 +33,67 @@ export interface AccountContact {
     updated_at: string;
 }
 
+export interface Category {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    parent_id?: number;
+    parent?: Category;
+    sort_order: number;
+    status: 'active' | 'inactive';
+    full_path: string;
+    has_children: boolean;
+    has_parent: boolean;
+    children_count: number;
+    products_count: number;
+    created_at: string;
+    updated_at: string;
+    can: {
+        edit: boolean;
+        delete: boolean;
+    };
+}
+
 export interface Product {
     id: number;
     category_id: number;
     product_type?: 'indoor_led' | 'outdoor_led' | 'kiosk' | 'controllers' | 'tv_screens';
     name: string;
     sku?: string;
-    hsn_code?: string;
-    brand?: string;
-    type?: string;
-    gst_percentage: number;
-    price: number;
-    price_per_sqft?: number;
-    min_price?: number;
-    max_price?: number;
     description?: string;
-    status?: string;
+    size?: string;
     h_mm?: number;
     w_mm?: number;
     size_inch?: string;
     upto_pix?: number;
+    price: number;
+    unit?: string;
+    price_per_sqft?: number;
+    brand?: string;
+    hsn_code?: string;
+    type?: string;
+    gst_percentage?: number;
+    min_price?: number;
+    max_price?: number;
+    status: 'active' | 'inactive';
+    price_range?: string;
     unit_size?: {
         width_mm: number;
         height_mm: number;
         width_ft: number;
         height_ft: number;
+    };
+    category?: {
+        id: number;
+        name: string;
+        slug: string;
+    };
+
+    can: {
+        view: boolean;
+        update: boolean;
+        delete: boolean;
     };
     created_at: string;
     updated_at: string;
@@ -125,6 +161,7 @@ export interface Quotation {
     delivery_terms?: string;
     payment_terms?: string;
     electrical_terms?: string;
+    show_hsn_code?: boolean;
     subtotal: number;
     tax_rate: number;
     tax_amount: number;

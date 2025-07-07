@@ -77,6 +77,7 @@ interface FormData extends Record<string, any> {
     shipping_city: string;
     shipping_zip_code: string;
     same_as_billing: boolean;
+    show_hsn_code: boolean;
     facade_type: string;
     facade_notes: string;
     product_type: string;
@@ -122,6 +123,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
         shipping_zip_code: quotation.shipping_zip_code || '',
         category: quotation.category || 'custom',
         same_as_billing: false,
+        show_hsn_code: quotation.show_hsn_code || false,
         facade_type: quotation.facade_type || '',
         facade_notes: quotation.facade_notes || '',
         product_type: quotation.product_type || '',
@@ -479,6 +481,14 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                             />
                                             <Label htmlFor="same_as_billing" className="text-sm">Same as billing</Label>
                                         </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id="show_hsn_code"
+                                                checked={data.show_hsn_code}
+                                                onCheckedChange={(checked) => setData('show_hsn_code', checked as boolean)}
+                                            />
+                                            <Label htmlFor="show_hsn_code" className="text-sm">Show HSN Code in Printout</Label>
+                                        </div>
                                     </div>
 
                                     <div>
@@ -627,120 +637,125 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
 
 
                             <div className="space-y-6">
-                                <div>
-                                    <Label>Size available at location</Label>
-                                    <div className="grid grid-cols-3 gap-2">
+                                {/* Size fields - only show for indoor and outdoor LED */}
+                                {data.product_type !== 'standard_led' && (
+                                    <>
                                         <div>
-                                            <Label>Width</Label>
-                                            <Input
-                                                value={data.available_size_width}
-                                                onChange={(e) => setData('available_size_width', e.target.value)}
-                                                required
-                                            />
+                                            <Label>Size available at location</Label>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div>
+                                                    <Label>Width</Label>
+                                                    <Input
+                                                        value={data.available_size_width}
+                                                        onChange={(e) => setData('available_size_width', e.target.value)}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>Height</Label>
+                                                    <Input
+                                                        value={data.available_size_height}
+                                                        onChange={(e) => setData('available_size_height', e.target.value)}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>Unit</Label>
+                                                    <Select value={data.available_size_unit} onValueChange={(val) => setData('available_size_unit', val)}>
+                                                        <SelectTrigger>
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="mm">mm</SelectItem>
+                                                            <SelectItem value="ft">ft</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+                                            <div className="mt-2 text-sm text-gray-500">
+                                                {parseFloat(data.available_size_width_ft) || 0} ft x {parseFloat(data.available_size_height_ft) || 0} ft
+                                                ({parseFloat(data.available_size_sqft) || 0} sq.ft)
+                                                {data.available_size_unit === 'ft' && (
+                                                    <>
+                                                        <br />
+                                                        <span className="text-xs text-gray-400">
+                                                            ({parseFloat(data.available_size_width_mm) || 0} mm × {parseFloat(data.available_size_height_mm) || 0} mm)
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
+
                                         <div>
-                                            <Label>Height</Label>
-                                            <Input
-                                                value={data.available_size_height}
-                                                onChange={(e) => setData('available_size_height', e.target.value)}
-                                                required
-                                            />
+                                            <Label>Suggested Size (Auto-calculated)</Label>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div>
+                                                    <Label>Width</Label>
+                                                    <Input
+                                                        value={data.proposed_size_width}
+                                                        readOnly
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>Height</Label>
+                                                    <Input
+                                                        value={data.proposed_size_height}
+                                                        readOnly
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>Unit</Label>
+                                                    <Input
+                                                        value={data.proposed_size_unit}
+                                                        readOnly
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="mt-2 text-sm text-gray-500">
+                                                Calculated: {parseFloat(data.proposed_size_width_mm) || 0}mm x {parseFloat(data.proposed_size_height_mm) || 0}mm ({parseFloat(data.proposed_size_width_ft) || 0}ft x {parseFloat(data.proposed_size_height_ft) || 0}ft) |
+                                                Area: {parseFloat(data.proposed_size_sqft) || 0} sq.ft
+                                            </div>
                                         </div>
-                                        <div>
-                                            <Label>Unit</Label>
-                                            <Select value={data.available_size_unit} onValueChange={(val) => setData('available_size_unit', val)}>
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="mm">mm</SelectItem>
-                                                    <SelectItem value="ft">ft</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                    <div className="mt-2 text-sm text-gray-500">
-                                        {data.available_size_width_ft} ft x {data.available_size_height_ft} ft
-                                        ({data.available_size_sqft} sq.ft)
-                                        {data.available_size_unit === 'ft' && (
-                                            <>
-                                                <br />
-                                                <span className="text-xs text-gray-400">
-                                                    ({data.available_size_width_mm} mm × {data.available_size_height_mm} mm)
+
+                                        {/* Visual Size Comparison */}
+                                        <div className="flex flex-col md:flex-row gap-8 items-center justify-center mt-6">
+                                            <div className="flex flex-col items-center">
+                                                <span className="mb-2 text-sm font-semibold">Size available at location</span>
+                                                <svg width={160} height={160} style={{ border: '1px solid #ccc', background: '#f9f9f9' }}>
+                                                    <rect
+                                                        x={10}
+                                                        y={10}
+                                                        width={Math.max(40, Math.min(140, (parseFloat(data.available_size_width_mm) || 0) / 10))}
+                                                        height={Math.max(40, Math.min(140, (parseFloat(data.available_size_height_mm) || 0) / 10))}
+                                                        fill="#b3e5fc"
+                                                        stroke="#0288d1"
+                                                        strokeWidth={2}
+                                                    />
+                                                </svg>
+                                                <span className="mt-1 text-xs text-gray-500">
+                                                    {parseFloat(data.available_size_width_mm) || 0}mm × {parseFloat(data.available_size_height_mm) || 0}mm
                                                 </span>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <Label>Suggested Size (Auto-calculated)</Label>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                            <Label>Width</Label>
-                                            <Input
-                                                value={data.proposed_size_width}
-                                                readOnly
-                                            />
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <span className="mb-2 text-sm font-semibold">Proposed Size</span>
+                                                <svg width={160} height={160} style={{ border: '1px solid #ccc', background: '#f9f9f9' }}>
+                                                    <rect
+                                                        x={10}
+                                                        y={10}
+                                                        width={Math.max(40, Math.min(140, (parseFloat(data.proposed_size_width) || 0) / 10))}
+                                                        height={Math.max(40, Math.min(140, (parseFloat(data.proposed_size_height) || 0) / 10))}
+                                                        fill="#c8e6c9"
+                                                        stroke="#388e3c"
+                                                        strokeWidth={2}
+                                                    />
+                                                </svg>
+                                                <span className="mt-1 text-xs text-gray-500">
+                                                    {parseFloat(data.proposed_size_width) || 0}mm × {parseFloat(data.proposed_size_height) || 0}mm
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <Label>Height</Label>
-                                            <Input
-                                                value={data.proposed_size_height}
-                                                readOnly
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Unit</Label>
-                                            <Input
-                                                value={data.proposed_size_unit}
-                                                readOnly
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="mt-2 text-sm text-gray-500">
-                                        Calculated: {data.proposed_size_width_mm}mm x {data.proposed_size_height_mm}mm ({data.proposed_size_width_ft}ft x {data.proposed_size_height_ft}ft) |
-                                        Area: {data.proposed_size_sqft} sq.ft
-                                    </div>
-                                </div>
-
-                                {/* Visual Size Comparison */}
-                                <div className="flex flex-col md:flex-row gap-8 items-center justify-center mt-6">
-                                    <div className="flex flex-col items-center">
-                                        <span className="mb-2 text-sm font-semibold">Size available at location</span>
-                                        <svg width={160} height={160} style={{ border: '1px solid #ccc', background: '#f9f9f9' }}>
-                                            <rect
-                                                x={10}
-                                                y={10}
-                                                width={Math.max(40, Math.min(140, (parseFloat(data.available_size_width_mm) / 10)))}
-                                                height={Math.max(40, Math.min(140, (parseFloat(data.available_size_height_mm) / 10)))}
-                                                fill="#b3e5fc"
-                                                stroke="#0288d1"
-                                                strokeWidth={2}
-                                            />
-                                        </svg>
-                                        <span className="mt-1 text-xs text-gray-500">
-                                            {data.available_size_width_mm}mm × {data.available_size_height_mm}mm
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-col items-center">
-                                        <span className="mb-2 text-sm font-semibold">Proposed Size</span>
-                                        <svg width={160} height={160} style={{ border: '1px solid #ccc', background: '#f9f9f9' }}>
-                                            <rect
-                                                x={10}
-                                                y={10}
-                                                width={Math.max(40, Math.min(140, (parseFloat(data.proposed_size_width) / 10)))}
-                                                height={Math.max(40, Math.min(140, (parseFloat(data.proposed_size_height) / 10)))}
-                                                fill="#c8e6c9"
-                                                stroke="#388e3c"
-                                                strokeWidth={2}
-                                            />
-                                        </svg>
-                                        <span className="mt-1 text-xs text-gray-500">
-                                            {data.proposed_size_width}mm × {data.proposed_size_height}mm
-                                        </span>
-                                    </div>
-                                </div>
+                                    </>
+                                )}
 
                                 {/* Facade Type Dropdown and Facade Notes */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

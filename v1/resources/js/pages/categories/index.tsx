@@ -128,6 +128,8 @@ export default function CategoriesIndex({ categories, filters, statuses }: {
                                     <TableHead>Name</TableHead>
                                     <TableHead>Description</TableHead>
                                     <TableHead>Parent</TableHead>
+                                    <TableHead>Sort Order</TableHead>
+                                    <TableHead>Products</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Created At</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
@@ -136,9 +138,20 @@ export default function CategoriesIndex({ categories, filters, statuses }: {
                             <TableBody>
                                 {categories.data.map((category: any) => (
                                     <TableRow key={category.id}>
-                                        <TableCell>{category.name}</TableCell>
+                                        <TableCell>
+                                            <div>
+                                                <div className="font-medium">{category.name}</div>
+                                                {category.has_children && (
+                                                    <div className="text-xs text-gray-500">
+                                                        {category.children_count} subcategories
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </TableCell>
                                         <TableCell>{category.description}</TableCell>
                                         <TableCell>{category.parent?.name || '-'}</TableCell>
+                                        <TableCell>{category.sort_order}</TableCell>
+                                        <TableCell>{category.products_count}</TableCell>
                                         <TableCell>
                                             <span
                                                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${

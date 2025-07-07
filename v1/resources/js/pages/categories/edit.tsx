@@ -37,6 +37,7 @@ const EditCategory: FC<EditCategoryProps> = ({ category, statuses, categories })
         description: category.data.description,
         status: category.data.status,
         parent_id: category.data.parent_id || "",
+        sort_order: category.data.sort_order || 0,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -108,6 +109,19 @@ const EditCategory: FC<EditCategoryProps> = ({ category, statuses, categories })
                                     placeholder="Enter category description"
                                 />
                                 {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="sort_order">Sort Order</Label>
+                                <Input
+                                    id="sort_order"
+                                    type="number"
+                                    min="0"
+                                    value={data.sort_order}
+                                    onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
+                                    placeholder="Enter sort order"
+                                />
+                                {errors.sort_order && <p className="text-sm text-red-500">{errors.sort_order}</p>}
                             </div>
 
                             <div className="space-y-2">

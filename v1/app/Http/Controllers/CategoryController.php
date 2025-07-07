@@ -56,6 +56,7 @@ class CategoryController extends Controller
             'name' => ['required', 'string', 'max:255', 'unique:categories'],
             'description' => ['nullable', 'string'],
             'status' => ['required', 'string', 'in:' . implode(',', array_keys(config('all.statuses')))],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
         // Check if the parent category is not a subcategory
@@ -66,7 +67,25 @@ class CategoryController extends Controller
             }
         }
 
-        Category::create($request->only(['parent_id', 'name', 'description', 'status']));
+        // Generate slug from name
+        $slug = \Illuminate\Support\Str::slug($request->name);
+
+        // Ensure slug uniqueness
+        $originalSlug = $slug;
+        $counter = 1;
+        while (Category::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+
+        Category::create([
+            'parent_id' => $request->parent_id,
+            'name' => $request->name,
+            'slug' => $slug,
+            'description' => $request->description,
+            'status' => $request->status,
+            'sort_order' => $request->sort_order ?? 0,
+        ]);
 
         return redirect()->route('categories.index')
             ->with('success', 'Category created successfully.');
@@ -101,6 +120,7 @@ class CategoryController extends Controller
             'name' => ['required', 'string', 'max:255', 'unique:categories,name,' . $category->id],
             'description' => ['nullable', 'string'],
             'status' => ['required', 'string', 'in:' . implode(',', array_keys(config('all.statuses')))],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
         // Check if the parent category is not a subcategory
@@ -119,7 +139,28 @@ class CategoryController extends Controller
             }
         }
 
-        $category->update($request->only(['parent_id', 'name', 'description', 'status']));
+        // Generate new slug if name has changed
+        $slug = $category->slug;
+        if ($request->name !== $category->name) {
+            $slug = \Illuminate\Support\Str::slug($request->name);
+
+            // Ensure slug uniqueness
+            $originalSlug = $slug;
+            $counter = 1;
+            while (Category::where('slug', $slug)->where('id', '!=', $category->id)->exists()) {
+                $slug = $originalSlug . '-' . $counter;
+                $counter++;
+            }
+        }
+
+        $category->update([
+            'parent_id' => $request->parent_id,
+            'name' => $request->name,
+            'slug' => $slug,
+            'description' => $request->description,
+            'status' => $request->status,
+            'sort_order' => $request->sort_order ?? $category->sort_order,
+        ]);
 
         return redirect()->route('categories.index')
             ->with('success', 'Category updated successfully.');

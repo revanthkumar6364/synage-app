@@ -26,11 +26,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('accounts', AccountController::class);
     Route::resource('accounts.contacts', AccountContactController::class);
     Route::resource('products', ProductController::class);
-    // Additional routes for image management
-    Route::post('products/{product}/images', [ProductController::class, 'addImages'])
-        ->name('products.images.store');
-    Route::delete('products/{product}/images/{image}', [ProductController::class, 'removeImage'])
-        ->name('products.images.destroy');
     Route::resource('quotations', QuotationController::class);
     Route::get('quotations/{quotation}/edit', [QuotationController::class, 'edit'])->name('quotations.edit');
     Route::get('quotations/{quotation}/products', [QuotationController::class, 'products'])->name('quotations.products');

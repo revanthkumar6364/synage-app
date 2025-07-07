@@ -4,20 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 
 class ProductController extends Controller
 {
-    private ImageManager $imageManager;
-
-    public function __construct()
-    {
-        $this->imageManager = new ImageManager(new Driver());
-    }
 
     public function index()
     {
@@ -42,17 +33,24 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'product_type' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'sku' => 'required|string|unique:products,sku',
             'description' => 'nullable|string',
+            'size' => 'nullable|string|max:255',
+            'h_mm' => 'nullable|numeric|min:0',
+            'w_mm' => 'nullable|numeric|min:0',
+            'size_inch' => 'nullable|string|max:255',
+            'upto_pix' => 'nullable|numeric|min:0',
             'price' => 'required|numeric|min:0',
-            'min_price' => 'nullable|numeric|min:0',
-            'max_price' => 'nullable|numeric|min:0|gte:min_price',
+            'unit' => 'nullable|string|max:255',
             'price_per_sqft' => 'nullable|numeric|min:0',
             'brand' => 'nullable|string|max:255',
             'type' => 'nullable|string|max:255',
             'gst_percentage' => 'nullable|numeric|min:0|max:100',
             'hsn_code' => 'nullable|string|max:50',
+            'min_price' => 'nullable|numeric|min:0',
+            'max_price' => 'nullable|numeric|min:0|gte:min_price',
             'status' => 'required|in:active,inactive'
         ]);
 
@@ -65,15 +63,15 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         return Inertia::render('products/show', [
-            'product' => $product
+            'product' => $product->load('category')
         ]);
     }
 
-    public function edit(Product $product)
+        public function edit(Product $product)
     {
         $categories = Category::all();
         return Inertia::render('products/edit', [
-            'product' => $product,
+            'product' => $product->load('category'),
             'categories' => $categories
         ]);
     }
@@ -82,17 +80,24 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
+            'product_type' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'sku' => 'required|string|unique:products,sku,' . $product->id,
             'description' => 'nullable|string',
+            'size' => 'nullable|string|max:255',
+            'h_mm' => 'nullable|numeric|min:0',
+            'w_mm' => 'nullable|numeric|min:0',
+            'size_inch' => 'nullable|string|max:255',
+            'upto_pix' => 'nullable|numeric|min:0',
             'price' => 'required|numeric|min:0',
-            'min_price' => 'nullable|numeric|min:0',
-            'max_price' => 'nullable|numeric|min:0|gte:min_price',
+            'unit' => 'nullable|string|max:255',
             'price_per_sqft' => 'nullable|numeric|min:0',
             'brand' => 'nullable|string|max:255',
             'type' => 'nullable|string|max:255',
             'gst_percentage' => 'nullable|numeric|min:0|max:100',
             'hsn_code' => 'nullable|string|max:50',
+            'min_price' => 'nullable|numeric|min:0',
+            'max_price' => 'nullable|numeric|min:0|gte:min_price',
             'status' => 'required|in:active,inactive'
         ]);
 
@@ -110,18 +115,5 @@ class ProductController extends Controller
             ->with('success', 'Product deleted successfully.');
     }
 
-    protected function storeImage(Product $product, UploadedFile $image): void
-    {
-        $path = $image->store('products', 'public');
 
-        // Optimize image
-        $img = $this->imageManager->read(public_path('storage/' . $path));
-        $img->scale(width: 800);
-        $img->save(public_path('storage/' . $path), quality: 80);
-
-        $product->images()->create([
-            'image_path' => $path,
-            'is_primary' => $product->images()->count() === 0
-        ]);
-    }
 }

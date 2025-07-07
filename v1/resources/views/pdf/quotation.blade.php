@@ -368,21 +368,21 @@
             <tr>
                 <td>
                     <h3>Size available at location</h3>
-                    <p>{{ $quotation->available_size_width_mm }} mm W x {{ $quotation->available_size_height_mm }} mm H</p>
+                    <p>{{ $quotation->available_size_width_mm ? number_format((float)$quotation->available_size_width_mm, 2) : '0' }} mm W x {{ $quotation->available_size_height_mm ? number_format((float)$quotation->available_size_height_mm, 2) : '0' }} mm H</p>
                 </td>
                 <td>
                     <h3>Resolution</h3>
-                    <p>512 x {{ $quotation->proposed_size_width_mm }} = {{ $quotation->proposed_size_width_mm * 512 }} Pixels</p>
+                    <p>512 x {{ $quotation->proposed_size_width_mm ? number_format((float)$quotation->proposed_size_width_mm, 2) : '0' }} = {{ number_format(((float)($quotation->proposed_size_width_mm ?? 0)) * 512, 0) }} Pixels</p>
                 </td>
             </tr>
         </table>
         <div class="separator" style="margin: 15px 0;"></div>
         <h3>Proposed Size</h3>
         <p>
-            {{ $quotation->proposed_size_width_mm }} mm W x {{ $quotation->proposed_size_height_mm }} mm H |
-            {{ $quotation->proposed_size_width_ft }} ft W x {{ $quotation->proposed_size_height_ft }} ft H =
-            {{ $quotation->proposed_size_sqft }} Sq ft |
-            {{ ceil($quotation->proposed_size_height_mm/160) }} R x {{ ceil($quotation->proposed_size_width_mm/320) }} C of 320 W x 160 H mm
+            {{ $quotation->proposed_size_width_mm ? number_format((float)$quotation->proposed_size_width_mm, 2) : '0' }} mm W x {{ $quotation->proposed_size_height_mm ? number_format((float)$quotation->proposed_size_height_mm, 2) : '0' }} mm H |
+            {{ $quotation->proposed_size_width_ft ? number_format((float)$quotation->proposed_size_width_ft, 2) : '0' }} ft W x {{ $quotation->proposed_size_height_ft ? number_format((float)$quotation->proposed_size_height_ft, 2) : '0' }} ft H =
+            {{ $quotation->proposed_size_sqft ? number_format((float)$quotation->proposed_size_sqft, 2) : '0' }} Sq ft |
+            {{ ceil(((float)($quotation->proposed_size_height_mm ?? 0))/160) }} R x {{ ceil(((float)($quotation->proposed_size_width_mm ?? 0))/320) }} C of 320 W x 160 H mm
         </p>
     </div>
 
@@ -391,7 +391,9 @@
             <tr>
                 <th style="width: 40px; text-align: center">#</th>
                 <th>Product Description</th>
-                <th>HSN</th>
+                @if($quotation->show_hsn_code)
+                    <th>HSN</th>
+                @endif
                 <th class="text-right">Qty</th>
                 <th class="text-right">Unit Price</th>
                 <th class="text-right">Tax %</th>
@@ -408,7 +410,9 @@
                             <div style="color: #666; margin-top: 4px">{{ $item->notes }}</div>
                         @endif
                     </td>
-                    <td>{{ $item->product->hsn_code }}</td>
+                    @if($quotation->show_hsn_code)
+                        <td>{{ $item->product->hsn_code }}</td>
+                    @endif
                     <td class="text-right">{{ $item->quantity }}</td>
                     <td class="text-right">₹{{ number_format($item->proposed_unit_price, 2) }}</td>
                     <td class="text-right">{{ $item->tax_percentage }}%</td>

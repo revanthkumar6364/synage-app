@@ -66,6 +66,7 @@ class Quotation extends Model
         'delivery_terms',
         'payment_terms',
         'electrical_terms',
+        'show_hsn_code',
         'subtotal',
         'tax_rate',
         'tax_amount',
@@ -89,12 +90,23 @@ class Quotation extends Model
     protected $casts = [
         'estimate_date' => 'date',
         'same_as_billing' => 'boolean',
+        'show_hsn_code' => 'boolean',
         'total_amount' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'grand_total' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'tax_rate' => 'decimal:2',
+        'available_size_width_mm' => 'decimal:2',
+        'available_size_height_mm' => 'decimal:2',
+        'available_size_width_ft' => 'decimal:2',
+        'available_size_height_ft' => 'decimal:2',
+        'available_size_sqft' => 'decimal:2',
+        'proposed_size_width_mm' => 'decimal:2',
+        'proposed_size_height_mm' => 'decimal:2',
+        'proposed_size_width_ft' => 'decimal:2',
+        'proposed_size_height_ft' => 'decimal:2',
+        'proposed_size_sqft' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -240,11 +252,26 @@ class Quotation extends Model
         // Get current date in YYYY-MM-DD format
         $date = date('Y-m-d');
 
-        // Count quotations for current date
-        $count = self::whereDate('created_at', $date)->count();
+        // Find the highest sequence number for this client and date
+        $basePattern = sprintf('%s/%s/%s - %s/', $prefix, $clientName, $region, $date);
+        $existingReferences = self::where('reference', 'like', $basePattern . '%')
+            ->pluck('reference')
+            ->toArray();
 
-        // Start from 1 (001) for the first quotation of the day
-        $sequence = $count + 1;
+        $maxSequence = 0;
+        foreach ($existingReferences as $ref) {
+            // Extract sequence number from reference (last part after /)
+            $parts = explode('/', $ref);
+            if (count($parts) >= 4) {
+                $sequencePart = end($parts);
+                if (is_numeric($sequencePart)) {
+                    $maxSequence = max($maxSequence, (int)$sequencePart);
+                }
+            }
+        }
+
+        // Next sequence number
+        $sequence = $maxSequence + 1;
 
         // Ensure the sequence is padded with leading zeros
         $paddedSequence = str_pad($sequence, 3, '0', STR_PAD_LEFT);
@@ -285,11 +312,26 @@ class Quotation extends Model
         // Get current date in YYYY-MM-DD format
         $date = date('Y-m-d');
 
-        // Count quotations for current date
-        $count = self::whereDate('created_at', $date)->count();
+        // Find the highest sequence number for this client and date
+        $basePattern = sprintf('%s/%s/%s - %s/', $prefix, $clientName, $region, $date);
+        $existingReferences = self::where('reference', 'like', $basePattern . '%')
+            ->pluck('reference')
+            ->toArray();
 
-        // Start from 1 (001) for the first quotation of the day
-        $sequence = $count + 1;
+        $maxSequence = 0;
+        foreach ($existingReferences as $ref) {
+            // Extract sequence number from reference (last part after /)
+            $parts = explode('/', $ref);
+            if (count($parts) >= 4) {
+                $sequencePart = end($parts);
+                if (is_numeric($sequencePart)) {
+                    $maxSequence = max($maxSequence, (int)$sequencePart);
+                }
+            }
+        }
+
+        // Next sequence number
+        $sequence = $maxSequence + 1;
 
         // Ensure the sequence is padded with leading zeros
         $paddedSequence = str_pad($sequence, 3, '0', STR_PAD_LEFT);
