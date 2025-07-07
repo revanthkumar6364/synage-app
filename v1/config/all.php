@@ -95,4 +95,12 @@ return [
         'payment_terms' => '100% Payment along with the order',
         'electrical_terms' => 'Installation and Commissioning to be done by our Team',
     ],
+
+    'quotation_facade_types' => [
+        'facade' => 'Facade',
+        'cashback' => 'Cashback',
+        'standalone' => 'Standalone',
+        'uni_pole' => 'Uni-pole',
+        'custom' => 'Custom',
+    ],
 ];

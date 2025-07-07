@@ -6,9 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { Account, BreadcrumbItem } from '@/types';
+import { Account, BreadcrumbItem, Product } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -22,6 +24,12 @@ interface Props {
         id: number;
         name: string;
     }[];
+    facadeTypes: Record<string, string>;
+    productsByType: {
+        indoor: Product[];
+        outdoor: Product[];
+        standard_led: Product[];
+    };
 }
 
 interface FormData {
@@ -31,6 +39,8 @@ interface FormData {
     account_id: string;
     account_contact_id: string;
     sales_user_id: string;
+    product_type: 'indoor' | 'outdoor' | 'standard_led' | '';
+    selected_product_id: string;
     available_size_width: string;
     available_size_height: string;
     available_size_unit: string;
@@ -62,6 +72,8 @@ interface FormData {
     shipping_zip_code: string;
     same_as_billing: boolean;
     status: 'draft';
+    facade_type?: string;
+    facade_notes?: string;
 }
 
 // Add categories constant
@@ -72,7 +84,7 @@ const CATEGORIES = {
     custom: 'Custom',
 } as const;
 
-export default function Create({ accounts = [], salesUsers = [] }: Props) {
+export default function Create({ accounts = [], salesUsers = [], facadeTypes = {}, productsByType }: Props) {
     const { auth } = usePage<{ auth: any }>().props;
     const { data, setData, post, processing, errors } = useForm<Record<string, any>>({
         reference: generateReference(),
@@ -81,6 +93,8 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
         account_id: "",
         account_contact_id: "",
         sales_user_id: "",
+        product_type: "",
+        selected_product_id: "",
         available_size_width: "",
         available_size_height: "",
         available_size_unit: "mm",
@@ -111,8 +125,38 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
         shipping_city: "",
         shipping_zip_code: "",
         same_as_billing: false,
-        status: 'draft'
+        status: 'draft',
+        facade_type: undefined,
+        facade_notes: undefined,
     });
+
+    // Get available products based on selected type
+    const getAvailableProducts = () => {
+        if (!data.product_type) return [];
+        return productsByType[data.product_type as keyof typeof productsByType] || [];
+    };
+
+    // Get selected product details
+    const getSelectedProduct = () => {
+        if (!data.selected_product_id) return null;
+        return getAvailableProducts().find((p: Product) => p.id.toString() === data.selected_product_id);
+    };
+
+    // Get product type display name
+    const getProductTypeDisplayName = (productType: string) => {
+        switch (productType) {
+            case 'indoor_led':
+                return 'Indoor LED';
+            case 'outdoor_led':
+                return 'Outdoor LED';
+            case 'kiosk':
+            case 'controllers':
+            case 'tv_screens':
+                return 'Standard LED';
+            default:
+                return productType;
+        }
+    };
 
     useEffect(() => {
         // Calculate derived measurements when width/height/unit changes
@@ -120,6 +164,7 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
             const width = parseFloat(data.available_size_width) || 0;
             const height = parseFloat(data.available_size_height) || 0;
             const unit = data.available_size_unit;
+            const selectedProduct = getSelectedProduct();
 
             let width_mm, height_mm, width_ft, height_ft, sqft;
 
@@ -137,9 +182,10 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
 
             sqft = width_ft * height_ft;
 
-            // Calculate maximum possible boxes based on available space
-            const boxWidth = 320; // mm
-            const boxHeight = 160; // mm
+            // Use product-specific unit size if available, otherwise fallback to default
+            const unitSize = selectedProduct?.unit_size || { width_mm: 320, height_mm: 160 };
+            const boxWidth = unitSize.width_mm;
+            const boxHeight = unitSize.height_mm;
 
             // Calculate how many boxes can fit in the width and height
             const boxesInWidth = Math.floor(width_mm / boxWidth);
@@ -150,78 +196,36 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
             const proposedWidth = boxWidth * boxesInWidth;
             const proposedHeight = boxHeight * Math.ceil(maxPossibleBoxes / boxesInWidth);
 
-            setData((prev: FormData) => {
-                // If no quantity is set yet, set it to max
-                const newQuantity = prev.quantity === "" ? maxPossibleBoxes.toString() :
-                    (parseInt(prev.quantity) > maxPossibleBoxes ? maxPossibleBoxes.toString() : prev.quantity);
-
-                return {
-                    ...prev,
-                    available_size_width_mm: width_mm.toFixed(2),
-                    available_size_height_mm: height_mm.toFixed(2),
-                    available_size_width_ft: width_ft.toFixed(2),
-                    available_size_height_ft: height_ft.toFixed(2),
-                    available_size_sqft: sqft.toFixed(2),
-                    max_quantity: maxPossibleBoxes.toString(),
-                    quantity: newQuantity,
-                    proposed_size_width: proposedWidth.toString(),
-                    proposed_size_height: proposedHeight.toString(),
-                    proposed_size_unit: "mm"
-                };
-            });
+            setData((prev: FormData) => ({
+                ...prev,
+                available_size_width_mm: width_mm.toFixed(2),
+                available_size_height_mm: height_mm.toFixed(2),
+                available_size_width_ft: width_ft.toFixed(2),
+                available_size_height_ft: height_ft.toFixed(2),
+                available_size_sqft: sqft.toFixed(2),
+                max_quantity: maxPossibleBoxes.toString(),
+                quantity: maxPossibleBoxes.toString(),
+                proposed_size_width: proposedWidth.toString(),
+                proposed_size_height: proposedHeight.toString(),
+                proposed_size_unit: "mm",
+                proposed_size_width_mm: proposedWidth.toFixed(2),
+                proposed_size_height_mm: proposedHeight.toFixed(2),
+                proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
+                proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
+                proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2)
+            }));
         };
 
         calculateMeasurements();
-    }, [data.available_size_width, data.available_size_height, data.available_size_unit]);
+    }, [data.available_size_width, data.available_size_height, data.available_size_unit, data.selected_product_id]);
 
+    // Reset selected product when product type changes
     useEffect(() => {
-        // Calculate proposed size based on quantity
-        const calculateProposedSize = () => {
-            const quantity = parseInt(data.quantity) || 0;
-            const maxQuantity = parseInt(data.max_quantity) || 0;
-            const availableWidth = parseFloat(data.available_size_width_mm) || 0;
-
-            if (quantity <= 0 || maxQuantity <= 0 || availableWidth <= 0) {
-                return;
-            }
-
-            const boxWidth = 320; // mm
-            const boxHeight = 160; // mm
-
-            // Calculate minimum number of boxes in width and height needed
-            const boxesInWidth = Math.floor(availableWidth / boxWidth);
-            if (boxesInWidth <= 0) {
-                return;
-            }
-
-            // Calculate required rows based on quantity
-            const requiredRows = Math.ceil(quantity / boxesInWidth);
-
-            // Calculate final proposed dimensions
-            const proposedWidth = boxWidth * boxesInWidth;
-            const proposedHeight = boxHeight * requiredRows;
-
-            setData((prev: FormData) => {
-                const newData = {
-                    ...prev,
-                    proposed_size_width: proposedWidth.toString(),
-                    proposed_size_height: proposedHeight.toString(),
-                    proposed_size_unit: "mm",
-                    proposed_size_width_mm: proposedWidth.toFixed(2),
-                    proposed_size_height_mm: proposedHeight.toFixed(2),
-                    proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
-                    proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
-                    proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2),
-                    quantity: quantity.toString(),
-                    max_quantity: maxQuantity.toString()
-                };
-
-                return newData;
-            });
-        };
-
-        calculateProposedSize();
-    }, [data.quantity, data.max_quantity, data.available_size_width_mm]);
+        setData((prev: FormData) => ({
+            ...prev,
+            selected_product_id: ""
+        }));
+    }, [data.product_type]);
 
     // Update shipping address when billing address changes and same_as_billing is true
     useEffect(() => {
@@ -344,70 +348,155 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <Label>Available Size <span className="text-red-500">*</span></Label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div>
-                                            <Label>Width</Label>
-                                            <Input
-                                                value={data.available_size_width}
-                                                onChange={(e) => setData('available_size_width', e.target.value)}
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Height</Label>
-                                            <Input
-                                                value={data.available_size_height}
-                                                onChange={(e) => setData('available_size_height', e.target.value)}
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Unit</Label>
-                                            <Select value={data.available_size_unit} onValueChange={(val) => setData('available_size_unit', val)}>
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="mm">mm</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
+                            {/* Product Type Selection */}
+                            <div className="space-y-4">
+                                <Label>LED Display Type <span className="text-red-500">*</span></Label>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="radio"
+                                            id="indoor"
+                                            name="product_type"
+                                            value="indoor"
+                                            checked={data.product_type === 'indoor'}
+                                            onChange={(e) => setData('product_type', e.target.value as 'indoor')}
+                                            className="w-4 h-4 text-blue-600"
+                                        />
+                                        <Label htmlFor="indoor" className="cursor-pointer">
+                                            <div className="font-medium">Indoor LED</div>
+                                            <div className="text-sm text-gray-500">Indoor display panels</div>
+                                        </Label>
                                     </div>
-                                    <div className="mt-2 text-sm text-gray-500">
-                                        {data.available_size_width_ft} ft x {data.available_size_height_ft} ft
-                                        ({data.available_size_sqft} sq.ft)
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="radio"
+                                            id="outdoor"
+                                            name="product_type"
+                                            value="outdoor"
+                                            checked={data.product_type === 'outdoor'}
+                                            onChange={(e) => setData('product_type', e.target.value as 'outdoor')}
+                                            className="w-4 h-4 text-blue-600"
+                                        />
+                                        <Label htmlFor="outdoor" className="cursor-pointer">
+                                            <div className="font-medium">Outdoor LED</div>
+                                            <div className="text-sm text-gray-500">Outdoor display panels</div>
+                                        </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="radio"
+                                            id="standard_led"
+                                            name="product_type"
+                                            value="standard_led"
+                                            checked={data.product_type === 'standard_led'}
+                                            onChange={(e) => setData('product_type', e.target.value as 'standard_led')}
+                                            className="w-4 h-4 text-blue-600"
+                                        />
+                                        <Label htmlFor="standard_led" className="cursor-pointer">
+                                            <div className="font-medium">Standard LED</div>
+                                            <div className="text-sm text-gray-500">Kiosks, controllers, TV screens</div>
+                                        </Label>
                                     </div>
                                 </div>
+                                {errors.product_type && <p className="text-sm text-red-500">{errors.product_type}</p>}
+                            </div>
 
+                            {/* Product Selection */}
+                            {data.product_type && (
                                 <div>
-                                    <Label>Quantity <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        type="number"
-                                        min="1"
-                                        max={data.max_quantity}
-                                        placeholder="Enter quantity"
-                                        value={data.quantity}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value) || 0;
-                                            const max = parseInt(data.max_quantity) || 0;
-                                            setData('quantity', Math.min(val, max).toString());
-                                        }}
-                                        required
-                                    />
-                                    <p className="mt-2 text-sm text-gray-500">
-                                        Unit size: 320mm x 160mm
-                                        {data.max_quantity && (
-                                            <> | Maximum possible quantity: {data.max_quantity} units</>
-                                        )}
-                                    </p>
+                                    <Label>Select Product <span className="text-red-500">*</span></Label>
+                                    <Select value={data.selected_product_id} onValueChange={(val) => setData('selected_product_id', val)}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a product" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {getAvailableProducts().map(product => (
+                                                <SelectItem key={product.id} value={product.id.toString()}>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium">{product.name}</span>
+                                                        <span className="text-sm text-gray-500">
+                                                            {product.brand} • {getProductTypeDisplayName(product.product_type || '')}
+                                                            {product.unit_size && (
+                                                                <> • {product.unit_size.width_mm}×{product.unit_size.height_mm}mm</>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.selected_product_id && <p className="text-sm text-red-500">{errors.selected_product_id}</p>}
+
+                                    {/* Selected Product Info */}
+                                    {getSelectedProduct() && (
+                                        <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                                            <div className="text-sm">
+                                                <div className="font-medium">Selected Product: {getSelectedProduct()?.name}</div>
+                                                <div className="text-gray-600">
+                                                    Brand: {getSelectedProduct()?.brand} |
+                                                    Type: {getProductTypeDisplayName(getSelectedProduct()?.product_type || '')} |
+                                                    Unit Size: {getSelectedProduct()?.unit_size?.width_mm}×{getSelectedProduct()?.unit_size?.height_mm}mm
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <div>
+                                <Label>Size available at location <span className="text-red-500">*</span></Label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <Label>Width</Label>
+                                        <Input
+                                            value={data.available_size_width}
+                                            onChange={(e) => setData('available_size_width', e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label>Height</Label>
+                                        <Input
+                                            value={data.available_size_height}
+                                            onChange={(e) => setData('available_size_height', e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label>Unit</Label>
+                                        <Select value={data.available_size_unit} onValueChange={(val) => setData('available_size_unit', val)}>
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="mm">mm</SelectItem>
+                                                <SelectItem value="ft">ft</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="mt-2 text-sm text-gray-500">
+                                    {data.available_size_width_ft} ft x {data.available_size_height_ft} ft
+                                    ({data.available_size_sqft} sq.ft)
+                                    {data.available_size_unit === 'ft' && (
+                                        <>
+                                            <br />
+                                            <span className="text-xs text-gray-400">
+                                                ({data.available_size_width_mm} mm × {data.available_size_height_mm} mm)
+                                            </span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
                             <div>
-                                <Label>Proposed Size (Auto-calculated)</Label>
+                                <Label>Suggested Size (Auto-calculated)</Label>
+                                <p className="mt-2 text-sm text-gray-500">
+                                    Unit size: {getSelectedProduct()?.unit_size?.width_mm || 320}mm x {getSelectedProduct()?.unit_size?.height_mm || 160}mm
+                                    {data.max_quantity && (
+                                        <> | Total quantity: {data.max_quantity} units</>
+                                    )}
+                                </p>
                                 <div className="grid grid-cols-3 gap-2">
                                     <div>
                                         <Label>Width</Label>
@@ -437,15 +526,56 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
                                 </div>
                             </div>
 
+                            {/* Visual Size Comparison */}
+                            <div className="flex flex-col md:flex-row gap-8 items-center justify-center mt-6">
+                                <div className="flex flex-col items-center">
+                                    <span className="mb-2 text-sm font-semibold">Size available at location</span>
+                                    <svg width={160} height={160} style={{ border: '1px solid #ccc', background: '#f9f9f9' }}>
+                                        <rect
+                                            x={10}
+                                            y={10}
+                                            width={Math.max(40, Math.min(140, (parseFloat(data.available_size_width_mm) / 10)))}
+                                            height={Math.max(40, Math.min(140, (parseFloat(data.available_size_height_mm) / 10)))}
+                                            fill="#b3e5fc"
+                                            stroke="#0288d1"
+                                            strokeWidth={2}
+                                        />
+                                    </svg>
+                                    <span className="mt-1 text-xs text-gray-500">
+                                        {data.available_size_width_mm}mm × {data.available_size_height_mm}mm
+                                    </span>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <span className="mb-2 text-sm font-semibold">Proposed Size</span>
+                                    <svg width={160} height={160} style={{ border: '1px solid #ccc', background: '#f9f9f9' }}>
+                                        <rect
+                                            x={10}
+                                            y={10}
+                                            width={Math.max(40, Math.min(140, (parseFloat(data.proposed_size_width) / 10)))}
+                                            height={Math.max(40, Math.min(140, (parseFloat(data.proposed_size_height) / 10)))}
+                                            fill="#c8e6c9"
+                                            stroke="#388e3c"
+                                            strokeWidth={2}
+                                        />
+                                    </svg>
+                                    <span className="mt-1 text-xs text-gray-500">
+                                        {data.proposed_size_width}mm × {data.proposed_size_height}mm
+                                    </span>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label>Description <span className="text-red-500">*</span></Label>
-                                    <Textarea
-                                        value={data.description}
-                                        onChange={(e) => setData('description', e.target.value)}
-                                        required
+                                    <Label>Estimate Date <span className="text-red-500">*</span></Label>
+                                    <DatePicker
+                                        selected={data.estimate_date ? new Date(data.estimate_date) : null}
+                                        onChange={date => setData('estimate_date', date ? date.toISOString().split('T')[0] : '')}
+                                        dateFormat="yyyy-MM-dd"
+                                        className={`w-full border rounded px-3 py-2 ${errors.estimate_date ? 'border-red-500' : ''}`}
+                                        placeholderText="Select estimate date"
                                     />
-                                    {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
+                                    {errors.estimate_date && <p className="text-sm text-red-500">{errors.estimate_date}</p>}
+
                                 </div>
 
                                 <div>
@@ -470,14 +600,13 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
                             </div>
 
                             <div>
-                                <Label>Estimate Date <span className="text-red-500">*</span></Label>
-                                <Input
-                                    type="date"
-                                    value={data.estimate_date}
-                                    onChange={(e) => setData('estimate_date', e.target.value)}
+                                <Label>Description <span className="text-red-500">*</span></Label>
+                                <Textarea
+                                    value={data.description}
+                                    onChange={(e) => setData('description', e.target.value)}
                                     required
                                 />
-                                {errors.estimate_date && <p className="text-sm text-red-500">{errors.estimate_date}</p>}
+                                {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
                             </div>
 
                             <div className="space-y-4">
@@ -573,6 +702,38 @@ export default function Create({ accounts = [], salesUsers = [] }: Props) {
                                     )}
                                 </div>
                             )}
+
+                            {/* Facade Type Dropdown and Facade Notes */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <Label>Facade Type <span className="text-red-500">*</span></Label>
+                                    <Select
+                                        value={data.facade_type || ''}
+                                        onValueChange={val => setData('facade_type', val)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select facade type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {Object.entries(facadeTypes).map(([key, label]) => (
+                                                <SelectItem key={key} value={key}>
+                                                    {label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.facade_type && <p className="text-sm text-red-500">{errors.facade_type}</p>}
+                                </div>
+                                <div>
+                                    <Label>Facade Notes</Label>
+                                    <Input
+                                        value={data.facade_notes || ''}
+                                        onChange={e => setData('facade_notes', e.target.value)}
+                                        placeholder="Enter notes for Facade"
+                                    />
+                                    {errors.facade_notes && <p className="text-sm text-red-500">{errors.facade_notes}</p>}
+                                </div>
+                            </div>
 
                             <div className="flex justify-end gap-4">
                                 <Button type="button" variant="outline" onClick={() => window.history.back()}>

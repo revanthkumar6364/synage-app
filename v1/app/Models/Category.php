@@ -18,8 +18,10 @@ class Category extends Model
      */
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'parent_id',
+        'sort_order',
         'status',
     ];
 
@@ -33,11 +35,8 @@ class Category extends Model
         return $this->hasMany(Category::class, 'parent_id');
     }
 
-    /**
-     * Get the products for the category.
-     */
-    // public function products(): HasMany
-    // {
-    //     return $this->hasMany(Product::class);
-    // }
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
 }

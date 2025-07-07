@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
             $table->foreignId('account_contact_id')->nullable()->constrained('account_contacts')->onDelete('set null');
             $table->foreignId('sales_user_id')->constrained('users')->onDelete('restrict');
+            $table->string('product_type')->nullable();
+            $table->foreignId('selected_product_id')->nullable()->constrained('products')->onDelete('set null');
             $table->string('available_size_width');
             $table->string('available_size_height');
             $table->string('available_size_unit');
@@ -36,6 +38,8 @@ return new class extends Migration
             $table->string('proposed_size_height_ft');
             $table->string('available_size_sqft');
             $table->string('proposed_size_sqft');
+            $table->string('facade_type')->nullable();
+            $table->text('facade_notes')->nullable();
 
             $table->text('description');
             $table->date('estimate_date');

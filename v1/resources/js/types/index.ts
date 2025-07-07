@@ -28,7 +28,7 @@ export interface AccountContact {
     name: string;
     email?: string;
     phone?: string;
-    position?: string;
+    role?: string;
     created_at: string;
     updated_at: string;
 }
@@ -36,6 +36,7 @@ export interface AccountContact {
 export interface Product {
     id: number;
     category_id: number;
+    product_type?: 'indoor_led' | 'outdoor_led' | 'kiosk' | 'controllers' | 'tv_screens';
     name: string;
     sku?: string;
     hsn_code?: string;
@@ -48,6 +49,16 @@ export interface Product {
     max_price?: number;
     description?: string;
     status?: string;
+    h_mm?: number;
+    w_mm?: number;
+    size_inch?: string;
+    upto_pix?: number;
+    unit_size?: {
+        width_mm: number;
+        height_mm: number;
+        width_ft: number;
+        height_ft: number;
+    };
     created_at: string;
     updated_at: string;
 }
@@ -71,6 +82,8 @@ export interface Quotation {
     reference: string;
     quotation_number: string;
     title: string;
+    product_type?: 'indoor' | 'outdoor' | 'standard_led';
+    selected_product_id?: number;
     available_size_width?: string;
     available_size_height?: string;
     available_size_unit?: string;
@@ -89,6 +102,8 @@ export interface Quotation {
     proposed_size_sqft?: string;
     quantity?: number;
     max_quantity?: number;
+    facade_type?: string;
+    facade_notes?: string;
     description?: string;
     category?: string;
     estimate_date?: string;
@@ -131,6 +146,7 @@ export interface Quotation {
     rejection_reason?: string;
     account?: Account;
     account_contact?: AccountContact;
+    selected_product?: Product;
     items: QuotationItem[];
     can: {
         update: boolean;

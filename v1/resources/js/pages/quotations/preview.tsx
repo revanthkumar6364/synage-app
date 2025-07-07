@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useTheme } from 'next-themes';
 import { Table, TableHeader, TableBody, TableCell, TableRow, TableHead } from '@/components/ui/table';
+import { FileTextIcon, FileIcon } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -145,6 +146,15 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                     Edit Terms
                                 </Button>
                             )}
+                            {quotation.can.update && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => router.visit(route('quotations.edit', quotation.id))}
+                                    className="font-medium"
+                                >
+                                    Edit Quotation
+                                </Button>
+                            )}
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
@@ -175,14 +185,26 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                     </div>
                                 </div>
 
-                                <Separator className="my-8" />
+                                <Separator/>
 
+                                {/* Reference and Date Row */}
+                                <div className="flex items-center justify-between my-8">
+                                    <div className="text-sm font-medium text-primary">
+                                        Reference: {quotation.reference}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        Date: {quotation.estimate_date ? new Date(quotation.estimate_date).toLocaleDateString('en-IN') : ''}
+                                    </div>
+                                </div>
+                                <Separator/>
                                 {/* Title Section */}
-                                <div className="text-center space-y-3 mb-8">
+                                <div className="text-center space-y-3 my-8">
                                     <h2 className="text-2xl font-semibold text-primary tracking-tight">{quotation.title}</h2>
                                     <div className="space-y-1">
                                         <p className="text-sm font-medium text-muted-foreground">
                                             Kind Attn: {quotation.account_contact?.name}
+                                            <br/>
+                                            {quotation.account_contact?.role}
                                         </p>
                                         <p className="text-sm text-muted-foreground">{quotation.description}</p>
                                     </div>
@@ -191,7 +213,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                 <Separator className="my-8" />
 
                                 {/* Billing and Shipping */}
-                                <div className="grid grid-cols-3 gap-8">
+                                <div className="grid grid-cols-2 gap-8">
                                     <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
                                         <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Bill To</h3>
                                         <div className="text-sm space-y-2">
@@ -214,17 +236,6 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col justify-between p-5 bg-muted/30 rounded-lg border border-border/50">
-                                        <div>
-                                            <h3 className="font-semibold text-primary mb-2">Date</h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                {quotation.estimate_date ? new Date(quotation.estimate_date).toLocaleDateString('en-IN') : ''}
-                                            </p>
-                                        </div>
-                                        <div className="flex justify-end">
-                                            <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50" />
-                                        </div>
-                                    </div>
                                 </div>
 
                                 <Separator className="my-8" />
@@ -238,6 +249,8 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                                     <TableHead className="w-[40px] text-center">#</TableHead>
                                                     <TableHead>Product Description</TableHead>
                                                     <TableHead className="text-right">Qty</TableHead>
+
+
                                                     <TableHead className="text-right">Unit Price</TableHead>
                                                     <TableHead className="text-right">Tax %</TableHead>
                                                     <TableHead className="text-right">Total</TableHead>
@@ -371,11 +384,11 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                                 alt="Blue signature stamp of Radiant Synage Pvt Ltd."
                                                 className="my-2"
                                                 height="40"
-                                                width="60"
+                                                width="200"
                                                 src="/placeholder.svg?height=40&width=60"
                                             />
-                                            <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50 mt-2" />
                                             <p className="text-sm font-semibold text-primary">{auth.user.name}</p>
+                                            <p className="text-sm font-semibold text-primary">{auth.user.email}, {auth.user.mobile}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-muted-foreground">Generated on</p>
@@ -387,25 +400,8 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                 {/* Attachments */}
                                 {(commonFiles.length > 0 || quotationFiles.length > 0) && (
                                     <div className="mt-8 space-y-6">
-                                        <Separator />
+
                                         {commonFiles.length > 0 && (
-                                            <div className="space-y-4">
-                                                <div className="flex items-center justify-between">
-                                                    <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-6 object-contain opacity-30" />
-                                                </div>
-                                                <div className="grid grid-cols-3 gap-4">
-                                                    {commonFiles.map((file) => (
-                                                        <img
-                                                            key={file.id}
-                                                            src={file.full_url}
-                                                            alt={file.name}
-                                                            className="rounded-lg shadow-sm h-30 w-30 object-cover"
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                        {quotationFiles.length > 0 && (
                                             <>
                                                 <Separator />
                                                 <div className="space-y-4">
@@ -413,14 +409,65 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                                         <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-6 object-contain opacity-30" />
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-4">
-                                                        {quotationFiles.map((file) => (
+                                                        {commonFiles.map((file) => (
                                                             <img
                                                                 key={file.id}
                                                                 src={file.full_url}
                                                                 alt={file.name}
-                                                                className="rounded-lg shadow-sm h-100 w-100 object-cover"
+                                                                className="rounded-lg shadow-sm h-30 w-30 object-cover"
                                                             />
                                                         ))}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                        {quotationFiles.length > 0 && (
+                                            <>
+                                                <Separator />
+                                                <div className="space-y-4">
+                                                    <div className="grid grid-cols-3 gap-4">
+                                                        {quotationFiles.map((file) => {
+                                                            const isImage = file.category === 'image' || (file.full_url && file.full_url.match(/\.(jpg|jpeg|png|gif)$/i));
+                                                            const isPdf = file.category === 'pdf' || file.name?.toLowerCase().endsWith('.pdf');
+                                                            if (isImage) {
+                                                                return (
+                                                                    <img
+                                                                        key={file.id}
+                                                                        src={file.full_url}
+                                                                        alt={file.name}
+                                                                        className="rounded-lg shadow-sm h-100 w-100 object-cover"
+                                                                    />
+                                                                );
+                                                            } else if (isPdf) {
+                                                                return (
+                                                                    <a
+                                                                        key={file.id}
+                                                                        href={file.full_url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex flex-col items-center justify-center border rounded-lg p-4 bg-white hover:bg-gray-50 transition"
+                                                                    >
+                                                                        <FileTextIcon className="h-8 w-8 text-red-600 mb-2" />
+                                                                        <span className="text-xs text-center">{file.name}</span>
+                                                                        <span className="text-blue-600 underline mt-1">View PDF</span>
+                                                                    </a>
+                                                                );
+                                                            } else {
+                                                                return (
+                                                                    <a
+                                                                        key={file.id}
+                                                                        href={file.full_url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex flex-col items-center justify-center border rounded-lg p-4 bg-white hover:bg-gray-50 transition"
+                                                                    >
+                                                                        <FileIcon className="h-8 w-8 text-gray-400 mb-2" />
+                                                                        <span className="text-xs text-center">{file.name}</span>
+                                                                        <span className="text-blue-600 underline mt-1">Download</span>
+                                                                    </a>
+                                                                );
+                                                            }
+                                                        })}
                                                     </div>
                                                 </div>
                                             </>
@@ -432,7 +479,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                     </CardContent>
                 </Card>
 
-                <div className="flex justify-between">
+                <div className="flex justify-between p-4">
                     <Button
                         type="button"
                         variant="outline"

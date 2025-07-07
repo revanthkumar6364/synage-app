@@ -171,7 +171,7 @@ export default function AccountShow({ account }: AccountShowProps) {
                                                     <TableCell>{contact.name}</TableCell>
                                                     <TableCell>{contact.email}</TableCell>
                                                     <TableCell>{contact.contact_number}</TableCell>
-                                                    <TableCell>{contact.designation}</TableCell>
+                                                    <TableCell>{contact.role}</TableCell>
                                                 </TableRow>
                                             ))}
                                             {(!account.data.contacts || account.data.contacts.length === 0) && (

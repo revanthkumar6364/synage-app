@@ -57,6 +57,12 @@ class QuotationController extends Controller
         return Inertia::render('quotations/create', [
             'accounts' => Account::with('contacts')->get(),
             'salesUsers' => User::where('role', 'sales')->get(),
+            'facadeTypes' => config('all.quotation_facade_types'),
+            'productsByType' => [
+                'indoor' => Product::byType('indoor')->get(),
+                'outdoor' => Product::byType('outdoor')->get(),
+                'standard_led' => Product::byType('standard_led')->get(),
+            ],
         ]);
     }
 
@@ -69,6 +75,8 @@ class QuotationController extends Controller
             'account_id' => 'required|exists:accounts,id',
             'account_contact_id' => 'nullable|exists:account_contacts,id',
             'sales_user_id' => auth()->user()->role === 'sales' ? 'nullable' : 'required|exists:users,id',
+            'product_type' => 'required|in:indoor,outdoor,standard_led',
+            'selected_product_id' => 'required|exists:products,id',
             'available_size_width' => 'required|string|max:100',
             'available_size_height' => 'required|string|max:100',
             'available_size_unit' => 'required|in:mm,ft',
@@ -102,7 +110,8 @@ class QuotationController extends Controller
             'status' => 'required|in:draft,pending,approved,rejected',
             'notes' => 'nullable|string',
             'client_scope' => 'nullable|string',
-
+            'facade_type' => 'required|string|in:facade,cashback,standalone,uni_pole,custom',
+            'facade_notes' => 'nullable|string',
         ]);
 
         try {
@@ -182,11 +191,16 @@ class QuotationController extends Controller
 
     public function edit(Quotation $quotation)
     {
-        //dd($quotation);
         return Inertia::render('quotations/edit', [
             'quotation' => $quotation,
             'accounts' => Account::with('contacts')->get(),
-            'products' => Product::get(),
+            'productsByType' => [
+                'indoor' => Product::byType('indoor')->get(),
+                'outdoor' => Product::byType('outdoor')->get(),
+                'standard_led' => Product::byType('standard_led')->get(),
+            ],
+            'facadeTypes' => config('all.quotation_facade_types'),
+            'salesUsers' => User::where('role', 'sales')->get(),
         ]);
     }
 
@@ -197,6 +211,8 @@ class QuotationController extends Controller
             'title' => 'required|string|max:255',
             'account_id' => 'required|exists:accounts,id',
             'account_contact_id' => 'nullable|exists:account_contacts,id',
+            'product_type' => 'required|in:indoor,outdoor,standard_led',
+            'selected_product_id' => 'required|exists:products,id',
             'available_size_width' => 'required|string|max:100',
             'available_size_height' => 'required|string|max:100',
             'available_size_unit' => 'required|in:mm,ft',
@@ -227,6 +243,8 @@ class QuotationController extends Controller
             'shipping_city' => 'required|string|max:100',
             'shipping_zip_code' => 'required|string|max:20',
             'same_as_billing' => 'boolean',
+            'facade_type' => 'required|string|in:facade,cashback,standalone,uni_pole,custom',
+            'facade_notes' => 'nullable|string',
         ]);
 
         $validated['updated_by'] = $request->user()->id;
@@ -241,6 +259,11 @@ class QuotationController extends Controller
         return Inertia::render('quotations/products', [
             'quotation' => $quotation->load('items'),
             'products' => Product::get(),
+            'productsByType' => [
+                'indoor' => Product::byType('indoor')->get(),
+                'outdoor' => Product::byType('outdoor')->get(),
+                'standard_led' => Product::byType('standard_led')->get(),
+            ],
         ]);
     }
 
@@ -531,9 +554,9 @@ class QuotationController extends Controller
 
     public function filesStore(Request $request, Quotation $quotation)
     {
-
         $validated = $request->validate([
-            'file' => 'required|file|mimes:jpg,jpeg,png,gif,svg|max:5120'
+            'file' => 'required|file|mimes:jpg,jpeg,png,gif,svg,pdf|max:5120',
+            'category' => 'required|string|in:image,pdf,brochure,supplement',
         ]);
 
         try {
@@ -544,16 +567,14 @@ class QuotationController extends Controller
             $filePath = 'quotation-images/' . $quotation->id;
             $fullPath = "{$filePath}/{$fileName}";
 
-            // Store the main file
             if (!Storage::disk('public')->put($fullPath, file_get_contents($file->getRealPath()))) {
                 throw new \Exception('Failed to store the file');
             }
 
-            // Create media record
             QuotationMedia::create([
                 'quotation_id' => $quotation->id,
-                'category' => 'quotation',
-                'name' => $fileName,
+                'category' => $validated['category'],
+                'name' => $file->getClientOriginalName(),
                 'file_name' => $fileName,
                 'file_path' => $filePath,
                 'mime_type' => $file->getMimeType(),

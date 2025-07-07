@@ -268,7 +268,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     <div className="bg-muted/30 p-5 rounded-lg border border-border/50 space-y-4">
                                         <div className="grid grid-cols-2 gap-6">
                                             <div className="space-y-2">
-                                                <h3 className="text-sm font-medium text-primary uppercase tracking-wide">Available Size</h3>
+                                                <h3 className="text-sm font-medium text-primary uppercase tracking-wide">Size available at location</h3>
                                                 <p className="text-sm text-muted-foreground">
                                                     {quotation.available_size_width_mm} mm W x {quotation.available_size_height_mm} mm H
                                                 </p>

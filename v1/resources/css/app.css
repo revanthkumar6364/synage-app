@@ -171,3 +171,10 @@
         @apply bg-background text-foreground;
     }
 }
+
+.react-datepicker-wrapper,
+.react-datepicker__input-container,
+.react-datepicker__input-container input {
+  width: 100% !important;
+  min-width: 0 !important;
+}

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatBytes } from "@/lib/utils";
-import { PlusIcon, LinkIcon, TrashIcon, ArrowLeftIcon, FileIcon } from 'lucide-react';
+import { PlusIcon, LinkIcon, TrashIcon, ArrowLeftIcon, FileIcon, FileTextIcon } from 'lucide-react';
 import { QuotationMedia } from '@/types';
 import { toast, Toaster } from 'sonner';
 import AppLayout from '@/layouts/app-layout';
@@ -38,6 +38,7 @@ interface Props {
 
 export default function QuotationFiles({ quotation, quotationFiles = [], commonFiles = [] }: Props) {
     const [uploading, setUploading] = useState(false);
+    const [fileCategory, setFileCategory] = useState('image');
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
@@ -45,6 +46,7 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
         const file = e.target.files[0];
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('category', fileCategory);
 
         setUploading(true);
 
@@ -164,6 +166,19 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
                                                     </div>
                                                 </TableCell>
                                                 <TableCell colSpan={4}>
+                                                    <div className="flex gap-2 items-center mb-2">
+                                                        <label className="text-sm">Category:</label>
+                                                        <select
+                                                            value={fileCategory}
+                                                            onChange={e => setFileCategory(e.target.value)}
+                                                            className="border rounded px-2 py-1 text-sm"
+                                                        >
+                                                            <option value="image">Image</option>
+                                                            <option value="pdf">PDF</option>
+                                                            <option value="brochure">Brochure</option>
+                                                            <option value="supplement">Supplement</option>
+                                                        </select>
+                                                    </div>
                                                     <Input
                                                         type="file"
                                                         onChange={handleFileChange}
@@ -184,11 +199,23 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
                                             <TableRow key={file.id}>
                                                 <TableCell>
                                                     <div className="relative group">
-                                                        <img
-                                                            src={file.full_url}
-                                                            alt={file.name}
-                                                            className="w-16 h-16 object-cover rounded transition-transform duration-200 group-hover:scale-105"
-                                                        />
+                                                        {file.category === 'pdf' || file.name?.toLowerCase().endsWith('.pdf') ? (
+                                                            <a href={file.full_url} target="_blank" rel="noopener noreferrer">
+                                                                <FileTextIcon className="h-8 w-8 text-red-600 mx-auto" />
+                                                                <span className="block text-xs text-center mt-1">PDF</span>
+                                                            </a>
+                                                        ) : file.category === 'image' || (file.full_url && file.full_url.match(/\.(jpg|jpeg|png|gif)$/i)) ? (
+                                                            <img
+                                                                src={file.full_url}
+                                                                alt={file.name}
+                                                                className="w-16 h-16 object-cover rounded transition-transform duration-200 group-hover:scale-105"
+                                                            />
+                                                        ) : (
+                                                            <a href={file.full_url} target="_blank" rel="noopener noreferrer">
+                                                                <FileIcon className="h-8 w-8 text-gray-400 mx-auto" />
+                                                                <span className="block text-xs text-center mt-1">File</span>
+                                                            </a>
+                                                        )}
                                                         <a
                                                             href={file.full_url}
                                                             target="_blank"

@@ -24,6 +24,8 @@ class Quotation extends Model
         'reference',
         'quotation_number',
         'title',
+        'product_type',
+        'selected_product_id',
         'available_size_width',
         'available_size_height',
         'available_size_unit',
@@ -40,6 +42,8 @@ class Quotation extends Model
         'proposed_size_height_ft',
         'available_size_sqft',
         'proposed_size_sqft',
+        'facade_type',
+        'facade_notes',
         'quantity',
         'max_quantity',
         'description',
@@ -137,6 +141,11 @@ class Quotation extends Model
     public function salesUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sales_user_id','id');
+    }
+
+    public function selectedProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'selected_product_id');
     }
 
     public function creator(): BelongsTo

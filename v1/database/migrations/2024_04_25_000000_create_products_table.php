@@ -11,9 +11,15 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
+            $table->string('product_type')->nullable();
             $table->string('name');
-            $table->string('sku')->unique();
+            $table->string('sku')->nullable();
             $table->text('description')->nullable();
+            $table->string('size')->nullable();
+            $table->decimal('h_mm', 10, 2)->nullable();
+            $table->decimal('w_mm', 10, 2)->nullable();
+            $table->string('size_inch')->nullable();
+            $table->decimal('upto_pix', 10, 2)->nullable();
             $table->decimal('price', 10, 2);
             $table->string('unit')->nullable();
             $table->decimal('price_per_sqft', 10, 2)->nullable();
@@ -24,6 +30,7 @@ return new class extends Migration
             $table->decimal('min_price', 10, 2)->nullable();
             $table->decimal('max_price', 10, 2)->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
+
             $table->timestamps();
         });
     }

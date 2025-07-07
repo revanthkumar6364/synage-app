@@ -345,7 +345,7 @@
         <table class="specs-grid">
             <tr>
                 <td>
-                    <h3>Available Size</h3>
+                    <h3>Size available at location</h3>
                     <p>{{ $quotation->available_size_width_mm }} mm W x {{ $quotation->available_size_height_mm }} mm H</p>
                 </td>
                 <td>
