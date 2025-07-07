@@ -178,3 +178,42 @@
   width: 100% !important;
   min-width: 0 !important;
 }
+
+/* Rich Text Editor Styles */
+.rich-text-editor {
+    line-height: 1.6;
+}
+
+.rich-text-editor:empty:before {
+    content: attr(data-placeholder);
+    color: rgb(156 163 175);
+    pointer-events: none;
+}
+
+.rich-text-editor ul,
+.rich-text-editor ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.rich-text-editor li {
+    margin: 0.25rem 0;
+}
+
+.rich-text-editor p {
+    margin: 0.5rem 0;
+}
+
+.rich-text-editor strong,
+.rich-text-editor b {
+    font-weight: 600;
+}
+
+.rich-text-editor em,
+.rich-text-editor i {
+    font-style: italic;
+}
+
+.rich-text-editor u {
+    text-decoration: underline;
+}

@@ -241,24 +241,34 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
     }, [data.billing_address, data.billing_location, data.billing_city, data.billing_zip_code, data.same_as_billing]);
 
     const handleAccountChange = (val: string) => {
-        const account = accounts.find(acc => acc.id.toString() === val);
-        if (!account) return;
+        setData('account_id', val);
+        setData('account_contact_id', '');
 
-        setData({
-            ...data,
-            account_id: val,
-            account_contact_id: "", // Reset contact when account changes
-            billing_address: account.billing_address || '',
-            billing_location: account.billing_location || '',
-            billing_city: account.billing_city || '',
-            billing_zip_code: account.billing_zip_code || '',
-            ...(data.same_as_billing ? {
-                shipping_address: account.shipping_address || '',
-                shipping_location: account.shipping_location || '',
-                shipping_city: account.shipping_city || '',
-                shipping_zip_code: account.shipping_zip_code || '',
-            } : {})
-        });
+        // Generate suggested reference number and populate billing address based on selected account
+        if (val) {
+            const selectedAccount = accounts.find(acc => acc.id.toString() === val);
+            if (selectedAccount) {
+                // Generate suggested reference number
+                const clientName = selectedAccount.business_name.substring(0, 4).toUpperCase();
+                const today = new Date().toISOString().split('T')[0];
+                const suggestedReference = `RSPL/${clientName}/MUM - ${today}/001`;
+                setData('reference', suggestedReference);
+
+                // Populate billing address
+                setData('billing_address', selectedAccount.billing_address || '');
+                setData('billing_location', selectedAccount.billing_location || '');
+                setData('billing_city', selectedAccount.billing_city || '');
+                setData('billing_zip_code', selectedAccount.billing_zip_code || '');
+
+                // Populate shipping address if same as billing is checked
+                if (data.same_as_billing) {
+                    setData('shipping_address', selectedAccount.shipping_address || '');
+                    setData('shipping_location', selectedAccount.shipping_location || '');
+                    setData('shipping_city', selectedAccount.shipping_city || '');
+                    setData('shipping_zip_code', selectedAccount.shipping_zip_code || '');
+                }
+            }
+        }
     };
 
     const handleSameAsBillingChange = (checked: boolean) => {
@@ -393,7 +403,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                             className="w-4 h-4 text-blue-600"
                                         />
                                         <Label htmlFor="standard_led" className="cursor-pointer">
-                                            <div className="font-medium">Standard LED</div>
+                                            <div className="font-medium">Display And Other</div>
                                             <div className="text-sm text-gray-500">Kiosks, controllers, TV screens</div>
                                         </Label>
                                     </div>
@@ -706,13 +716,13 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                             {/* Facade Type Dropdown and Facade Notes */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label>Facade Type <span className="text-red-500">*</span></Label>
+                                    <Label>Installation Type <span className="text-red-500">*</span></Label>
                                     <Select
                                         value={data.facade_type || ''}
                                         onValueChange={val => setData('facade_type', val)}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select facade type" />
+                                            <SelectValue placeholder="Select installation type" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {Object.entries(facadeTypes).map(([key, label]) => (
@@ -725,11 +735,11 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                     {errors.facade_type && <p className="text-sm text-red-500">{errors.facade_type}</p>}
                                 </div>
                                 <div>
-                                    <Label>Facade Notes</Label>
+                                    <Label>Installation Notes</Label>
                                     <Input
                                         value={data.facade_notes || ''}
                                         onChange={e => setData('facade_notes', e.target.value)}
-                                        placeholder="Enter notes for Facade"
+                                        placeholder="Enter notes for Installation"
                                     />
                                     {errors.facade_notes && <p className="text-sm text-red-500">{errors.facade_notes}</p>}
                                 </div>

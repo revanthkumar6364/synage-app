@@ -128,20 +128,19 @@ export default function QuotationProducts({ quotation, products }: Props) {
             if (product) {
                 const numericValue = typeof value === 'string' ? parseFloat(value) : value;
                 const minPrice = product.min_price || 0;
-                const maxPrice = product.max_price || Infinity;
 
                 // Remove any previous error
                 delete newProducts[index].priceError;
 
                 // For managers, show suggested range but don't enforce validation
                 if (auth.user.role === 'manager') {
-                    if (numericValue < minPrice || (maxPrice !== Infinity && numericValue > maxPrice)) {
-                        newProducts[index].priceError = `Suggested range: ₹${minPrice} - ₹${maxPrice} (You can set any price as manager)`;
+                    if (numericValue < minPrice) {
+                        newProducts[index].priceError = `Suggested minimum: ₹${minPrice} (You can set any price as manager)`;
                     }
                 } else {
                     // For other users, enforce validation
-                    if (numericValue < minPrice || (maxPrice !== Infinity && numericValue > maxPrice)) {
-                        newProducts[index].priceError = `Price must be between ₹${minPrice} and ₹${maxPrice}`;
+                    if (numericValue < minPrice) {
+                        newProducts[index].priceError = `Price must not be less than ₹${minPrice}`;
                     }
                 }
 
@@ -179,9 +178,8 @@ export default function QuotationProducts({ quotation, products }: Props) {
                 const productDetails = products.find(p => p.id === product.id);
                 if (productDetails) {
                     const minPrice = productDetails.min_price || 0;
-                    const maxPrice = productDetails.max_price || Infinity;
                     const proposedPrice = parseFloat(product.proposed_unit_price.toString());
-                    return proposedPrice < minPrice || (maxPrice !== Infinity && proposedPrice > maxPrice);
+                    return proposedPrice < minPrice;
                 }
                 return false;
             });

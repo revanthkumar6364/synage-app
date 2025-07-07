@@ -154,11 +154,11 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
     }, [data.billing_address, data.billing_location, data.billing_city, data.billing_zip_code, data.same_as_billing]);
 
     useEffect(() => {
-        const width = parseFloat(data.available_size_width) || 0;
-        const height = parseFloat(data.available_size_height) || 0;
-        const unit = data.available_size_unit;
+            const width = parseFloat(data.available_size_width) || 0;
+            const height = parseFloat(data.available_size_height) || 0;
+            const unit = data.available_size_unit;
         const selectedProduct = getSelectedProduct();
-        let width_mm, height_mm, width_ft, height_ft, sqft;
+            let width_mm, height_mm, width_ft, height_ft, sqft;
         if (unit === 'mm') {
             width_mm = width;
             height_mm = height;
@@ -170,34 +170,34 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
             width_mm = width * 304.8;
             height_mm = height * 304.8;
         }
-        sqft = width_ft * height_ft;
+            sqft = width_ft * height_ft;
         // Use product-specific unit size if available, otherwise fallback to default
         const unitSize = selectedProduct?.unit_size || { width_mm: 320, height_mm: 160 };
         const boxWidth = unitSize.width_mm;
         const boxHeight = unitSize.height_mm;
-        const boxesInWidth = Math.floor(width_mm / boxWidth);
-        const boxesInHeight = Math.floor(height_mm / boxHeight);
-        const maxPossibleBoxes = boxesInWidth * boxesInHeight;
-        const proposedWidth = boxWidth * boxesInWidth;
+            const boxesInWidth = Math.floor(width_mm / boxWidth);
+            const boxesInHeight = Math.floor(height_mm / boxHeight);
+            const maxPossibleBoxes = boxesInWidth * boxesInHeight;
+            const proposedWidth = boxWidth * boxesInWidth;
         const proposedHeight = boxHeight * Math.ceil(maxPossibleBoxes / boxesInWidth);
         setData((prev: any) => ({
-            ...prev,
-            available_size_width_mm: width_mm.toFixed(2),
-            available_size_height_mm: height_mm.toFixed(2),
-            available_size_width_ft: width_ft.toFixed(2),
-            available_size_height_ft: height_ft.toFixed(2),
-            available_size_sqft: sqft.toFixed(2),
-            max_quantity: maxPossibleBoxes.toString(),
-            quantity: maxPossibleBoxes.toString(),
-            proposed_size_width: proposedWidth.toString(),
-            proposed_size_height: proposedHeight.toString(),
-            proposed_size_unit: "mm",
-            proposed_size_width_mm: proposedWidth.toFixed(2),
-            proposed_size_height_mm: proposedHeight.toFixed(2),
-            proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
-            proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
-            proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2)
-        }));
+                ...prev,
+                available_size_width_mm: width_mm.toFixed(2),
+                available_size_height_mm: height_mm.toFixed(2),
+                available_size_width_ft: width_ft.toFixed(2),
+                available_size_height_ft: height_ft.toFixed(2),
+                available_size_sqft: sqft.toFixed(2),
+                max_quantity: maxPossibleBoxes.toString(),
+                quantity: maxPossibleBoxes.toString(),
+                proposed_size_width: proposedWidth.toString(),
+                proposed_size_height: proposedHeight.toString(),
+                proposed_size_unit: "mm",
+                proposed_size_width_mm: proposedWidth.toFixed(2),
+                proposed_size_height_mm: proposedHeight.toFixed(2),
+                proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
+                proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
+                proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2)
+            }));
     }, [data.available_size_width, data.available_size_height, data.available_size_unit, data.selected_product_id, data.product_type]);
 
     useEffect(() => {
@@ -221,23 +221,36 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
     };
 
     const handleAccountChange = (value: string) => {
-        const selectedAccount = accounts.find(account => account.id.toString() === value);
-        setData(prev => ({
-            ...prev,
-            account_id: Number(value),
-            account_contact_id: undefined,
-            billing_address: selectedAccount?.billing_address || '',
-            billing_location: selectedAccount?.billing_location || '',
-            billing_city: selectedAccount?.billing_city || '',
-            billing_zip_code: selectedAccount?.billing_zip_code || '',
-            shipping_address: data.same_as_billing ? (selectedAccount?.shipping_address || '') : prev.shipping_address,
-            shipping_location: data.same_as_billing ? (selectedAccount?.shipping_location || '') : prev.shipping_location,
-            shipping_city: data.same_as_billing ? (selectedAccount?.shipping_city || '') : prev.shipping_city,
-            shipping_zip_code: data.same_as_billing ? (selectedAccount?.shipping_zip_code || '') : prev.shipping_zip_code
-        }));
+        setData('account_id', Number(value));
+        setData('account_contact_id', undefined);
 
+        // Generate suggested reference number and populate billing address based on selected account
+        if (value) {
+            const selectedAccount = accounts.find(acc => acc.id.toString() === value);
         if (selectedAccount) {
+                // Generate suggested reference number
+                const clientName = selectedAccount.business_name.substring(0, 4).toUpperCase();
+                const today = new Date().toISOString().split('T')[0];
+                const suggestedReference = `RSPL/${clientName}/MUM - ${today}/001`;
+                setData('reference', suggestedReference);
+
+                // Populate billing address
+                setData('billing_address', selectedAccount.billing_address || '');
+                setData('billing_location', selectedAccount.billing_location || '');
+                setData('billing_city', selectedAccount.billing_city || '');
+                setData('billing_zip_code', selectedAccount.billing_zip_code || '');
+
+                // Populate shipping address if same as billing is checked
+                if (data.same_as_billing) {
+                    setData('shipping_address', selectedAccount.shipping_address || '');
+                    setData('shipping_location', selectedAccount.shipping_location || '');
+                    setData('shipping_city', selectedAccount.shipping_city || '');
+                    setData('shipping_zip_code', selectedAccount.shipping_zip_code || '');
+                }
+
+                // Set account contacts
             setAccountContacts(selectedAccount.contacts || []);
+            }
         } else {
             setAccountContacts([]);
         }
@@ -321,12 +334,17 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <Label>Reference ID</Label>
+                                    <Label>Reference ID <span className="text-red-500">*</span></Label>
                                     <Input
                                         value={data.reference}
                                         onChange={e => setData('reference', e.target.value)}
+                                        placeholder="RSPL/CLNT/MUM - 2024-01-15/001"
                                         className={errors.reference ? 'border-red-500' : ''}
+                                        required
                                     />
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Format: RSPL/4characters of Client name/MUM - region/Date-5
+                                    </p>
                                     {errors.reference && <span className="text-red-500 text-sm">{errors.reference}</span>}
                                 </div>
 
@@ -552,7 +570,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                             className="w-4 h-4 text-blue-600"
                                         />
                                         <Label htmlFor="standard_led" className="cursor-pointer">
-                                            <div className="font-medium">Standard LED</div>
+                                            <div className="font-medium">Display And Other</div>
                                             <div className="text-sm text-gray-500">Kiosks, controllers, TV screens</div>
                                         </Label>
                                     </div>
@@ -598,6 +616,12 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                             </div>
                                         </div>
                                     )}
+                                    <p className="mt-2 text-sm text-gray-500">
+                                        Unit size: {getSelectedProduct()?.unit_size?.width_mm || 320}mm x {getSelectedProduct()?.unit_size?.height_mm || 160}mm
+                                        {data.max_quantity && (
+                                            <> | Total quantity: {data.max_quantity} units</>
+                                        )}
+                                    </p>
                                 </div>
                             )}
 
@@ -721,7 +745,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                 {/* Facade Type Dropdown and Facade Notes */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <Label>Facade Type <span className="text-red-500">*</span></Label>
+                                        <Label>Installation Type <span className="text-red-500">*</span></Label>
                                         <Select
                                             value={data.facade_type || ''}
                                             onValueChange={val => setData('facade_type', val)}
@@ -740,11 +764,11 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                         {errors.facade_type && <p className="text-sm text-red-500">{errors.facade_type}</p>}
                                     </div>
                                     <div>
-                                        <Label>Facade Notes</Label>
+                                        <Label>Installation Notes</Label>
                                         <Input
                                             value={data.facade_notes || ''}
                                             onChange={e => setData('facade_notes', e.target.value)}
-                                            placeholder="Enter notes for Facade"
+                                            placeholder="Enter notes for Installation"
                                         />
                                         {errors.facade_notes && <p className="text-sm text-red-500">{errors.facade_notes}</p>}
                                     </div>

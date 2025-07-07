@@ -221,22 +221,81 @@ class Quotation extends Model
     public function generateReferenceNumber(): string
     {
         $prefix = 'RSPL';
-        $month = date('M');
-        $year = date('Y');
 
-        // Count quotations for current month and year
-        $count = self::whereYear('created_at', $year)
-            ->whereMonth('created_at', date('m'))
-            ->count();
+        // Get client name (first 4 characters, uppercase)
+        $clientName = 'CLNT'; // Default
+        if ($this->account) {
+            $clientName = substr(strtoupper($this->account->business_name), 0, 4);
+        } elseif ($this->account_id) {
+            // Load the account if not already loaded
+            $account = Account::find($this->account_id);
+            if ($account) {
+                $clientName = substr(strtoupper($account->business_name), 0, 4);
+            }
+        }
 
-        // Start from 1 (001) for the first quotation of the month
+        // Get region (you might want to add a region field to accounts or quotations)
+        $region = 'MUM'; // Default to MUM, can be made dynamic later
+
+        // Get current date in YYYY-MM-DD format
+        $date = date('Y-m-d');
+
+        // Count quotations for current date
+        $count = self::whereDate('created_at', $date)->count();
+
+        // Start from 1 (001) for the first quotation of the day
         $sequence = $count + 1;
 
         // Ensure the sequence is padded with leading zeros
         $paddedSequence = str_pad($sequence, 3, '0', STR_PAD_LEFT);
 
-        // Format: RSPL/MON/YYYY-XXX
-        return sprintf('%s/%s/%s-%s', $prefix, strtoupper($month), $year, $paddedSequence);
+        // Format: RSPL/4characters of Client name/MUM - region/Date-5
+        return sprintf('%s/%s/%s - %s/%s', $prefix, $clientName, $region, $date, $paddedSequence);
+    }
+
+    // Generate revision reference number
+    public function generateRevisionReferenceNumber(): string
+    {
+        $baseReference = $this->reference;
+
+        // Count existing revisions for this quotation
+        $revisionCount = $this->versions()->count() + 1;
+
+        // Format revision number as R001, R002, etc.
+        $revisionNumber = 'R' . str_pad($revisionCount, 3, '0', STR_PAD_LEFT);
+
+        // Add revision number to base reference
+        return $baseReference . ' - ' . $revisionNumber;
+    }
+
+    // Static method to generate a suggested reference number
+    public static function generateSuggestedReference($accountName = null): string
+    {
+        $prefix = 'RSPL';
+
+        // Get client name (first 4 characters, uppercase)
+        $clientName = 'CLNT'; // Default
+        if ($accountName) {
+            $clientName = substr(strtoupper($accountName), 0, 4);
+        }
+
+        // Get region
+        $region = 'MUM';
+
+        // Get current date in YYYY-MM-DD format
+        $date = date('Y-m-d');
+
+        // Count quotations for current date
+        $count = self::whereDate('created_at', $date)->count();
+
+        // Start from 1 (001) for the first quotation of the day
+        $sequence = $count + 1;
+
+        // Ensure the sequence is padded with leading zeros
+        $paddedSequence = str_pad($sequence, 3, '0', STR_PAD_LEFT);
+
+        // Format: RSPL/4characters of Client name/MUM - region/Date-5
+        return sprintf('%s/%s/%s - %s/%s', $prefix, $clientName, $region, $date, $paddedSequence);
     }
 
     // Scopes

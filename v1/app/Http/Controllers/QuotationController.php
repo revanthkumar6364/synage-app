@@ -118,7 +118,6 @@ class QuotationController extends Controller
             DB::beginTransaction();
 
             $quotation = new Quotation();
-            $validated['reference'] = $quotation->generateReferenceNumber();
             $validated['status'] = 'draft';
             $validated['created_by'] = $request->user()->id;
             $validated['updated_by'] = $request->user()->id;
@@ -491,7 +490,7 @@ class QuotationController extends Controller
             $newQuotation->status = 'draft';
             $newQuotation->editable = true;
             $newQuotation->quotation_number = $newQuotation->generateQuotationNumber();
-            $newQuotation->reference = $quotation->reference . '-V' . ($quotation->versions()->count() + 1);
+            $newQuotation->reference = $quotation->generateRevisionReferenceNumber();
             $newQuotation->created_by = $request->user()->id;
             $newQuotation->updated_by = $request->user()->id;
             $newQuotation->last_action = 'created_version';

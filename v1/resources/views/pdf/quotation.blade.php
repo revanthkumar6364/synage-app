@@ -275,6 +275,26 @@
     </style>
 </head>
 <body>
+    @if($quotation->status === 'approved')
+        <div style="
+            position: fixed;
+            top: 35%;
+            left: 0;
+            width: 100vw;
+            text-align: center;
+            opacity: 0.08;
+            font-size: 120px;
+            font-weight: bold;
+            color: #1a237e;
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
+            transform: rotate(-20deg);
+        ">
+            Radiant Synage
+        </div>
+    @endif
+
     <div class="header">
         <table class="header-table">
             <tr>
@@ -298,10 +318,21 @@
     </div>
 
     <div class="separator"></div>
-
+    <table style="width: 100%; margin: 24px 0 16px 0;">
+        <tr>
+            <td style="font-size: 12px; font-weight: 500; color: #1a237e; text-align: left;">
+                Reference: {{ $quotation->reference }}
+            </td>
+            <td style="font-size: 12px; color: #666; text-align: right;">
+                Date: {{ \Carbon\Carbon::parse($quotation->estimate_date)->format('d/m/Y') }}
+            </td>
+        </tr>
+    </table>
+    <div class="separator"></div>
     <div class="title-section">
         <h2>{{ $quotation->title }}</h2>
-        <p style="font-weight: 500">Kind Attn: {{ optional($quotation->account_contact)->name }}</p>
+        <p style="font-weight: 500">Kind Attn: {{ optional($quotation->account_contact)->name }}<br>
+        {{ optional($quotation->account_contact)->role }}</p>
         <p>{{ $quotation->description }}</p>
     </div>
 
@@ -325,15 +356,6 @@
                     <p>{{ $quotation->shipping_address }}</p>
                     <p>{{ $quotation->shipping_city }}, {{ $quotation->shipping_location }} {{ $quotation->shipping_zip_code }}</p>
                     <p style="margin-top: 8px"><span style="font-weight: 500">GST NO:</span> {{ optional($quotation->account)->gst_number }}</p>
-                </div>
-            </td>
-            <td>
-                <div class="info-box" style="position: relative;">
-                    <h3>Date</h3>
-                    <p>{{ \Carbon\Carbon::parse($quotation->estimate_date)->format('d/m/Y') }}</p>
-                    <div style="position: absolute; bottom: 15px; right: 15px;">
-                        <img src="{{ public_path('images/logo.png') }}" alt="Logo" style="height: 30px; opacity: 0.5;">
-                    </div>
                 </div>
             </td>
         </tr>
@@ -454,21 +476,31 @@
     <div class="footer">
         <div class="footer-top">
             <div>
-                <p style="color: #666">For any information or clarifications</p>
-                <p style="font-weight: 500">Contact: 8884491377</p>
+                For any information or clarifications<br>
+                <b>Contact: 8884491377</b>
             </div>
+
             <img src="{{ public_path('images/logo.png') }}" alt="Logo" class="footer-logo">
         </div>
         <div class="separator"></div>
         <div class="signature-section">
             <div class="signature-block">
-                <p>For Radiant Synage Pvt Ltd.,</p>
-                <img src="{{ public_path('images/logo.png') }}" alt="Logo" style="height: 30px; opacity: 0.5; margin-top: 8px;">
-                <p class="signature-name">{{ auth()->user()->name }}</p>
+                For Radiant Synage Pvt Ltd.,<br>
+                <img src="{{ public_path('images/signature.png') }}" alt="Signature" style="height: 40px; margin: 8px 0;">
+                <div class="signature-name">{{ auth()->user()->name ?? '' }}</div>
+                <div class="signature-name">{{ auth()->user()->email ?? '' }}, {{ auth()->user()->mobile ?? '' }}</div>
+                <div style="margin-top: 8px; font-size: 11px;">
+                    <a href="https://wa.me/918884491377" style="margin-right: 8px; text-decoration: none; color: #25D366;">WhatsApp</a>
+                    <a href="https://facebook.com/radiantsynage" style="margin-right: 8px; text-decoration: none; color: #1877F3;">Facebook</a>
+                    <a href="https://instagram.com/radiantsynage" style="margin-right: 8px; text-decoration: none; color: #E4405F;">Instagram</a>
+                    <a href="https://youtube.com/@radiantsynage" style="margin-right: 8px; text-decoration: none; color: #FF0000;">YouTube</a>
+                    <a href="https://linkedin.com/company/radiantsynage" style="margin-right: 8px; text-decoration: none; color: #0A66C2;">LinkedIn</a>
+                    <a href="https://radiantsynage.com" style="text-decoration: none; color: #1a1a1a;">Website</a>
+                </div>
             </div>
             <div class="generated-date">
-                <p>Generated on</p>
-                <p style="font-size: 11px">{{ now()->format('d/m/Y') }}</p>
+                Generated on<br>
+                {{ \Carbon\Carbon::now()->format('d/m/Y') }}
             </div>
         </div>
     </div>
@@ -478,7 +510,6 @@
             <div class="separator"></div>
             @if($commonFiles->isNotEmpty())
                 <div style="margin-bottom: 25px">
-                    <img src="{{ public_path('images/logo.png') }}" alt="Logo" style="height: 24px; opacity: 0.3; margin-bottom: 15px;">
                     <div class="attachments-grid">
                         @foreach($commonFiles as $file)
                             <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
@@ -491,7 +522,7 @@
             @if($quotationFiles->isNotEmpty())
                 <div class="separator"></div>
                 <div>
-                    <img src="{{ public_path('images/logo.png') }}" alt="Logo" style="height: 24px; opacity: 0.3; margin-bottom: 15px;">
+                    <h3>Attachments</h3>
                     <div class="attachments-grid">
                         @foreach($quotationFiles as $file)
                             <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"

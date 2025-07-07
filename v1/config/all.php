@@ -89,10 +89,10 @@ return [
     ],
 
     'terms_and_conditions' => [
-        'taxes_terms' => 'The above price is inclusive of all taxes and duties',
-        'warranty_terms' => 'Warranty is 3 Years for all the products quoted100% Payment along with the order',
-        'delivery_terms' => 'Delivery is Immediate.',
-        'payment_terms' => '100% Payment along with the order',
+        'taxes_terms' => 'The quoted price is inclusive of all applicable taxes and duties, unless stated otherwise. Prices are valid for a period of 15 days from the date of quotation, subject to confirmation.',
+        'warranty_terms' => 'The entire solution carries a standard 3-year warranty from the date of Invoice. Warranty excludes physical damages, electrical burnouts, water ingress (in case of indoor), and damage due to mishandling or improper electrical/environmental conditions at the client\'s premises. Any repair or service due to such exclusions will be chargeable.',
+        'delivery_terms' => 'Standard delivery timeline is 2 to 3 weeks from the date of PO and receipt of advance payment. Timeline may vary depending on import logistics, site readiness, and confirmation of technical drawings and approvals.',
+        'payment_terms' => '100% Advance Payment along with confirmed Purchase Order. Payment to be made via NEFT/RTGS to Radiant Synage\'s designated account as per the invoice.',
         'electrical_terms' => 'Installation and Commissioning to be done by our Team',
     ],
 

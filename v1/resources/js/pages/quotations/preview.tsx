@@ -3,14 +3,178 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Product, BreadcrumbItem, QuotationMedia, Quotation } from '@/types';
 import { Toaster, toast } from 'sonner';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useTheme } from 'next-themes';
 import { Table, TableHeader, TableBody, TableCell, TableRow, TableHead } from '@/components/ui/table';
-import { FileTextIcon, FileIcon } from 'lucide-react';
+import { FileTextIcon, FileIcon, MessageCircle } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Bold, Italic, Underline, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Facebook, Instagram, Youtube, Linkedin, Globe } from 'lucide-react';
+
+// Rich Text Editor Component
+interface RichTextEditorProps {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    rows?: number;
+}
+
+function RichTextEditor({ value, onChange, placeholder, rows = 4 }: RichTextEditorProps) {
+    const editorRef = useRef<HTMLDivElement>(null);
+
+    // Only update the content if the value changes from outside
+    useEffect(() => {
+        if (editorRef.current && editorRef.current.innerHTML !== value) {
+            editorRef.current.innerHTML = value || '';
+        }
+    }, [value]);
+
+    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+        onChange(e.currentTarget.innerHTML);
+    };
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        const text = e.clipboardData.getData('text/plain');
+        const selection = window.getSelection();
+        if (!selection?.rangeCount) return;
+
+        // Delete current selection
+        selection.deleteFromDocument();
+
+        // Insert text node at caret
+        const range = selection.getRangeAt(0);
+        const textNode = document.createTextNode(text);
+        range.insertNode(textNode);
+
+        // Move caret after inserted text
+        range.setStartAfter(textNode);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        // Update the form value
+        // Use setTimeout to ensure React gets the updated content
+        setTimeout(() => {
+            const editor = e.currentTarget;
+            onChange(editor.innerHTML);
+        }, 0);
+    };
+
+    return (
+        <div className={`border rounded-md`}>
+            {/* Toolbar */}
+            <div className="flex items-center gap-1 p-2 border-b bg-muted/30">
+                <ToggleGroup type="single" size="sm">
+                    <ToggleGroupItem
+                        value="bold"
+                        onClick={() => {
+                            editorRef.current?.focus();
+                            document.execCommand('bold');
+                        }}
+                        className="h-8 w-8"
+                    >
+                        <Bold className="h-4 w-4" />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                        value="italic"
+                        onClick={() => {
+                            editorRef.current?.focus();
+                            document.execCommand('italic');
+                        }}
+                        className="h-8 w-8"
+                    >
+                        <Italic className="h-4 w-4" />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                        value="underline"
+                        onClick={() => {
+                            editorRef.current?.focus();
+                            document.execCommand('underline');
+                        }}
+                        className="h-8 w-8"
+                    >
+                        <Underline className="h-4 w-4" />
+                    </ToggleGroupItem>
+                </ToggleGroup>
+
+                <Separator orientation="vertical" className="h-6" />
+
+                <ToggleGroup type="single" size="sm">
+                    <ToggleGroupItem
+                        value="justifyLeft"
+                        onClick={() => {
+                            editorRef.current?.focus();
+                            document.execCommand('justifyLeft');
+                        }}
+                        className="h-8 w-8"
+                    >
+                        <AlignLeft className="h-4 w-4" />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                        value="justifyCenter"
+                        onClick={() => {
+                            editorRef.current?.focus();
+                            document.execCommand('justifyCenter');
+                        }}
+                        className="h-8 w-8"
+                    >
+                        <AlignCenter className="h-4 w-4" />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                        value="justifyRight"
+                        onClick={() => {
+                            editorRef.current?.focus();
+                            document.execCommand('justifyRight');
+                        }}
+                        className="h-8 w-8"
+                    >
+                        <AlignRight className="h-4 w-4" />
+                    </ToggleGroupItem>
+                </ToggleGroup>
+
+                <Separator orientation="vertical" className="h-6" />
+
+                <ToggleGroup type="single" size="sm">
+                    <ToggleGroupItem
+                        value="insertUnorderedList"
+                        onClick={() => {
+                            editorRef.current?.focus();
+                            document.execCommand('insertUnorderedList');
+                        }}
+                        className="h-8 w-8"
+                    >
+                        <List className="h-4 w-4" />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                        value="insertOrderedList"
+                        onClick={() => {
+                            editorRef.current?.focus();
+                            document.execCommand('insertOrderedList');
+                        }}
+                        className="h-8 w-8"
+                    >
+                        <ListOrdered className="h-4 w-4" />
+                    </ToggleGroupItem>
+                </ToggleGroup>
+            </div>
+
+            {/* Editor */}
+            <div
+                ref={editorRef}
+                contentEditable
+                onInput={handleInput}
+                onPaste={handlePaste}
+                className="p-3 min-h-[120px] focus:outline-none prose prose-sm max-w-none rich-text-editor"
+                style={{ minHeight: `${rows * 1.5}rem` }}
+                data-placeholder={placeholder}
+            />
+        </div>
+    );
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -311,26 +475,30 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                             <div>
                                                 <h4 className="font-medium mb-2">Taxes</h4>
                                                 {isEditing ? (
-                                                    <Textarea
+                                                    <RichTextEditor
                                                         value={form.data.taxes}
-                                                        onChange={e => form.setData('taxes', e.target.value)}
-                                                        rows={4}
+                                                        onChange={e => form.setData('taxes', e)}
                                                     />
                                                 ) : (
-                                                    <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.taxes_terms}</p>
+                                                    <div
+                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                        dangerouslySetInnerHTML={{ __html: quotation.taxes_terms || '' }}
+                                                    />
                                                 )}
                                             </div>
 
                                             <div>
                                                 <h4 className="font-medium mb-2">Warranty</h4>
                                                 {isEditing ? (
-                                                    <Textarea
+                                                    <RichTextEditor
                                                         value={form.data.warranty}
-                                                        onChange={e => form.setData('warranty', e.target.value)}
-                                                        rows={4}
+                                                        onChange={e => form.setData('warranty', e)}
                                                     />
                                                 ) : (
-                                                    <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.warranty_terms}</p>
+                                                    <div
+                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                        dangerouslySetInnerHTML={{ __html: quotation.warranty_terms || '' }}
+                                                    />
                                                 )}
                                             </div>
                                         </div>
@@ -339,26 +507,30 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                             <div>
                                                 <h4 className="font-medium mb-2">Delivery Terms</h4>
                                                 {isEditing ? (
-                                                    <Textarea
+                                                    <RichTextEditor
                                                         value={form.data.delivery_terms}
-                                                        onChange={e => form.setData('delivery_terms', e.target.value)}
-                                                        rows={4}
+                                                        onChange={e => form.setData('delivery_terms', e)}
                                                     />
                                                 ) : (
-                                                    <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.delivery_terms}</p>
+                                                    <div
+                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                        dangerouslySetInnerHTML={{ __html: quotation.delivery_terms || '' }}
+                                                    />
                                                 )}
                                             </div>
 
                                             <div>
                                                 <h4 className="font-medium mb-2">Payment Terms</h4>
                                                 {isEditing ? (
-                                                    <Textarea
+                                                    <RichTextEditor
                                                         value={form.data.payment_terms}
-                                                        onChange={e => form.setData('payment_terms', e.target.value)}
-                                                        rows={4}
+                                                        onChange={e => form.setData('payment_terms', e)}
                                                     />
                                                 ) : (
-                                                    <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.payment_terms}</p>
+                                                    <div
+                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                        dangerouslySetInnerHTML={{ __html: quotation.payment_terms || '' }}
+                                                    />
                                                 )}
                                             </div>
                                         </div>
@@ -395,6 +567,35 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                             <p className="text-sm">{new Date().toLocaleDateString('en-IN')}</p>
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* Social Media Links */}
+                                <div className="flex items-center gap-4 mt-6">
+                                    {/* WhatsApp */}
+                                    <a href={`https://wa.me/${auth.user.mobile}`} target="_blank" rel="noopener noreferrer" title="WhatsApp" className="text-green-600 hover:text-green-700 text-xl">
+                                        {/* WhatsApp Unicode emoji as fallback */}
+                                        <MessageCircle className="h-6 w-6 text-green-600 hover:text-green-700" />
+                                    </a>
+                                    {/* Facebook */}
+                                    <a href="https://www.facebook.com/radiantsynage" target="_blank" rel="noopener noreferrer" title="Facebook">
+                                        <Facebook className="h-6 w-6 text-blue-600 hover:text-blue-800" />
+                                    </a>
+                                    {/* Instagram */}
+                                    <a href="https://www.instagram.com/radiant_synage/" target="_blank" rel="noopener noreferrer" title="Instagram">
+                                        <Instagram className="h-6 w-6 text-pink-500 hover:text-pink-700" />
+                                    </a>
+                                    {/* YouTube */}
+                                    <a href="https://youtube.com/@radiantsynage6751?si=1IP2exl9OX5rY7i9" target="_blank" rel="noopener noreferrer" title="YouTube">
+                                        <Youtube className="h-6 w-6 text-red-600 hover:text-red-800" />
+                                    </a>
+                                    {/* LinkedIn */}
+                                    <a href="https://www.linkedin.com/company/radiant-synage-pvt-ltd/" target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                                        <Linkedin className="h-6 w-6 text-blue-700 hover:text-blue-900" />
+                                    </a>
+                                    {/* Website */}
+                                    <a href="https://radiantsynage.com" target="_blank" rel="noopener noreferrer" title="Website">
+                                        <Globe className="h-6 w-6 text-gray-700 hover:text-black" />
+                                    </a>
                                 </div>
 
                                 {/* Attachments */}

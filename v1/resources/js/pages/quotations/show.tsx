@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useTheme } from 'next-themes';
 import { Table, TableHeader, TableBody, TableCell, TableRow, TableHead } from '@/components/ui/table';
+import { MessageCircle, Facebook, Instagram, Youtube, Linkedin, Globe } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -209,14 +210,27 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     </div>
                                 </div>
 
-                                <Separator className="my-8" />
+                                <Separator />
+
+                                {/* Reference and Date Row */}
+                                <div className="flex items-center justify-between my-8">
+                                    <div className="text-sm font-medium text-primary">
+                                        Reference: {quotation.reference}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        Date: {quotation.estimate_date ? new Date(quotation.estimate_date).toLocaleDateString('en-IN') : ''}
+                                    </div>
+                                </div>
+                                <Separator />
 
                                 {/* Title Section */}
-                                <div className="text-center space-y-3 mb-8">
+                                <div className="text-center space-y-3 my-8">
                                     <h2 className="text-2xl font-semibold text-primary tracking-tight">{quotation.title}</h2>
                                     <div className="space-y-1">
                                         <p className="text-sm font-medium text-muted-foreground">
                                             Kind Attn: {quotation.account_contact?.name}
+                                            <br/>
+                                            {quotation.account_contact?.role}
                                         </p>
                                         <p className="text-sm text-muted-foreground">{quotation.description}</p>
                                     </div>
@@ -225,7 +239,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                 <Separator className="my-8" />
 
                                 {/* Billing and Shipping */}
-                                <div className="grid grid-cols-3 gap-8">
+                                <div className="grid grid-cols-2 gap-8">
                                     <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
                                         <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Bill To</h3>
                                         <div className="text-sm space-y-2">
@@ -246,17 +260,6 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                 <p>{quotation.shipping_city}, {quotation.shipping_location} {quotation.shipping_zip_code}</p>
                                                 <p className="font-medium mt-2">GST NO: {quotation.account?.gst_number}</p>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col justify-between p-5 bg-muted/30 rounded-lg border border-border/50">
-                                        <div>
-                                            <h3 className="font-semibold text-primary mb-2">Date</h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                {new Date(quotation.estimate_date).toLocaleDateString('en-IN')}
-                                            </p>
-                                        </div>
-                                        <div className="flex justify-end">
-                                            <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50" />
                                         </div>
                                     </div>
                                 </div>
@@ -411,17 +414,45 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                 alt="Blue signature stamp of Radiant Synage Pvt Ltd."
                                                 className="my-2"
                                                 height="40"
-                                                width="60"
+                                                width="200"
                                                 src="/placeholder.svg?height=40&width=60"
                                             />
-                                            <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50 mt-2" />
                                             <p className="text-sm font-semibold text-primary">{auth.user.name}</p>
+                                            <p className="text-sm font-semibold text-primary">{auth.user.email}, {auth.user.mobile}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-muted-foreground">Generated on</p>
                                             <p className="text-sm">{new Date().toLocaleDateString('en-IN')}</p>
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* Social Media Links */}
+                                <div className="flex items-center gap-4 mt-6">
+                                    {/* WhatsApp */}
+                                    <a href={`https://wa.me/${auth.user.mobile}`} target="_blank" rel="noopener noreferrer" title="WhatsApp" className="text-green-600 hover:text-green-700 text-xl">
+                                        <MessageCircle className="h-6 w-6 text-green-600 hover:text-green-700" />
+                                    </a>
+                                    {/* Facebook */}
+                                    <a href="https://www.facebook.com/radiantsynage" target="_blank" rel="noopener noreferrer" title="Facebook">
+                                        <Facebook className="h-6 w-6 text-blue-600 hover:text-blue-800" />
+                                    </a>
+                                    {/* Instagram */}
+                                    <a href="https://www.instagram.com/radiant_synage/" target="_blank" rel="noopener noreferrer" title="Instagram">
+                                        <Instagram className="h-6 w-6 text-pink-500 hover:text-pink-700" />
+                                    </a>
+                                    {/* YouTube */}
+                                    <a href="https://youtube.com/@radiantsynage6751?si=1IP2exl9OX5rY7i9" target="_blank" rel="noopener noreferrer" title="YouTube">
+                                        <Youtube className="h-6 w-6 text-red-600 hover:text-red-800" />
+                                    </a>
+                                    {/* LinkedIn */}
+                                    <a href="https://www.linkedin.com/company/radiant-synage-pvt-ltd/" target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                                        <Linkedin className="h-6 w-6 text-blue-700 hover:text-blue-900" />
+                                    </a>
+                                    {/* Website */}
+                                    <a href="https://radiantsynage.com" target="_blank" rel="noopener noreferrer" title="Website">
+                                        <Globe className="h-6 w-6 text-gray-700 hover:text-black" />
+                                    </a>
                                 </div>
 
                                 {/* Attachments */}
