@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('quotations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('parent_id')->nullable()->constrained('quotations');
-            $table->string('reference')->unique();
+            $table->string('reference')->nullable();
             $table->string('quotation_number')->unique()->nullable(); // Made nullable since we generate it
             $table->string('title');
             $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
@@ -28,16 +28,16 @@ return new class extends Migration
             $table->string('proposed_size_unit')->nullable();
             $table->string('quantity')->nullable();
             $table->string('max_quantity')->nullable();
-            $table->string('available_size_width_mm')->nullable();
-            $table->string('available_size_height_mm')->nullable();
-            $table->string('proposed_size_width_mm')->nullable();
-            $table->string('proposed_size_height_mm')->nullable();
-            $table->string('available_size_width_ft')->nullable();
-            $table->string('available_size_height_ft')->nullable();
-            $table->string('proposed_size_width_ft')->nullable();
-            $table->string('proposed_size_height_ft')->nullable();
-            $table->string('available_size_sqft')->nullable();
-            $table->string('proposed_size_sqft')->nullable();
+            $table->decimal('available_size_width_mm', 10, 2)->default(0);
+            $table->decimal('available_size_height_mm', 10, 2)->default(0);
+            $table->decimal('proposed_size_width_mm', 10, 2)->default(0);
+            $table->decimal('proposed_size_height_mm', 10, 2)->default(0);
+            $table->decimal('available_size_width_ft', 10, 2)->default(0);
+            $table->decimal('available_size_height_ft', 10, 2)->default(0);
+            $table->decimal('proposed_size_width_ft', 10, 2)->default(0);
+            $table->decimal('proposed_size_height_ft', 10, 2)->default(0);
+            $table->decimal('available_size_sqft', 10, 2)->default(0);
+            $table->decimal('proposed_size_sqft', 10, 2)->default(0);
             $table->string('facade_type')->nullable();
             $table->text('facade_notes')->nullable();
 
@@ -66,6 +66,8 @@ return new class extends Migration
             $table->text('delivery_terms')->nullable();
             $table->text('payment_terms')->nullable();
             $table->text('electrical_terms')->nullable();
+
+            $table->boolean('show_hsn_code')->default(false);
 
             // Financial Details
             $table->decimal('subtotal', 10, 2)->default(0);

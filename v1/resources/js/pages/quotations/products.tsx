@@ -1,3 +1,4 @@
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,6 +28,8 @@ interface QuotationItem {
     discount_percentage: number;
     tax_percentage: number;
     notes: string | null;
+    available_size_width_mm?: number | '';
+    available_size_height_mm?: number | '';
 }
 
 interface SelectedProduct {
@@ -37,6 +40,8 @@ interface SelectedProduct {
     discount_percentage: number;
     tax_percentage: number;
     notes: string;
+    available_size_width_mm?: number | '';
+    available_size_height_mm?: number | '';
     priceError?: string;
 }
 
@@ -79,7 +84,9 @@ export default function QuotationProducts({ quotation, products }: Props) {
                 proposed_unit_price: item.proposed_unit_price || item.unit_price,
                 discount_percentage: item.discount_percentage,
                 tax_percentage: item.tax_percentage,
-                notes: item.notes || ''
+                notes: item.notes || '',
+                available_size_width_mm: item.available_size_width_mm ?? '',
+                available_size_height_mm: item.available_size_height_mm ?? ''
             }));
             setSelectedProducts(initialProducts);
         }
@@ -93,7 +100,9 @@ export default function QuotationProducts({ quotation, products }: Props) {
             proposed_unit_price: product.proposed_unit_price,
             discount_percentage: product.discount_percentage,
             tax_percentage: product.tax_percentage,
-            notes: product.notes
+            notes: product.notes,
+            available_size_width_mm: product.available_size_width_mm,
+            available_size_height_mm: product.available_size_height_mm,
         }));
         form.setData('items', items);
     }, [selectedProducts]);
@@ -118,7 +127,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
         setSelectedProducts(newProducts);
     };
 
-    const handleProductChange = (index: number, field: ProductField, value: string | number) => {
+    const handleProductChange = (index: number, field: ProductField | 'available_size_width_mm' | 'available_size_height_mm', value: string | number) => {
         const newProducts = [...selectedProducts];
         const product = products.find(p => p.id === newProducts[index].id);
 
@@ -148,6 +157,8 @@ export default function QuotationProducts({ quotation, products }: Props) {
             }
         } else if (field === 'quantity') {
             finalValue = typeof value === 'string' ? parseInt(value) : value;
+        } else if (field === 'available_size_width_mm' || field === 'available_size_height_mm') {
+            finalValue = value === '' ? '' : parseFloat(value as string);
         }
 
         newProducts[index] = {
@@ -265,7 +276,28 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                 >
                                                     <div>
                                                         <div className="font-medium">{product.name}</div>
-                                                        <div className="text-sm text-gray-500">{product.description}</div>
+                                                        <div className="text-sm text-gray-500">
+                                                            {(() => {
+                                                                switch (product.product_type) {
+                                                                    case 'indoor_led':
+                                                                        return product.description + ' ' + 'Indoor LED';
+                                                                    case 'outdoor_led':
+                                                                        return product.cabinet_type + ' ' + 'Outdoor LED';
+                                                                    case 'kiosk':
+                                                                        return product.description + ' ' + 'Kiosk';
+                                                                    case 'controllers':
+                                                                        return product.description + ' ' + 'Controllers';
+                                                                    case 'tv_screens':
+                                                                        return product.description + ' ' + 'TV Screens';
+                                                                    default:
+                                                                        return product.product_type;
+                                                                }
+                                                            })()}
+                                                            {/* Show item box size for indoor/outdoor */}
+                                                            {((product.product_type === 'indoor_led' || product.product_type === 'outdoor_led') && (product.unit_size?.width_mm && product.unit_size?.height_mm)) && (
+                                                                <> • {product.unit_size.width_mm}×{product.unit_size.height_mm}mm</>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                     <div className="text-right">
                                                         <div>₹{product.price}</div>
@@ -293,83 +325,160 @@ export default function QuotationProducts({ quotation, products }: Props) {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Product Id</TableHead>
-                                        <TableHead>Product Description</TableHead>
-                                        <TableHead>HSN Code</TableHead>
-                                        <TableHead>Unit Price (₹)</TableHead>
-                                        <TableHead>Proposed Price (₹)</TableHead>
-                                        <TableHead>Quantity</TableHead>
-                                        <TableHead>Total W/O GST (₹)</TableHead>
-                                        <TableHead>GST %</TableHead>
-                                        <TableHead>Total W/ GST (₹)</TableHead>
-                                        <TableHead>Action</TableHead>
+                                        <TableHead rowSpan={2}>Product Info</TableHead>
+
+                                        <TableHead colSpan={2} className="text-center">Available size at location</TableHead>
+                                        <TableHead rowSpan={2}>Unit Price</TableHead>
+                                        <TableHead rowSpan={2}>Proposed Price</TableHead>
+                                        <TableHead rowSpan={2}>Qty</TableHead>
+                                        <TableHead rowSpan={2}>Total W/O GST (₹)</TableHead>
+                                        <TableHead rowSpan={2}>GST %</TableHead>
+                                        <TableHead rowSpan={2}>Total (₹)</TableHead>
+                                        <TableHead rowSpan={2}>Action</TableHead>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableHead className="text-center">Width (mm)</TableHead>
+                                        <TableHead className="text-center">Height (mm)</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {selectedProducts.map((product, index) => {
                                         const productDetails = products.find(p => p.id === product.id);
+                                        const isIndoorOutdoor = productDetails && (productDetails.product_type === 'indoor_led' || productDetails.product_type === 'outdoor_led');
+                                        // Calculation logic for proposed size and quantity
+                                        let calc = null;
+                                        if (isIndoorOutdoor) {
+                                            // Use per-item available size if present, else fallback to product unit size
+                                            const availableWidthMm = product.available_size_width_mm ? parseFloat(product.available_size_width_mm as any) : 0;
+                                            const availableHeightMm = product.available_size_height_mm ? parseFloat(product.available_size_height_mm as any) : 0;
+                                            const unitWidthMm = productDetails.unit_size?.width_mm || productDetails.w_mm || 320;
+                                            const unitHeightMm = productDetails.unit_size?.height_mm || productDetails.h_mm || 160;
+                                            const boxesInWidth = unitWidthMm > 0 ? Math.floor(availableWidthMm / unitWidthMm) : 0;
+                                            const boxesInHeight = unitHeightMm > 0 ? Math.floor(availableHeightMm / unitHeightMm) : 0;
+                                            const maxPossibleBoxes = boxesInWidth * boxesInHeight;
+                                            const proposedWidthMm = unitWidthMm * boxesInWidth;
+                                            const proposedHeightMm = unitHeightMm * (boxesInWidth > 0 ? Math.ceil(maxPossibleBoxes / boxesInWidth) : 0);
+                                            const proposedWidthFt = (proposedWidthMm / 304.8).toFixed(2);
+                                            const proposedHeightFt = (proposedHeightMm / 304.8).toFixed(2);
+                                            const proposedSqft = ((proposedWidthMm / 304.8) * (proposedHeightMm / 304.8)).toFixed(2);
+                                            calc = {
+                                                proposedWidthMm: proposedWidthMm.toFixed(2),
+                                                proposedHeightMm: proposedHeightMm.toFixed(2),
+                                                proposedWidthFt,
+                                                proposedHeightFt,
+                                                proposedSqft,
+                                                maxPossibleBoxes
+                                            };
+                                        }
+                                        // Calculate subtotal (W/O GST)
+                                        const subtotal = product.quantity * product.proposed_unit_price;
                                         return (
-                                            <TableRow key={index}>
-                                                <TableCell>
-                                                    {productDetails?.id}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {productDetails?.name}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {productDetails?.hsn_code}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Input
-                                                        type="number"
-                                                        step="0.01"
-                                                        className="w-28"
-                                                        value={product.unit_price}
-                                                        readOnly
-                                                        disabled
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Input
-                                                        type="number"
-                                                        step="0.01"
-                                                        className={`w-28 ${product.priceError ? 'border-red-500' : ''}`}
-                                                        value={product.proposed_unit_price}
-                                                        onChange={(e) => handleProductChange(index, 'proposed_unit_price', e.target.value)}
-                                                    />
-                                                    {product.priceError && (
-                                                        <div className="mt-1 w-48 text-xs text-red-500">
-                                                            {product.priceError}
-                                                        </div>
+                                            <React.Fragment key={index}>
+                                                <TableRow>
+                                                    <TableCell style={{ minWidth: 180 }}>
+                                                        <div style={{ fontWeight: 600 }}>{productDetails?.name}</div>
+                                                        <div style={{ fontSize: 12, color: '#666' }}>Brand: {productDetails?.brand || '-'}</div>
+                                                        <div style={{ fontSize: 12, color: '#888' }}>HSN: {productDetails?.hsn_code || '-'}</div>
+                                                    </TableCell>
+
+                                                    {isIndoorOutdoor ? (
+                                                        <>
+                                                            <TableCell>
+                                                                <Input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    step="0.01"
+                                                                    className="w-20"
+                                                                    placeholder="Width (mm)"
+                                                                    value={product.available_size_width_mm ?? ''}
+                                                                    onChange={e => handleProductChange(index, 'available_size_width_mm', e.target.value)}
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    step="0.01"
+                                                                    className="w-20"
+                                                                    placeholder="Height (mm)"
+                                                                    value={product.available_size_height_mm ?? ''}
+                                                                    onChange={e => handleProductChange(index, 'available_size_height_mm', e.target.value)}
+                                                                />
+                                                            </TableCell>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <TableCell>-</TableCell>
+                                                            <TableCell>-</TableCell>
+                                                        </>
                                                     )}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Input
-                                                        type="number"
-                                                        min="1"
-                                                        className="w-20"
-                                                        value={product.quantity}
-                                                        onChange={(e) => handleProductChange(index, 'quantity', e.target.value)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    ₹{(product.quantity * product.proposed_unit_price).toFixed(2)}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {product.tax_percentage}%
-                                                </TableCell>
-                                                <TableCell>
-                                                    ₹{calculateSubtotal(product)}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Button
-                                                        variant="destructive"
-                                                        onClick={() => handleRemoveProduct(index)}
-                                                    >
-                                                        Remove
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
+                                                    <TableCell>
+                                                        <div style={{ minWidth: 80 }}>
+                                                            ₹{Number(product.unit_price).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Input
+                                                            type="number"
+                                                            step="0.01"
+                                                            className={`w-32 ${product.priceError ? 'border-red-500' : ''}`}
+                                                            value={product.proposed_unit_price}
+                                                            onChange={(e) => handleProductChange(index, 'proposed_unit_price', e.target.value)}
+                                                            placeholder="Proposed"
+                                                        />
+                                                        {product.priceError && (
+                                                            <div className="mt-1 w-48 text-xs text-red-500">
+                                                                {product.priceError}
+                                                            </div>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Input
+                                                            type="number"
+                                                            min="1"
+                                                            className="w-16"
+                                                            value={product.quantity}
+                                                            onChange={(e) => handleProductChange(index, 'quantity', e.target.value)}
+                                                            placeholder="Qty"
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div style={{ minWidth: 100 }}>
+                                                            ₹{subtotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div style={{ minWidth: 50 }}>{product.tax_percentage}%</div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div style={{ minWidth: 100 }}>
+                                                            ₹{(product.quantity * product.proposed_unit_price).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={() => handleRemoveProduct(index)}
+                                                        >
+                                                            Remove
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                                {/* Show calculated proposed size and quantity below the row for indoor/outdoor */}
+                                                {isIndoorOutdoor && calc && (
+                                                    <tr>
+                                                        <td colSpan={10} style={{ background: '#f9f9f9', padding: '8px 16px' }}>
+                                                            <div style={{ fontSize: 13, color: '#333' }}>
+                                                                <strong>Item Box Size:</strong> {productDetails.unit_size?.width_mm || productDetails.w_mm || 320} mm W × {productDetails.unit_size?.height_mm || productDetails.h_mm || 160} mm H
+                                                                &nbsp;|&nbsp;
+                                                                <strong>Proposed Size:</strong> {calc.proposedWidthMm} mm W × {calc.proposedHeightMm} mm H
+                                                                &nbsp;|&nbsp; {calc.proposedWidthFt} ft × {calc.proposedHeightFt} ft = {calc.proposedSqft} sq.ft
+                                                                &nbsp;|&nbsp; <strong>Calculated Quantity:</strong> {calc.maxPossibleBoxes} units
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </React.Fragment>
                                         );
                                     })}
                                 </TableBody>

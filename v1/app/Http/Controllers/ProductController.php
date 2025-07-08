@@ -51,7 +51,10 @@ class ProductController extends Controller
             'hsn_code' => 'nullable|string|max:50',
             'min_price' => 'nullable|numeric|min:0',
             'max_price' => 'nullable|numeric|min:0|gte:min_price',
-            'status' => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
+            'pixel_pitch' => 'nullable|numeric|min:0',
+            'refresh_rate' => 'nullable|integer|min:0',
+            'cabinet_type' => 'nullable|string|max:255'
         ]);
 
         $product = Product::create($validated);
@@ -98,7 +101,10 @@ class ProductController extends Controller
             'hsn_code' => 'nullable|string|max:50',
             'min_price' => 'nullable|numeric|min:0',
             'max_price' => 'nullable|numeric|min:0|gte:min_price',
-            'status' => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
+            'pixel_pitch' => 'nullable|numeric|min:0',
+            'refresh_rate' => 'nullable|integer|min:0',
+            'cabinet_type' => 'nullable|string|max:255'
         ]);
 
         $product->update($validated);

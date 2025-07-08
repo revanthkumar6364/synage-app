@@ -141,6 +141,18 @@ const Show: FC<ShowProps> = ({ product }) => {
                                         <span className="text-sm text-gray-500">HSN Code:</span>
                                         <p>{product.hsn_code || 'N/A'}</p>
                                     </div>
+                                    <div>
+                                        <span className="text-sm text-gray-500">Pixel Pitch (If applicable):</span>
+                                        <p>{product.pixel_pitch ? `${product.pixel_pitch} mm` : 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm text-gray-500">Refresh Rate (If applicable):</span>
+                                        <p>{product.refresh_rate ? `${product.refresh_rate} Hz` : 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm text-gray-500">Cabinet Type (If applicable):</span>
+                                        <p>{product.cabinet_type || 'N/A'}</p>
+                                    </div>
                                 </div>
                             </div>
 

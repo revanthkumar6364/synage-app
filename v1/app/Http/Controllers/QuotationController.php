@@ -349,6 +349,8 @@ class QuotationController extends Controller
             'items.*.proposed_unit_price' => 'required|numeric|min:0',
             'items.*.discount_percentage' => 'required|numeric|min:0|max:100',
             'items.*.tax_percentage' => 'required|numeric|min:0|max:100',
+            'items.*.available_size_width_mm' => 'nullable|numeric|min:0',
+            'items.*.available_size_height_mm' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
             'client_scope' => 'nullable|string',
         ]);
@@ -377,7 +379,9 @@ class QuotationController extends Controller
                     'proposed_unit_price' => $item['proposed_unit_price'],
                     'discount_percentage' => $item['discount_percentage'],
                     'tax_percentage' => $item['tax_percentage'],
-                    'notes' => $item['notes'] ?? null
+                    'notes' => $item['notes'] ?? null,
+                    'available_size_width_mm' => $item['available_size_width_mm'] ?? null,
+                    'available_size_height_mm' => $item['available_size_height_mm'] ?? null,
                 ]);
 
                 // Calculate totals based on proposed_unit_price

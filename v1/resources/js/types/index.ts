@@ -78,6 +78,9 @@ export interface Product {
     max_price?: number;
     status: 'active' | 'inactive';
     price_range?: string;
+    pixel_pitch?: number;
+    refresh_rate?: number;
+    cabinet_type?: string;
     unit_size?: {
         width_mm: number;
         height_mm: number;
@@ -100,6 +103,8 @@ export interface Product {
 }
 
 export interface QuotationItem {
+    available_size_height_mm: any;
+    available_size_width_mm: any;
     product: any;
     total: ReactNode;
     id: number;

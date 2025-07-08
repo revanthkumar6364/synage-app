@@ -27,6 +27,8 @@ class QuotationItem extends Model
         'subtotal',
         'total',
         'notes',
+        'available_size_width_mm',
+        'available_size_height_mm',
     ];
 
     protected $casts = [
@@ -40,6 +42,8 @@ class QuotationItem extends Model
         'tax_amount' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'total' => 'decimal:2',
+        'available_size_width_mm' => 'decimal:2',
+        'available_size_height_mm' => 'decimal:2',
     ];
 
     public function quotation(): BelongsTo

@@ -48,6 +48,9 @@ interface EditProps {
         min_price?: number;
         max_price?: number;
         status?: 'active' | 'inactive';
+        pixel_pitch?: number;
+        refresh_rate?: number;
+        cabinet_type?: string;
         category?: {
             id: number;
             name: string;
@@ -89,6 +92,9 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
         min_price: product.min_price?.toString() || '',
         max_price: product.max_price?.toString() || '',
         status: product.status || 'active',
+        pixel_pitch: product.pixel_pitch?.toString() || '',
+        refresh_rate: product.refresh_rate?.toString() || '',
+        cabinet_type: product.cabinet_type || '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -308,7 +314,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 <h3 className="text-lg font-semibold">Dimensions</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <Label htmlFor="size">Size</Label>
+                                        <Label htmlFor="size">Size (mm) (If applicable)</Label>
                                         <Input
                                             id="size"
                                             value={data.size}
@@ -319,7 +325,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="size_inch">Size (Inches)</Label>
+                                        <Label htmlFor="size_inch">Size (Inches) (If applicable)</Label>
                                         <Input
                                             id="size_inch"
                                             value={data.size_inch}
@@ -330,7 +336,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="h_mm">Height (mm)</Label>
+                                        <Label htmlFor="h_mm">Height (mm) (If applicable)</Label>
                                         <Input
                                             id="h_mm"
                                             type="number"
@@ -343,7 +349,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="w_mm">Width (mm)</Label>
+                                        <Label htmlFor="w_mm">Width (mm) (If applicable)</Label>
                                         <Input
                                             id="w_mm"
                                             type="number"
@@ -356,7 +362,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label htmlFor="upto_pix">Up to Pixels</Label>
+                                        <Label htmlFor="upto_pix">Up to Pixels (If applicable)</Label>
                                         <Input
                                             id="upto_pix"
                                             type="number"
@@ -366,6 +372,43 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                             placeholder="Enter up to pixels"
                                         />
                                         {errors.upto_pix && <p className="text-sm text-red-500">{errors.upto_pix}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="pixel_pitch">Pixel Pitch (mm) (If applicable)</Label>
+                                        <Input
+                                            id="pixel_pitch"
+                                            type="number"
+                                            step="0.01"
+                                            value={data.pixel_pitch}
+                                            onChange={(e) => setData('pixel_pitch', e.target.value)}
+                                            placeholder="Enter pixel pitch in mm"
+                                        />
+                                        {errors.pixel_pitch && <p className="text-sm text-red-500">{errors.pixel_pitch}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="refresh_rate">Refresh Rate (Hz) (If applicable)</Label>
+                                        <Input
+                                            id="refresh_rate"
+                                            type="number"
+                                            step="1"
+                                            value={data.refresh_rate}
+                                            onChange={(e) => setData('refresh_rate', e.target.value)}
+                                            placeholder="Enter refresh rate in Hz"
+                                        />
+                                        {errors.refresh_rate && <p className="text-sm text-red-500">{errors.refresh_rate}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="cabinet_type">Cabinet Type (If applicable)</Label>
+                                        <Input
+                                            id="cabinet_type"
+                                            value={data.cabinet_type}
+                                            onChange={(e) => setData('cabinet_type', e.target.value)}
+                                            placeholder="Enter cabinet type"
+                                        />
+                                        {errors.cabinet_type && <p className="text-sm text-red-500">{errors.cabinet_type}</p>}
                                     </div>
                                 </div>
                             </div>

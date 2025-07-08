@@ -362,29 +362,86 @@
     </table>
 
     <div class="separator"></div>
-
     <div class="specs-section">
-        <table class="specs-grid">
-            <tr>
-                <td>
-                    <h3>Size available at location</h3>
-                    <p>{{ $quotation->available_size_width_mm ? number_format((float)$quotation->available_size_width_mm, 2) : '0' }} mm W x {{ $quotation->available_size_height_mm ? number_format((float)$quotation->available_size_height_mm, 2) : '0' }} mm H</p>
-                </td>
-                <td>
-                    <h3>Resolution</h3>
-                    <p>512 x {{ $quotation->proposed_size_width_mm ? number_format((float)$quotation->proposed_size_width_mm, 2) : '0' }} = {{ number_format(((float)($quotation->proposed_size_width_mm ?? 0)) * 512, 0) }} Pixels</p>
-                </td>
-            </tr>
-        </table>
-        <div class="separator" style="margin: 15px 0;"></div>
-        <h3>Proposed Size</h3>
-        <p>
-            {{ $quotation->proposed_size_width_mm ? number_format((float)$quotation->proposed_size_width_mm, 2) : '0' }} mm W x {{ $quotation->proposed_size_height_mm ? number_format((float)$quotation->proposed_size_height_mm, 2) : '0' }} mm H |
-            {{ $quotation->proposed_size_width_ft ? number_format((float)$quotation->proposed_size_width_ft, 2) : '0' }} ft W x {{ $quotation->proposed_size_height_ft ? number_format((float)$quotation->proposed_size_height_ft, 2) : '0' }} ft H =
-            {{ $quotation->proposed_size_sqft ? number_format((float)$quotation->proposed_size_sqft, 2) : '0' }} Sq ft |
-            {{ ceil(((float)($quotation->proposed_size_height_mm ?? 0))/160) }} R x {{ ceil(((float)($quotation->proposed_size_width_mm ?? 0))/320) }} C of 320 W x 160 H mm
-        </p>
+        <h3>Installation Type</h3>
+        <p>{{ $quotation->facade_type ?? '-' }} : {{ $quotation->facade_notes ?? '-' }}</p>
     </div>
+    <div class="separator"></div>
+    @foreach($quotation->items as $index => $item)
+        @php
+            $isSelected = $item->product_id == $quotation->selected_product_id;
+            // Use per-item available size if present, else fallback to main quotation
+            $available_width_mm = isset($item->available_size_width_mm) && $item->available_size_width_mm ? (float) $item->available_size_width_mm : (float) $quotation->available_size_width_mm;
+            $available_height_mm = isset($item->available_size_height_mm) && $item->available_size_height_mm ? (float) $item->available_size_height_mm : (float) $quotation->available_size_height_mm;
+            $available_width_ft = $available_width_mm / 304.8;
+            $available_height_ft = $available_height_mm / 304.8;
+            $available_sqft = $available_width_ft * $available_height_ft;
+
+            // Get product unit size
+            $unit_width_mm = isset($item->product->unit_size['width_mm']) ? (float)$item->product->unit_size['width_mm'] : ((float)$item->product->w_mm ?: 320);
+            $unit_height_mm = isset($item->product->unit_size['height_mm']) ? (float)$item->product->unit_size['height_mm'] : ((float)$item->product->h_mm ?: 160);
+
+            // Use the item's selected quantity
+            $quantity = $item->quantity;
+            $boxes_in_width = $unit_width_mm > 0 ? floor($available_width_mm / $unit_width_mm) : 0;
+            $boxes_in_height = $unit_height_mm > 0 ? floor($available_height_mm / $unit_height_mm) : 0;
+            $max_possible_boxes = $boxes_in_width * $boxes_in_height;
+            // Proposed width/height based on selected quantity (fill rows first)
+            $proposed_width_mm = $boxes_in_width > 0 ? $unit_width_mm * min($boxes_in_width, $quantity) : 0;
+            $proposed_height_mm = $boxes_in_width > 0 ? $unit_height_mm * ceil($quantity / max($boxes_in_width,1)) : 0;
+            $proposed_width_ft = $proposed_width_mm / 304.8;
+            $proposed_height_ft = $proposed_height_mm / 304.8;
+            $proposed_sqft = $proposed_width_ft * $proposed_height_ft;
+        @endphp
+        @if(in_array($item->product->product_type, ['indoor_led', 'outdoor_led']))
+            <div class="specs-section">
+                <h3 style="margin-bottom: 8px; color: #333;">Product Specifications - {{ $item->product->name }}</h3>
+                <table class="specs-grid">
+                    <tr>
+                        <td>
+                            <h3>SIZE AVAILABLE AT LOCATION</h3>
+                            <p>{{ number_format($available_width_mm, 2) }} mm W x {{ number_format($available_height_mm, 2) }} mm H</p>
+                            <div style="margin-top: 8px;">
+                                <h3>PROPOSED SIZE</h3>
+                                <p>
+                                    {{ number_format($proposed_width_mm, 2) }} mm W x {{ number_format($proposed_height_mm, 2) }} mm H |
+                                    {{ number_format($proposed_width_ft, 2) }} ft W x {{ number_format($proposed_height_ft, 2) }} ft H =
+                                    {{ number_format($proposed_sqft, 2) }} Sq ft |
+                                    {{ $boxes_in_height }} R x {{ $boxes_in_width }} C of {{ $unit_width_mm }} W x {{ $unit_height_mm }} H mm
+                                </p>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <h3>RESOLUTION</h3>
+                                <p>{{ number_format($proposed_width_mm * 512, 0) }} Pixels</p>
+                            </div>
+                        </td>
+                        <td>
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="vertical-align: top; padding-right: 16px;">
+                                        <h3>BRAND NAME</h3>
+                                        <p>{{ $item->product->brand ?? '-' }}</p>
+                                        <div style="margin-top: 8px;">
+                                            <h3>PIXEL PITCH</h3>
+                                            <p>{{ $item->product->pixel_pitch ? $item->product->pixel_pitch . ' mm' : 'N/A' }}</p>
+                                        </div>
+                                    </td>
+                                    <td style="vertical-align: top;">
+                                        <h3>REFRESH RATE</h3>
+                                        <p>{{ $item->product->refresh_rate ? $item->product->refresh_rate . ' Hz' : 'N/A' }}</p>
+                                        <div style="margin-top: 8px;">
+                                            <h3>CABINET</h3>
+                                            <p>{{ $item->product->cabinet_type ?? 'N/A' }}</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        @endif
+    @endforeach
 
     <table class="products-table">
         <thead>

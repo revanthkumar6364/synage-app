@@ -416,9 +416,24 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                                         <span className="font-medium">{product.name}</span>
                                                         <span className="text-sm text-gray-500">
                                                             {product.brand} • {getProductTypeDisplayName(product.product_type || '')}
-                                                            {product.unit_size && (
-                                                                <> • {product.unit_size.width_mm}×{product.unit_size.height_mm}mm</>
-                                                            )}
+                                                            {(() => {
+                                                                if (product.product_type === 'tv_screens' && product.size_inch) {
+                                                                    return <> • {product.size_inch}" Inch</>;
+                                                                }
+                                                                if (product.product_type === 'kiosk' && product.size_inch) {
+                                                                    return <> • {product.size_inch}" Inch</>;
+                                                                }
+                                                                if (product.product_type === 'controllers' && product.upto_pix) {
+                                                                    return <> • Up to {product.upto_pix.toLocaleString()} pixels</>;
+                                                                }
+                                                                if (product.product_type === 'indoor_led' && product.unit_size) {
+                                                                    return <> • {product.unit_size.width_mm}×{product.unit_size.height_mm}mm</>;
+                                                                }
+                                                                if (product.product_type === 'outdoor_led' && product.unit_size) {
+                                                                    return <> • {product.unit_size.width_mm}×{product.unit_size.height_mm}mm</>;
+                                                                }
+                                                                return null;
+                                                            })()}
                                                         </span>
                                                     </div>
                                                 </SelectItem>
@@ -435,7 +450,27 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                                 <div className="text-gray-600">
                                                     Brand: {getSelectedProduct()?.brand} |
                                                     Type: {getProductTypeDisplayName(getSelectedProduct()?.product_type || '')} |
-                                                    Unit Size: {getSelectedProduct()?.unit_size?.width_mm}×{getSelectedProduct()?.unit_size?.height_mm}mm
+                                                    {(() => {
+                                                        const product = getSelectedProduct();
+                                                        if (!product) return null;
+
+                                                        if (product.product_type === 'tv_screens' && product.size_inch) {
+                                                            return <>Size: {product.size_inch}" Inch</>;
+                                                        }
+                                                        if (product.product_type === 'kiosk' && product.size_inch) {
+                                                            return <>Size: {product.size_inch}" Inch</>;
+                                                        }
+                                                        if (product.product_type === 'controllers' && product.upto_pix) {
+                                                            return <>Up to: {product.upto_pix.toLocaleString()} pixels</>;
+                                                        }
+                                                        if (product.product_type === 'indoor_led' && product.unit_size) {
+                                                            return <>Unit Size: {product.unit_size.width_mm}×{product.unit_size.height_mm}mm</>;
+                                                        }
+                                                        if (product.product_type === 'outdoor_led' && product.unit_size) {
+                                                            return <>Unit Size: {product.unit_size.width_mm}×{product.unit_size.height_mm}mm</>;
+                                                        }
+                                                        return null;
+                                                    })()}
                                                 </div>
                                             </div>
                                         </div>
@@ -495,7 +530,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                     <div>
                                         <Label>Suggested Size (Auto-calculated)</Label>
                                         <p className="mt-2 text-sm text-gray-500">
-                                            Unit size: {getSelectedProduct()?.unit_size?.width_mm || 320}mm x {getSelectedProduct()?.unit_size?.height_mm || 160}mm
+                                            Unit size: {getSelectedProduct()?.unit_size?.width_mm || 0}mm x {getSelectedProduct()?.unit_size?.height_mm || 0}mm
                                             {data.max_quantity && (
                                                 <> | Total quantity: {data.max_quantity} units</>
                                             )}

@@ -23,6 +23,8 @@ return new class extends Migration
             $table->decimal('subtotal', 10, 2);
             $table->decimal('total', 10, 2);
             $table->text('notes')->nullable();
+            $table->decimal('available_size_width_mm', 10, 2)->nullable();
+            $table->decimal('available_size_height_mm', 10, 2)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

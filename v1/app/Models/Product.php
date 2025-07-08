@@ -32,7 +32,10 @@ class Product extends Model
         'gst_percentage',
         'min_price',
         'max_price',
-        'status'
+        'status',
+        'pixel_pitch',
+        'refresh_rate',
+        'cabinet_type'
     ];
 
     protected $casts = [
@@ -43,7 +46,9 @@ class Product extends Model
         'gst_percentage' => 'decimal:2',
         'h_mm' => 'decimal:2',
         'w_mm' => 'decimal:2',
-        'upto_pix' => 'decimal:2'
+        'upto_pix' => 'decimal:2',
+        'pixel_pitch' => 'decimal:2',
+        'refresh_rate' => 'integer'
     ];
 
     protected $appends = ['price_range', 'can', 'unit_size'];
@@ -83,7 +88,7 @@ class Product extends Model
     public function getUnitSizeAttribute()
     {
         // Return the unit size based on product dimensions
-        if ($this->h_mm && $this->w_mm) {
+        if ($this->h_mm > 0 && $this->w_mm > 0) {
             return [
                 'width_mm' => $this->w_mm,
                 'height_mm' => $this->h_mm,

@@ -268,7 +268,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
 
                                 {/* Product Specifications */}
                                 <div className="space-y-6">
-                                    <div className="bg-muted/30 p-5 rounded-lg border border-border/50 space-y-4">
+                                    {/* <div className="bg-muted/30 p-5 rounded-lg border border-border/50 space-y-4">
                                         <div className="grid grid-cols-2 gap-6">
                                             <div className="space-y-2">
                                                 <h3 className="text-sm font-medium text-primary uppercase tracking-wide">Size available at location</h3>
@@ -299,7 +299,95 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                 })()}
                                             </p>
                                         </div>
-                                    </div>
+                                    </div> */}
+
+                                    {/* Per-Item Product Specifications for LED Products */}
+                                    {quotation.items.map((item: any, index: number) => {
+                                        const isIndoorOutdoor = item.product && (item.product.product_type === 'indoor_led' || item.product.product_type === 'outdoor_led');
+
+                                        if (!isIndoorOutdoor) return null;
+
+                                        // Use per-item available size if present, else fallback to main quotation
+                                        const availableWidthMm = item.available_size_width_mm ? parseFloat(item.available_size_width_mm) : parseFloat(quotation.available_size_width_mm || '0');
+                                        const availableHeightMm = item.available_size_height_mm ? parseFloat(item.available_size_height_mm) : parseFloat(quotation.available_size_height_mm || '0');
+                                        const availableWidthFt = availableWidthMm / 304.8;
+                                        const availableHeightFt = availableHeightMm / 304.8;
+                                        const availableSqft = availableWidthFt * availableHeightFt;
+
+                                        // Get product unit size
+                                        const unitWidthMm = item.product.unit_size?.width_mm || item.product.w_mm || 320;
+                                        const unitHeightMm = item.product.unit_size?.height_mm || item.product.h_mm || 160;
+
+                                        // Use the item's selected quantity
+                                        const quantity = parseFloat(item.quantity) || 0;
+                                        const boxesInWidth = unitWidthMm > 0 ? Math.floor(availableWidthMm / unitWidthMm) : 0;
+                                        const boxesInHeight = unitHeightMm > 0 ? Math.floor(availableHeightMm / unitHeightMm) : 0;
+                                        const maxPossibleBoxes = boxesInWidth * boxesInHeight;
+
+                                        // Proposed width/height based on selected quantity (fill rows first)
+                                        const proposedWidthMm = boxesInWidth > 0 ? unitWidthMm * Math.min(boxesInWidth, quantity) : 0;
+                                        const proposedHeightMm = boxesInWidth > 0 ? unitHeightMm * Math.ceil(quantity / Math.max(boxesInWidth, 1)) : 0;
+                                        const proposedWidthFt = proposedWidthMm / 304.8;
+                                        const proposedHeightFt = proposedHeightMm / 304.8;
+                                        const proposedSqft = proposedWidthFt * proposedHeightFt;
+
+                                        return (
+                                            <div key={item.id} className="bg-muted/30 p-5 rounded-lg border border-border/50 space-y-4">
+                                                <h3 className="text-lg font-semibold text-primary">Product Specifications - {item.product.name}</h3>
+                                                <div className="grid grid-cols-2 gap-6">
+                                                    <div className="space-y-4">
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">SIZE AVAILABLE AT LOCATION</h4>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                {availableWidthMm.toFixed(2)} mm W x {availableHeightMm.toFixed(2)} mm H
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">PROPOSED SIZE</h4>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                {proposedWidthMm.toFixed(2)} mm W x {proposedHeightMm.toFixed(2)} mm H |
+                                                                {proposedWidthFt.toFixed(2)} ft W x {proposedHeightFt.toFixed(2)} ft H =
+                                                                {proposedSqft.toFixed(2)} Sq ft |
+                                                                {boxesInHeight} R x {boxesInWidth} C of {unitWidthMm} W x {unitHeightMm} H mm
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">RESOLUTION</h4>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                {Math.round(proposedWidthMm * 512)} Pixels
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="space-y-4">
+                                                            <div>
+                                                                <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">BRAND NAME</h4>
+                                                                <p className="text-sm text-muted-foreground">{item.product.brand || '-'}</p>
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">PIXEL PITCH</h4>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    {item.product.pixel_pitch ? `${item.product.pixel_pitch} mm` : 'N/A'}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-4">
+                                                            <div>
+                                                                <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">REFRESH RATE</h4>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    {item.product.refresh_rate ? `${item.product.refresh_rate} Hz` : 'N/A'}
+                                                                </p>
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">CABINET</h4>
+                                                                <p className="text-sm text-muted-foreground">{item.product.cabinet_type || 'N/A'}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
 
                                     <div className="rounded-lg border">
                                         <Table>
