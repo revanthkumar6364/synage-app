@@ -19,13 +19,13 @@ class QuotationMediaController extends Controller
         }
 
         $query = QuotationMedia::query()
-            ->when($request->filled('search'), function($q, $search) use ($request) {
-                $q->where(function($subQuery) use ($request) {
+            ->when($request->filled('search'), function ($q, $search) use ($request) {
+                $q->where(function ($subQuery) use ($request) {
                     $subQuery->where('name', 'like', "%{$request->search}%")
-                             ->orWhere('category', 'like', "%{$request->search}%");
+                        ->orWhere('category', 'like', "%{$request->search}%");
                 });
             })
-            ->when($request->filled('category') && $request->category !== 'all', function($q, $category) use ($request) {
+            ->when($request->filled('category') && $request->category !== 'all', function ($q, $category) use ($request) {
                 $q->byCategory($request->category);
             })
             ->active();
@@ -155,9 +155,9 @@ class QuotationMediaController extends Controller
         }
     }
 
-    public function destroy(Request $request, $quotationMediaId)
+    public function destroy(Request $request, $id)
     {
-        $quotationMedia = QuotationMedia::find($quotationMediaId);
+        $quotationMedia = QuotationMedia::findOrFail($id);
         if ($request->user()->cannot('delete', $quotationMedia)) {
             abort(403);
         }
@@ -203,5 +203,28 @@ class QuotationMediaController extends Controller
             DB::rollBack();
             return back()->with('error', 'Failed to update sort order: ' . $e->getMessage());
         }
+    }
+
+    public function attach(Request $request, $id)
+    {
+        $media = QuotationMedia::findOrFail($id);
+        $quotationId = $request->input('quotation_id');
+        if (!$quotationId) {
+            return response()->json(['error' => 'Quotation ID required'], 422);
+        }
+        $media->quotation_id = $quotationId;
+        $media->save();
+        return response()->json(['success' => true]);
+    }
+
+    public function detach(Request $request, $id)
+    {
+        $media = QuotationMedia::findOrFail($id);
+        if ($request->user()->cannot('update', $media)) {
+            abort(403);
+        }
+        $media->quotation_id = null;
+        $media->save();
+        return response()->json(['success' => true]);
     }
 }

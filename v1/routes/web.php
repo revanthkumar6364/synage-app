@@ -49,12 +49,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // Quotation Media Management
 Route::middleware(['auth'])->group(function () {
-    Route::resource('quotation-media', QuotationMediaController::class);
-    Route::post('quotation-media/sort', [QuotationMediaController::class, 'updateSortOrder'])->name('quotation-media.sort');
+    Route::get('quotation-media', [QuotationMediaController::class, 'index'])->name('quotation-media.index');
+    Route::get('quotation-media/create', [QuotationMediaController::class, 'create'])->name('quotation-media.create');
     Route::post('quotation-media', [QuotationMediaController::class, 'store'])->name('quotation-media.store');
+    Route::get('quotation-media/{id}/edit', [QuotationMediaController::class, 'edit'])->name('quotation-media.edit');
+    Route::put('quotation-media/{id}', [QuotationMediaController::class, 'update'])->name('quotation-media.update');
+    Route::delete('quotation-media/{id}', [QuotationMediaController::class, 'destroy'])->name('quotation-media.destroy');
+    Route::post('quotation-media/sort', [QuotationMediaController::class, 'updateSortOrder'])->name('quotation-media.sort');
     Route::patch('quotation-media/{id}/attach', [QuotationMediaController::class, 'attach'])->name('quotation-media.attach');
     Route::patch('quotation-media/{id}/detach', [QuotationMediaController::class, 'detach'])->name('quotation-media.detach');
-    Route::delete('quotation-media/{id}', [QuotationMediaController::class, 'destroy'])->name('quotation-media.destroy');
 });
 
 require __DIR__.'/settings.php';

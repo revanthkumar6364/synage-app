@@ -18,6 +18,7 @@ import { PlusIcon, LinkIcon, TrashIcon, ArrowLeftIcon, FileIcon, FileTextIcon } 
 import { QuotationMedia } from '@/types';
 import { toast, Toaster } from 'sonner';
 import AppLayout from '@/layouts/app-layout';
+import axios from 'axios';
 
 interface Props {
     quotation: {
@@ -78,11 +79,19 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
         });
     };
 
-    const handleDetach = (mediaId: number) => {
-        router.patch(route('quotation-media.detach', { id: mediaId }), {}, {
-            onSuccess: () => toast.success('File detached successfully'),
-            onError: () => toast.error('Failed to detach file'),
-        });
+    const handleDetach = async (mediaId: number) => {
+        try {
+            const response = await axios.patch(route('quotation-media.detach', { id: mediaId }));
+            if (response.data && response.data.success) {
+                toast.success('File detached successfully');
+                window.location.reload();
+            } else {
+                toast.error('Failed to detach file');
+            }
+        } catch (e) {
+            console.error(e);
+            toast.error('Failed to detach file');
+        }
     };
 
     return (

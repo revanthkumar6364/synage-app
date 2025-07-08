@@ -110,8 +110,13 @@ export default function Index({ media, filters, categories }: Props) {
             onSuccess: () => {
                 toast.success('Media deleted successfully');
             },
-            onError: () => {
-                toast.error('Failed to delete media');
+            onError: (errors) => {
+                console.error('Delete error:', errors);
+                if (errors.error) {
+                    toast.error(errors.error);
+                } else {
+                    toast.error('Failed to delete media');
+                }
             },
         });
     };
