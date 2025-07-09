@@ -1,92 +1,115 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{{ $quotation->title }}</title>
     <style>
         @page {
             margin: 0;
             padding: 0;
         }
+
         body {
             font-family: 'DejaVu Sans', sans-serif;
             margin: 0;
             padding: 30px;
-            font-size: 11px;
+            font-size: 12px;
+            /* Changed from 11px to 12px */
             line-height: 1.4;
             color: #333;
         }
+
         .header {
             width: 100%;
             margin-bottom: 30px;
         }
+
         .header-table {
             width: 100%;
             border-collapse: collapse;
         }
+
         .header-table td {
             vertical-align: top;
             padding: 0;
         }
+
         .logo-section {
             width: 40%;
         }
+
         .logo {
             max-height: 50px;
             width: auto;
         }
+
         .company-info {
             text-align: right;
-            font-size: 11px;
+            font-size: 14px;
+            /* Changed from 11px to 14px for address section */
             line-height: 1.5;
         }
+
         .company-info h3 {
-            font-size: 14px;
+            font-size: 16px;
+            /* Changed from 14px to 16px for logo section */
             margin: 0 0 8px 0;
             color: #1a1a1a;
         }
+
         .company-info p {
             margin: 4px 0;
             color: #666;
         }
+
         .company-info .email {
             color: #1a1a1a;
             text-decoration: none;
         }
+
         .separator {
             border-top: 1px solid #e5e5e5;
             margin: 25px 0;
         }
+
         .title-section {
             text-align: center;
             margin-bottom: 25px;
         }
+
         .title-section h2 {
             font-size: 18px;
             margin: 0 0 8px 0;
             color: #1a1a1a;
         }
+
         .title-section p {
             margin: 4px 0;
             font-size: 11px;
             color: #666;
         }
+
         .info-grid {
             width: 100%;
             border-collapse: collapse;
             margin: 25px 0;
         }
+
         .info-grid td {
             width: 33.33%;
             padding: 0 10px;
             vertical-align: top;
         }
+
         .info-grid td:first-child {
             padding-left: 0;
         }
+
         .info-grid td:last-child {
             padding-right: 0;
         }
+
         .info-box {
             background: #f8f9fa;
             padding: 15px;
@@ -95,6 +118,7 @@
             min-height: 120px;
             position: relative;
         }
+
         .info-box h3 {
             margin: 0 0 10px 0;
             font-size: 12px;
@@ -103,16 +127,19 @@
             letter-spacing: 0.5px;
             color: #1a1a1a;
         }
+
         .info-box p {
             margin: 6px 0;
             font-size: 11px;
             line-height: 1.5;
             color: #666;
         }
+
         .info-box .business-name {
             color: #1a1a1a;
             font-weight: 500;
         }
+
         .specs-section {
             background: #f8f9fa;
             padding: 15px;
@@ -120,15 +147,18 @@
             border-radius: 6px;
             margin: 25px 0;
         }
+
         .specs-grid {
             width: 100%;
             border-collapse: collapse;
         }
+
         .specs-grid td {
             width: 50%;
             padding: 0 15px 15px 0;
             vertical-align: top;
         }
+
         .specs-grid h3 {
             font-size: 12px;
             margin: 0 0 6px 0;
@@ -136,17 +166,20 @@
             letter-spacing: 0.5px;
             color: #1a1a1a;
         }
+
         .specs-grid p {
             margin: 0;
             font-size: 11px;
             color: #666;
         }
+
         .products-table {
             width: 100%;
             border-collapse: collapse;
             margin: 25px 0;
             border: 1px solid #e5e5e5;
         }
+
         .products-table th {
             background: #f8f9fa;
             padding: 10px;
@@ -156,20 +189,24 @@
             border-bottom: 1px solid #e5e5e5;
             color: #1a1a1a;
         }
+
         .products-table td {
             padding: 10px;
             font-size: 11px;
             border-bottom: 1px solid #e5e5e5;
             color: #666;
         }
+
         .products-table .text-right {
             text-align: right;
         }
+
         .totals-section {
             width: 250px;
             margin-left: auto;
             margin-bottom: 25px;
         }
+
         .totals-row {
             display: flex;
             justify-content: space-between;
@@ -177,6 +214,7 @@
             font-size: 11px;
             color: #666;
         }
+
         .totals-row.final {
             margin-top: 8px;
             padding-top: 8px;
@@ -184,6 +222,7 @@
             font-weight: bold;
             color: #1a1a1a;
         }
+
         .note-box {
             background: #fff;
             padding: 15px;
@@ -191,92 +230,111 @@
             border-radius: 6px;
             margin: 25px 0;
         }
+
         .terms-section {
             margin: 25px 0;
         }
+
         .terms-section h3 {
             font-size: 14px;
             margin: 0 0 15px 0;
             color: #1a1a1a;
         }
+
         .terms-grid {
             width: 100%;
             border-collapse: collapse;
         }
+
         .terms-grid td {
             width: 50%;
             padding: 0 15px 15px 0;
             vertical-align: top;
         }
+
         .terms-grid h4 {
             font-size: 12px;
             margin: 0 0 8px 0;
             color: #1a1a1a;
         }
+
         .terms-grid p {
             margin: 0;
             font-size: 11px;
             color: #666;
         }
+
         .footer {
             margin-top: 25px;
         }
+
         .footer-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
+
         .footer-logo {
             height: 30px;
             opacity: 0.5;
         }
+
         .signature-section {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
         }
+
         .signature-block img {
             height: 30px;
             margin: 8px 0;
             opacity: 0.5;
         }
+
         .signature-name {
             font-size: 11px;
             font-weight: bold;
             color: #1a1a1a;
         }
+
         .generated-date {
             text-align: right;
             font-size: 10px;
             color: #666;
         }
+
         .attachments {
             margin-top: 30px;
         }
+
         .attachments-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-top: 15px;
         }
+
         .attachment-img {
             width: 200px;
             height: 200px;
             border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .attachment-img1 {
             width: auto;
             height: 500px;
             border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
+
 <body>
-    @if($quotation->status === 'approved')
-        <div style="
+    @if ($quotation->status === 'approved')
+        <div
+            style="
             position: fixed;
             top: 35%;
             left: 0;
@@ -332,7 +390,7 @@
     <div class="title-section">
         <h2>{{ $quotation->title }}</h2>
         <p style="font-weight: 500">Kind Attn: {{ optional($quotation->account_contact)->name }}<br>
-        {{ optional($quotation->account_contact)->role }}</p>
+            {{ optional($quotation->account_contact)->role }}</p>
         <p>{{ $quotation->description }}</p>
     </div>
 
@@ -345,8 +403,10 @@
                     <h3>Bill To</h3>
                     <p class="business-name">{{ optional($quotation->account)->business_name }}</p>
                     <p>{{ $quotation->billing_address }}</p>
-                    <p>{{ $quotation->billing_city }}, {{ $quotation->billing_location }} {{ $quotation->billing_zip_code }}</p>
-                    <p style="margin-top: 8px"><span style="font-weight: 500">GST NO:</span> {{ optional($quotation->account)->gst_number }}</p>
+                    <p>{{ $quotation->billing_city }}, {{ $quotation->billing_location }}
+                        {{ $quotation->billing_zip_code }}</p>
+                    <p style="margin-top: 8px"><span style="font-weight: 500">GST NO:</span>
+                        {{ optional($quotation->account)->gst_number }}</p>
                 </div>
             </td>
             <td>
@@ -354,8 +414,10 @@
                     <h3>Ship To</h3>
                     <p class="business-name">{{ optional($quotation->account_contact)->name }}</p>
                     <p>{{ $quotation->shipping_address }}</p>
-                    <p>{{ $quotation->shipping_city }}, {{ $quotation->shipping_location }} {{ $quotation->shipping_zip_code }}</p>
-                    <p style="margin-top: 8px"><span style="font-weight: 500">GST NO:</span> {{ optional($quotation->account)->gst_number }}</p>
+                    <p>{{ $quotation->shipping_city }}, {{ $quotation->shipping_location }}
+                        {{ $quotation->shipping_zip_code }}</p>
+                    <p style="margin-top: 8px"><span style="font-weight: 500">GST NO:</span>
+                        {{ optional($quotation->account)->gst_number }}</p>
                 </div>
             </td>
         </tr>
@@ -367,19 +429,31 @@
         <p>{{ $quotation->facade_type ?? '-' }} : {{ $quotation->facade_notes ?? '-' }}</p>
     </div>
     <div class="separator"></div>
-    @foreach($quotation->items as $index => $item)
+    @foreach ($quotation->items as $index => $item)
         @php
             $isSelected = $item->product_id == $quotation->selected_product_id;
             // Use per-item available size if present, else fallback to main quotation
-            $available_width_mm = isset($item->available_size_width_mm) && $item->available_size_width_mm ? (float) $item->available_size_width_mm : (float) $quotation->available_size_width_mm;
-            $available_height_mm = isset($item->available_size_height_mm) && $item->available_size_height_mm ? (float) $item->available_size_height_mm : (float) $quotation->available_size_height_mm;
+            $available_width_mm =
+                isset($item->available_size_width_mm) && $item->available_size_width_mm
+                    ? (float) $item->available_size_width_mm
+                    : (float) $quotation->available_size_width_mm;
+            $available_height_mm =
+                isset($item->available_size_height_mm) && $item->available_size_height_mm
+                    ? (float) $item->available_size_height_mm
+                    : (float) $quotation->available_size_height_mm;
             $available_width_ft = $available_width_mm / 304.8;
             $available_height_ft = $available_height_mm / 304.8;
             $available_sqft = $available_width_ft * $available_height_ft;
 
             // Get product unit size
-            $unit_width_mm = isset($item->product->unit_size['width_mm']) ? (float)$item->product->unit_size['width_mm'] : ((float)$item->product->w_mm ?: 320);
-            $unit_height_mm = isset($item->product->unit_size['height_mm']) ? (float)$item->product->unit_size['height_mm'] : ((float)$item->product->h_mm ?: 160);
+            $unit_width_mm = isset($item->product->unit_size['width_mm'])
+                ? (float) $item->product->unit_size['width_mm']
+                : ((float) $item->product->w_mm ?:
+                320);
+            $unit_height_mm = isset($item->product->unit_size['height_mm'])
+                ? (float) $item->product->unit_size['height_mm']
+                : ((float) $item->product->h_mm ?:
+                160);
 
             // Use the item's selected quantity
             $quantity = $item->quantity;
@@ -388,30 +462,34 @@
             $max_possible_boxes = $boxes_in_width * $boxes_in_height;
             // Proposed width/height based on selected quantity (fill rows first)
             $proposed_width_mm = $boxes_in_width > 0 ? $unit_width_mm * min($boxes_in_width, $quantity) : 0;
-            $proposed_height_mm = $boxes_in_width > 0 ? $unit_height_mm * ceil($quantity / max($boxes_in_width,1)) : 0;
+            $proposed_height_mm = $boxes_in_width > 0 ? $unit_height_mm * ceil($quantity / max($boxes_in_width, 1)) : 0;
             $proposed_width_ft = $proposed_width_mm / 304.8;
             $proposed_height_ft = $proposed_height_mm / 304.8;
             $proposed_sqft = $proposed_width_ft * $proposed_height_ft;
         @endphp
-        @if(in_array($item->product->product_type, ['indoor_led', 'outdoor_led']))
+        @if (in_array($item->product->product_type, ['indoor_led', 'outdoor_led']))
             <div class="specs-section">
                 <h3 style="margin-bottom: 8px; color: #333;">Product Specifications - {{ $item->product->name }}</h3>
                 <table class="specs-grid">
                     <tr>
                         <td>
                             <h3>SIZE AVAILABLE AT LOCATION</h3>
-                            <p>{{ number_format($available_width_mm, 2) }} mm W x {{ number_format($available_height_mm, 2) }} mm H</p>
+                            <p>{{ number_format($available_width_mm, 2) }} mm W x
+                                {{ number_format($available_height_mm, 2) }} mm H</p>
                             <div style="margin-top: 8px;">
-                                <h3>PROPOSED SIZE</h3>
+                                <h3>SUGGESTED SIZE</h3>
                                 <p>
-                                    {{ number_format($proposed_width_mm, 2) }} mm W x {{ number_format($proposed_height_mm, 2) }} mm H |
-                                    {{ number_format($proposed_width_ft, 2) }} ft W x {{ number_format($proposed_height_ft, 2) }} ft H =
+                                    {{ number_format($proposed_width_mm, 2) }} mm W x
+                                    {{ number_format($proposed_height_mm, 2) }} mm H |
+                                    {{ number_format($proposed_width_ft, 2) }} ft W x
+                                    {{ number_format($proposed_height_ft, 2) }} ft H =
                                     {{ number_format($proposed_sqft, 2) }} Sq ft |
-                                    {{ $boxes_in_height }} R x {{ $boxes_in_width }} C of {{ $unit_width_mm }} W x {{ $unit_height_mm }} H mm
+                                    {{ $boxes_in_height }} R x {{ $boxes_in_width }} C of {{ $unit_width_mm }} W x
+                                    {{ $unit_height_mm }} H mm
                                 </p>
                             </div>
                             <div style="margin-top: 8px;">
-                                <h3>RESOLUTION</h3>
+                                <h3>NO OF PIXELS</h3>
                                 <p>{{ number_format($proposed_width_mm * 512, 0) }} Pixels</p>
                             </div>
                         </td>
@@ -423,14 +501,16 @@
                                         <p>{{ $item->product->brand ?? '-' }}</p>
                                         <div style="margin-top: 8px;">
                                             <h3>PIXEL PITCH</h3>
-                                            <p>{{ $item->product->pixel_pitch ? $item->product->pixel_pitch . ' mm' : 'N/A' }}</p>
+                                            <p>{{ $item->product->pixel_pitch ? $item->product->pixel_pitch . ' mm' : 'N/A' }}
+                                            </p>
                                         </div>
                                     </td>
                                     <td style="vertical-align: top;">
                                         <h3>REFRESH RATE</h3>
-                                        <p>{{ $item->product->refresh_rate ? $item->product->refresh_rate . ' Hz' : 'N/A' }}</p>
+                                        <p>{{ $item->product->refresh_rate ? $item->product->refresh_rate . ' Hz' : 'N/A' }}
+                                        </p>
                                         <div style="margin-top: 8px;">
-                                            <h3>CABINET</h3>
+                                            <h3>CABINET TYPE</h3>
                                             <p>{{ $item->product->cabinet_type ?? 'N/A' }}</p>
                                         </div>
                                     </td>
@@ -448,7 +528,7 @@
             <tr>
                 <th style="width: 40px; text-align: center">#</th>
                 <th>Product Description</th>
-                @if($quotation->show_hsn_code)
+                @if ($quotation->show_hsn_code)
                     <th>HSN</th>
                 @endif
                 <th class="text-right">Qty</th>
@@ -458,16 +538,16 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($quotation->items as $index => $item)
+            @foreach ($quotation->items as $index => $item)
                 <tr>
                     <td style="text-align: center">{{ $index + 1 }}</td>
                     <td>
                         <div style="font-weight: 500">{{ $item->product->name }}</div>
-                        @if($item->notes)
+                        @if ($item->notes)
                             <div style="color: #666; margin-top: 4px">{{ $item->notes }}</div>
                         @endif
                     </td>
-                    @if($quotation->show_hsn_code)
+                    @if ($quotation->show_hsn_code)
                         <td>{{ $item->product->hsn_code }}</td>
                     @endif
                     <td class="text-right">{{ $item->quantity }}</td>
@@ -547,15 +627,22 @@
         <div class="signature-section">
             <div class="signature-block">
                 For Radiant Synage Pvt Ltd.,<br>
-                <img src="{{ public_path('images/signature.png') }}" alt="Signature" style="height: 40px; margin: 8px 0;">
+                <img src="{{ public_path('images/signature.png') }}" alt="Signature"
+                    style="height: 40px; margin: 8px 0;">
                 <div class="signature-name">{{ auth()->user()->name ?? '' }}</div>
-                <div class="signature-name">{{ auth()->user()->email ?? '' }}, {{ auth()->user()->mobile ?? '' }}</div>
+                <div class="signature-name">{{ auth()->user()->email ?? '' }}, {{ auth()->user()->mobile ?? '' }}
+                </div>
                 <div style="margin-top: 8px; font-size: 11px;">
-                    <a href="https://wa.me/918884491377" style="margin-right: 8px; text-decoration: none; color: #25D366;">WhatsApp</a>
-                    <a href="https://facebook.com/radiantsynage" style="margin-right: 8px; text-decoration: none; color: #1877F3;">Facebook</a>
-                    <a href="https://instagram.com/radiantsynage" style="margin-right: 8px; text-decoration: none; color: #E4405F;">Instagram</a>
-                    <a href="https://youtube.com/@radiantsynage" style="margin-right: 8px; text-decoration: none; color: #FF0000;">YouTube</a>
-                    <a href="https://linkedin.com/company/radiantsynage" style="margin-right: 8px; text-decoration: none; color: #0A66C2;">LinkedIn</a>
+                    <a href="https://wa.me/918884491377"
+                        style="margin-right: 8px; text-decoration: none; color: #25D366;">WhatsApp</a>
+                    <a href="https://facebook.com/radiantsynage"
+                        style="margin-right: 8px; text-decoration: none; color: #1877F3;">Facebook</a>
+                    <a href="https://instagram.com/radiantsynage"
+                        style="margin-right: 8px; text-decoration: none; color: #E4405F;">Instagram</a>
+                    <a href="https://youtube.com/@radiantsynage"
+                        style="margin-right: 8px; text-decoration: none; color: #FF0000;">YouTube</a>
+                    <a href="https://linkedin.com/company/radiantsynage"
+                        style="margin-right: 8px; text-decoration: none; color: #0A66C2;">LinkedIn</a>
                     <a href="https://radiantsynage.com" style="text-decoration: none; color: #1a1a1a;">Website</a>
                 </div>
             </div>
@@ -566,29 +653,27 @@
         </div>
     </div>
 
-    @if($commonFiles->isNotEmpty() || $quotationFiles->isNotEmpty())
+    @if ($commonFiles->isNotEmpty() || $quotationFiles->isNotEmpty())
         <div class="attachments">
             <div class="separator"></div>
-            @if($commonFiles->isNotEmpty())
+            @if ($commonFiles->isNotEmpty())
                 <div style="margin-bottom: 25px">
                     <div class="attachments-grid">
-                        @foreach($commonFiles as $file)
+                        @foreach ($commonFiles as $file)
                             <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
-                                 alt="{{ $file->name }}"
-                                 class="attachment-img">
+                                alt="{{ $file->name }}" class="attachment-img">
                         @endforeach
                     </div>
                 </div>
             @endif
-            @if($quotationFiles->isNotEmpty())
+            @if ($quotationFiles->isNotEmpty())
                 <div class="separator"></div>
                 <div>
                     <h3>Attachments</h3>
                     <div class="attachments-grid">
-                        @foreach($quotationFiles as $file)
+                        @foreach ($quotationFiles as $file)
                             <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
-                                 alt="{{ $file->name }}"
-                                 class="attachment-img1">
+                                alt="{{ $file->name }}" class="attachment-img1">
                         @endforeach
                     </div>
                 </div>
@@ -596,4 +681,5 @@
         </div>
     @endif
 </body>
+
 </html>
