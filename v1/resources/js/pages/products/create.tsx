@@ -39,19 +39,19 @@ const Create: FC<CreateProps> = ({ categories }) => {
         sku: '',
         description: '',
         size: '',
-        h_mm: '',
-        w_mm: '',
+        h_mm: 0,
+        w_mm: 0,
         size_inch: '',
-        upto_pix: '',
+        upto_pix: 0,
         price: '',
         unit: '',
-        price_per_sqft: '',
+        price_per_sqft: 0,
         brand: '',
         type: '',
-        gst_percentage: '',
+        gst_percentage: 0,
         hsn_code: '',
-        min_price: '',
-        max_price: '',
+        min_price: 0,
+        max_price: 0,
         status: 'active',
         pixel_pitch: '',
         refresh_rate: '',
@@ -156,7 +156,7 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                         type="number"
                                         step="0.01"
                                         value={data.min_price}
-                                        onChange={(e) => setData('min_price', e.target.value)}
+                                        onChange={(e) => setData('min_price', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                                         placeholder="Enter min price"
                                     />
                                     {errors.min_price && <p className="text-sm text-red-500">{errors.min_price}</p>}
@@ -169,7 +169,7 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                         type="number"
                                         step="0.01"
                                         value={data.max_price}
-                                        onChange={(e) => setData('max_price', e.target.value)}
+                                        onChange={(e) => setData('max_price', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                                         placeholder="Enter max price"
                                     />
                                     {errors.max_price && <p className="text-sm text-red-500">{errors.max_price}</p>}
@@ -182,7 +182,7 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                         type="number"
                                         step="0.01"
                                         value={data.price_per_sqft}
-                                        onChange={(e) => setData('price_per_sqft', e.target.value)}
+                                        onChange={(e) => setData('price_per_sqft', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                                         placeholder="Enter price per square foot"
                                     />
                                     {errors.price_per_sqft && <p className="text-sm text-red-500">{errors.price_per_sqft}</p>}
@@ -211,13 +211,13 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="gst_percentage">GST Percentage</Label>
+                                    <Label htmlFor="gst_percentage">GST Percentage (required if applicable, default 0)</Label>
                                     <Input
                                         id="gst_percentage"
                                         type="number"
                                         step="0.01"
                                         value={data.gst_percentage}
-                                        onChange={(e) => setData('gst_percentage', e.target.value)}
+                                        onChange={(e) => setData('gst_percentage', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                                         placeholder="Enter GST percentage"
                                     />
                                     {errors.gst_percentage && <p className="text-sm text-red-500">{errors.gst_percentage}</p>}
@@ -257,12 +257,12 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                 <h3 className="text-lg font-semibold">Dimensions</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <Label htmlFor="size">Size (mm) (If applicable)</Label>
+                                        <Label htmlFor="size">Size (mm) Width X Height (If applicable)</Label>
                                         <Input
                                             id="size"
                                             value={data.size}
                                             onChange={(e) => setData('size', e.target.value)}
-                                            placeholder="Enter size (e.g., 320x160)"
+                                            placeholder="Enter size (e.g., 500 mm X 1000 mm)"
                                         />
                                         {errors.size && <p className="text-sm text-red-500">{errors.size}</p>}
                                     </div>
@@ -285,7 +285,7 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                             type="number"
                                             step="0.01"
                                             value={data.h_mm}
-                                            onChange={(e) => setData('h_mm', e.target.value)}
+                                            onChange={(e) => setData('h_mm', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                                             placeholder="Enter height in mm"
                                         />
                                         {errors.h_mm && <p className="text-sm text-red-500">{errors.h_mm}</p>}
@@ -298,7 +298,7 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                             type="number"
                                             step="0.01"
                                             value={data.w_mm}
-                                            onChange={(e) => setData('w_mm', e.target.value)}
+                                            onChange={(e) => setData('w_mm', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                                             placeholder="Enter width in mm"
                                         />
                                         {errors.w_mm && <p className="text-sm text-red-500">{errors.w_mm}</p>}
@@ -311,7 +311,7 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                             type="number"
                                             step="0.01"
                                             value={data.upto_pix}
-                                            onChange={(e) => setData('upto_pix', e.target.value)}
+                                            onChange={(e) => setData('upto_pix', e.target.value === '' ? 0 : parseFloat(e.target.value))}
                                             placeholder="Enter up to pixels"
                                         />
                                         {errors.upto_pix && <p className="text-sm text-red-500">{errors.upto_pix}</p>}
