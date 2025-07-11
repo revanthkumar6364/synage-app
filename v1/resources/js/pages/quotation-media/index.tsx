@@ -115,7 +115,7 @@ export default function Index({ media, filters, categories }: Props) {
                 if (errors.error) {
                     toast.error(errors.error);
                 } else {
-                    toast.error('Failed to delete media');
+                toast.error('Failed to delete media');
                 }
             },
         });

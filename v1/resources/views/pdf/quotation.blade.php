@@ -398,7 +398,7 @@
     <div class="title-section">
         <h2>{{ $quotation->title }}</h2>
         <p style="font-weight: 500">Kind Attn: {{ optional($quotation->account_contact)->name }}<br>
-            {{ optional($quotation->account_contact)->role }}</p>
+        {{ optional($quotation->account_contact)->role }}</p>
         <p>{{ $quotation->description }}</p>
     </div>
 
@@ -476,17 +476,17 @@
             $proposed_sqft = $proposed_width_ft * $proposed_height_ft;
         @endphp
         @if (in_array($item->product->product_type, ['indoor_led', 'outdoor_led']))
-            <div class="specs-section">
+    <div class="specs-section">
                 <h3 style="margin-bottom: 8px; color: #333;">Product Specifications - {{ $item->product->name }}</h3>
-                <table class="specs-grid">
-                    <tr>
-                        <td>
+        <table class="specs-grid">
+            <tr>
+                <td>
                             <h3>SIZE AVAILABLE AT LOCATION</h3>
                             <p>{{ number_format($available_width_mm, 2) }} mm W x
                                 {{ number_format($available_height_mm, 2) }} mm H</p>
                             <div style="margin-top: 8px;">
                                 <h3>SUGGESTED SIZE</h3>
-                                <p>
+                        <p>
                                     {{ number_format($proposed_width_mm, 2) }} mm W x
                                     {{ number_format($proposed_height_mm, 2) }} mm H |
                                     {{ number_format($proposed_width_ft, 2) }} ft W x
@@ -494,14 +494,14 @@
                                     {{ number_format($proposed_sqft, 2) }} Sq ft |
                                     {{ $boxes_in_height }} R x {{ $boxes_in_width }} C of {{ $unit_width_mm }} W x
                                     {{ $unit_height_mm }} H mm
-                                </p>
-                            </div>
+                        </p>
+                    </div>
                             <div style="margin-top: 8px;">
                                 <h3>NO OF PIXELS</h3>
                                 <p>{{ number_format($proposed_width_mm * 512, 0) }} Pixels</p>
-                            </div>
-                        </td>
-                        <td>
+                    </div>
+                </td>
+                <td>
                             <table style="width: 100%;">
                                 <tr>
                                     <td style="vertical-align: top; padding-right: 16px;">
@@ -511,7 +511,7 @@
                                             <h3>PIXEL PITCH</h3>
                                             <p>{{ $item->product->pixel_pitch ? $item->product->pixel_pitch . ' mm' : 'N/A' }}
                                             </p>
-                                        </div>
+                    </div>
                                     </td>
                                     <td style="vertical-align: top;">
                                         <h3>REFRESH RATE</h3>
@@ -520,14 +520,14 @@
                                         <div style="margin-top: 8px;">
                                             <h3>CABINET TYPE</h3>
                                             <p>{{ $item->product->cabinet_type ?? 'N/A' }}</p>
-                                        </div>
+                    </div>
                                     </td>
                                 </tr>
                             </table>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+                </td>
+            </tr>
+        </table>
+    </div>
         @endif
     @endforeach
 

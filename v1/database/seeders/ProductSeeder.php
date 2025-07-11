@@ -128,19 +128,19 @@ class ProductSeeder extends Seeder
             $data['size_inch'] = null;
 
             // Parse size for all product types
-            if (preg_match('/([\d\.]+)\s*mm\s*X\s*([\d\.]+)\s*mm/i', $data['size'], $m)) {
-                $data['w_mm'] = (float)$m[1];
-                $data['h_mm'] = (float)$m[2];
-            } elseif (preg_match('/([\d\.]+)\s*Inch\s*X\s*([\d\.]+)\s*Inch/i', $data['size'], $i)) {
-                // e.g. 43 Inch X 24 Inch
-                $data['w_mm'] = round((float)$i[1] * 25.4, 2);
-                $data['h_mm'] = round((float)$i[2] * 25.4, 2);
-                $data['size_inch'] = (float)$i[1];
-            } elseif (preg_match('/([\d\.]+)\s*Inch/i', $data['size'], $i)) {
+                if (preg_match('/([\d\.]+)\s*mm\s*X\s*([\d\.]+)\s*mm/i', $data['size'], $m)) {
+                    $data['w_mm'] = (float)$m[1];
+                    $data['h_mm'] = (float)$m[2];
+                } elseif (preg_match('/([\d\.]+)\s*Inch\s*X\s*([\d\.]+)\s*Inch/i', $data['size'], $i)) {
+                    // e.g. 43 Inch X 24 Inch
+                    $data['w_mm'] = round((float)$i[1] * 25.4, 2);
+                    $data['h_mm'] = round((float)$i[2] * 25.4, 2);
+                    $data['size_inch'] = (float)$i[1];
+                } elseif (preg_match('/([\d\.]+)\s*Inch/i', $data['size'], $i)) {
                 // For single inch measurements (like TV screens and kiosks)
-                $data['w_mm'] = round((float)$i[1] * 25.4, 2);
+                    $data['w_mm'] = round((float)$i[1] * 25.4, 2);
                 $data['h_mm'] = 0;
-                $data['size_inch'] = (float)$i[1];
+                    $data['size_inch'] = (float)$i[1];
             }
 
             // parse upto_pix

@@ -78,6 +78,22 @@ class ProductController extends Controller
             'cabinet_type' => 'nullable|string|max:255'
         ]);
 
+        // Convert empty strings to 0 for numeric fields that have default values
+        $numericFieldsWithDefaults = ['h_mm', 'w_mm', 'upto_pix', 'price_per_sqft', 'gst_percentage', 'min_price', 'max_price'];
+        foreach ($numericFieldsWithDefaults as $field) {
+            if (isset($validated[$field]) && $validated[$field] === '') {
+                $validated[$field] = 0;
+            }
+        }
+
+        // Convert empty strings to null for nullable fields
+        $nullableFields = ['pixel_pitch', 'refresh_rate', 'description', 'size', 'size_inch', 'unit', 'brand', 'type', 'hsn_code', 'cabinet_type'];
+        foreach ($nullableFields as $field) {
+            if (isset($validated[$field]) && $validated[$field] === '') {
+                $validated[$field] = null;
+            }
+        }
+
         // Get the category and set product_type from category slug
         $category = Category::find($validated['category_id']);
         if ($category) {
@@ -132,6 +148,22 @@ class ProductController extends Controller
             'refresh_rate' => 'nullable|integer|min:0',
             'cabinet_type' => 'nullable|string|max:255'
         ]);
+
+        // Convert empty strings to 0 for numeric fields that have default values
+        $numericFieldsWithDefaults = ['h_mm', 'w_mm', 'upto_pix', 'price_per_sqft', 'gst_percentage', 'min_price', 'max_price'];
+        foreach ($numericFieldsWithDefaults as $field) {
+            if (isset($validated[$field]) && $validated[$field] === '') {
+                $validated[$field] = 0;
+            }
+        }
+
+        // Convert empty strings to null for nullable fields
+        $nullableFields = ['pixel_pitch', 'refresh_rate', 'description', 'size', 'size_inch', 'unit', 'brand', 'type', 'hsn_code', 'cabinet_type'];
+        foreach ($nullableFields as $field) {
+            if (isset($validated[$field]) && $validated[$field] === '') {
+                $validated[$field] = null;
+            }
+        }
 
         // Get the category and set product_type from category slug
         $category = Category::find($validated['category_id']);
