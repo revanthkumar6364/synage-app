@@ -10,14 +10,36 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')
-            ->latest()
-            ->paginate(10);
+        $query = Product::with('category');
+
+        // Handle search
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%")
+                  ->orWhere('brand', 'like', "%{$search}%")
+                  ->orWhere('product_type', 'like', "%{$search}%")
+                  ->orWhereHas('category', function ($categoryQuery) use ($search) {
+                      $categoryQuery->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Handle category filter
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->get('category'));
+        }
+
+        $products = $query->latest()->paginate(10);
+        $categories = Category::orderBy('name')->get();
 
         return Inertia::render('products/index', [
-            'products' => $products
+            'products' => $products,
+            'categories' => $categories,
+            'filters' => $request->only(['search', 'category'])
         ]);
     }
 
@@ -33,7 +55,6 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'product_type' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'sku' => 'required|string|unique:products,sku',
             'description' => 'nullable|string',
@@ -56,6 +77,12 @@ class ProductController extends Controller
             'refresh_rate' => 'nullable|integer|min:0',
             'cabinet_type' => 'nullable|string|max:255'
         ]);
+
+        // Get the category and set product_type from category slug
+        $category = Category::find($validated['category_id']);
+        if ($category) {
+            $validated['product_type'] = $category->slug;
+        }
 
         $product = Product::create($validated);
 
@@ -83,7 +110,6 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'product_type' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'sku' => 'required|string|unique:products,sku,' . $product->id,
             'description' => 'nullable|string',
@@ -106,6 +132,12 @@ class ProductController extends Controller
             'refresh_rate' => 'nullable|integer|min:0',
             'cabinet_type' => 'nullable|string|max:255'
         ]);
+
+        // Get the category and set product_type from category slug
+        $category = Category::find($validated['category_id']);
+        if ($category) {
+            $validated['product_type'] = $category->slug;
+        }
 
         $product->update($validated);
 

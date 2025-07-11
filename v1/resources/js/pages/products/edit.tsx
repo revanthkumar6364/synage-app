@@ -73,7 +73,6 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
 
     const { data, setData, put, processing, errors } = useForm({
         category_id: product.category_id?.toString() || '',
-        product_type: product.product_type || '',
         name: product.name || '',
         sku: product.sku || '',
         description: product.description || '',
@@ -140,25 +139,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     {errors.category_id && <p className="text-sm text-red-500">{errors.category_id}</p>}
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="product_type">Product Type</Label>
-                                    <Select
-                                        value={data.product_type}
-                                        onValueChange={(value) => setData('product_type', value)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select product type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="indoor_led">Indoor LED</SelectItem>
-                                            <SelectItem value="outdoor_led">Outdoor LED</SelectItem>
-                                            <SelectItem value="kiosk">Kiosk</SelectItem>
-                                            <SelectItem value="controllers">Controllers</SelectItem>
-                                            <SelectItem value="tv_screens">TV Screens</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.product_type && <p className="text-sm text-red-500">{errors.product_type}</p>}
-                                </div>
+
 
                                 <div className="space-y-2">
                                     <Label htmlFor="name">Name <span className="text-red-500">*</span></Label>

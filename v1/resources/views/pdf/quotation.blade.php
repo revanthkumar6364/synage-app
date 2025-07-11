@@ -15,7 +15,7 @@
             margin: 0;
             padding: 30px;
             font-size: 12px;
-            /* Changed from 11px to 12px */
+            /* Main content font size */
             line-height: 1.4;
             color: #333;
         }
@@ -47,13 +47,13 @@
         .company-info {
             text-align: right;
             font-size: 14px;
-            /* Changed from 11px to 14px for address section */
+            /* Subheading font size for address section */
             line-height: 1.5;
         }
 
         .company-info h3 {
             font-size: 16px;
-            /* Changed from 14px to 16px for logo section */
+            /* Heading font size for logo section */
             margin: 0 0 8px 0;
             color: #1a1a1a;
         }
@@ -79,7 +79,8 @@
         }
 
         .title-section h2 {
-            font-size: 18px;
+            font-size: 16px;
+            /* Heading font size for main title */
             margin: 0 0 8px 0;
             color: #1a1a1a;
         }
@@ -121,7 +122,8 @@
 
         .info-box h3 {
             margin: 0 0 10px 0;
-            font-size: 12px;
+            font-size: 14px;
+            /* Subheading font size */
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -160,7 +162,8 @@
         }
 
         .specs-grid h3 {
-            font-size: 12px;
+            font-size: 14px;
+            /* Subheading font size */
             margin: 0 0 6px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -183,7 +186,8 @@
         .products-table th {
             background: #f8f9fa;
             padding: 10px;
-            font-size: 11px;
+            font-size: 14px;
+            /* Subheading font size for table headers */
             font-weight: bold;
             text-align: left;
             border-bottom: 1px solid #e5e5e5;
@@ -192,7 +196,8 @@
 
         .products-table td {
             padding: 10px;
-            font-size: 11px;
+            font-size: 12px;
+            /* Main content font size for table cells */
             border-bottom: 1px solid #e5e5e5;
             color: #666;
         }
@@ -211,7 +216,8 @@
             display: flex;
             justify-content: space-between;
             margin: 4px 0;
-            font-size: 11px;
+            font-size: 12px;
+            /* Main content font size for totals */
             color: #666;
         }
 
@@ -236,7 +242,8 @@
         }
 
         .terms-section h3 {
-            font-size: 14px;
+            font-size: 16px;
+            /* Heading font size for section title */
             margin: 0 0 15px 0;
             color: #1a1a1a;
         }
@@ -253,7 +260,8 @@
         }
 
         .terms-grid h4 {
-            font-size: 12px;
+            font-size: 14px;
+            /* Subheading font size for terms */
             margin: 0 0 8px 0;
             color: #1a1a1a;
         }
