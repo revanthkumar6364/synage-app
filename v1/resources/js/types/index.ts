@@ -20,6 +20,7 @@ export interface Account {
     contacts?: AccountContact[];
     created_at: string;
     updated_at: string;
+    region?: string;
 }
 
 export interface AccountContact {

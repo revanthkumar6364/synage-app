@@ -247,7 +247,7 @@ class Quotation extends Model
         }
 
         // Get region (you might want to add a region field to accounts or quotations)
-        $region = 'MUM'; // Default to MUM, can be made dynamic later
+        $region = $this->account->region ?? 'MUM';
 
         // Get current date in YYYY-MM-DD format
         $date = date('Y-m-d');

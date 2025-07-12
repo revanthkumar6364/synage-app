@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('business_name');
             $table->string('gst_number')->nullable();
             $table->string('industry_type')->nullable();
+            $table->string('region')->nullable();
 
             // Billing Address
             $table->text('billing_address')->nullable();

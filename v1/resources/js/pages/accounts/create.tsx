@@ -36,6 +36,7 @@ const CreateAccount: FC<CreateAccountProps> = ({ industry_types, statuses }) => 
         shipping_zip_code: '',
         same_as_billing: false,
         status: 'active',
+        region: '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -45,14 +46,18 @@ const CreateAccount: FC<CreateAccountProps> = ({ industry_types, statuses }) => 
 
     const handleSameAsBilling = (checked: boolean | "indeterminate") => {
         const isChecked = checked === true;
-        setData({
-            ...data,
-            same_as_billing: isChecked,
-            shipping_address: isChecked ? data.billing_address : '',
-            shipping_location: isChecked ? data.billing_location : '',
-            shipping_city: isChecked ? data.billing_city : '',
-            shipping_zip_code: isChecked ? data.billing_zip_code : '',
-        });
+        setData('same_as_billing', isChecked as any);
+        if (isChecked) {
+            setData('shipping_address', data.billing_address);
+            setData('shipping_location', data.billing_location);
+            setData('shipping_city', data.billing_city);
+            setData('shipping_zip_code', data.billing_zip_code);
+        } else {
+            setData('shipping_address', '');
+            setData('shipping_location', '');
+            setData('shipping_city', '');
+            setData('shipping_zip_code', '');
+        }
     };
 
     return (
@@ -228,6 +233,17 @@ const CreateAccount: FC<CreateAccountProps> = ({ industry_types, statuses }) => 
                                     </SelectContent>
                                 </Select>
                                 {errors.status && <p className="text-sm text-red-500">{errors.status}</p>}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="region">Region</Label>
+                                <Input
+                                    id="region"
+                                    value={data.region}
+                                    onChange={e => setData('region', e.target.value)}
+                                    placeholder="Enter region (if applicable)"
+                                />
+                                {errors.region && <p className="text-sm text-red-500">{errors.region}</p>}
                             </div>
 
                             <Button type="submit" disabled={processing}>

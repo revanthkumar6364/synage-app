@@ -24,6 +24,7 @@ class AccountResource extends JsonResource
             'shipping_city' => $this->shipping_city,
             'shipping_zip_code' => $this->shipping_zip_code,
             'same_as_billing' => $this->same_as_billing,
+            'region' => $this->region,
             'status' => $this->status,
             'contacts' => AccountContactResource::collection($this->whenLoaded('contacts')),
             'created_at' => $this->created_at,

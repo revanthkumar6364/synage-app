@@ -24,7 +24,8 @@ class Account extends Model
         'shipping_city',
         'shipping_zip_code',
         'same_as_billing',
-        'status'
+        'status',
+        'region'
     ];
 
     protected $casts = [

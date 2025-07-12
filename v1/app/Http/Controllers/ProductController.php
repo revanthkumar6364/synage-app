@@ -29,8 +29,8 @@ class ProductController extends Controller
         }
 
         // Handle category filter
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->get('category'));
+        if ($request->filled('category') && $request->category !== '' && $request->category !== 'all') {
+            $query->where('category_id', $request->category);
         }
 
         $products = $query->latest()->paginate(10);

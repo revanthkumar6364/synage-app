@@ -39,6 +39,12 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [selectedCategory, setSelectedCategory] = useState(filters.category || '');
 
+    useEffect(() => {
+        setSearchTerm(filters.search || '');
+        setSelectedCategory(filters.category || '');
+        // eslint-disable-next-line
+    }, []); // Only run on mount
+
     const formatPrice = (price: number | string | null | undefined): string => {
         if (!price) return 'N/A';
         const numericPrice = typeof price === 'string' ? parseFloat(price) : price;

@@ -57,6 +57,7 @@ class AccountController extends Controller
             'shipping_location' => 'nullable|string|max:255',
             'shipping_city' => 'nullable|string|max:255',
             'shipping_zip_code' => 'nullable|string|max:255',
+            'region' => 'nullable|string|max:255',
             'same_as_billing' => 'boolean',
             'status' => 'required|in:active,inactive'
         ]);
@@ -101,6 +102,7 @@ class AccountController extends Controller
             'shipping_location' => 'nullable|string|max:255',
             'shipping_city' => 'nullable|string|max:255',
             'shipping_zip_code' => 'nullable|string|max:255',
+            'region' => 'nullable|string|max:255',
             'same_as_billing' => 'boolean',
             'status' => 'required|in:active,inactive'
         ]);

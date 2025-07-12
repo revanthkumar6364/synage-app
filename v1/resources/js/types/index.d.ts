@@ -1,5 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 import type { Config } from 'ziggy-js';
+import { ReactNode } from 'react';
 
 export interface Auth {
     user: User;
@@ -58,6 +59,7 @@ export interface Account {
     created_at: string;
     updated_at: string;
     contacts?: AccountContact[];
+    region?: string;
     [key: string]: unknown;
 }
 
@@ -71,6 +73,21 @@ export interface AccountContact {
     created_at: string;
     updated_at: string;
     [key: string]: unknown;
+}
+
+export interface QuotationItem {
+    available_size_height_mm: any;
+    available_size_width_mm: any;
+    product: any;
+    total: ReactNode;
+    id: number;
+    product_id: number;
+    quantity: string | number;
+    unit_price: string | number;
+    proposed_unit_price?: string | number;
+    discount_percentage: string | number;
+    tax_percentage: string | number;
+    notes?: string;
 }
 
 export interface QuotationMedia {

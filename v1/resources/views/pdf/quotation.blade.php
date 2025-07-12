@@ -8,13 +8,14 @@
         @page {
             margin: 0;
             padding: 0;
+            size: A4;
         }
 
         body {
             font-family: 'DejaVu Sans', sans-serif;
             margin: 0;
             padding: 30px;
-            font-size: 12px;
+            font-size: 16px;
             /* Main content font size */
             line-height: 1.4;
             color: #333;
@@ -46,13 +47,13 @@
 
         .company-info {
             text-align: right;
-            font-size: 14px;
+            font-size: 20px;
             /* Subheading font size for address section */
             line-height: 1.5;
         }
 
         .company-info h3 {
-            font-size: 16px;
+            font-size: 28px;
             /* Heading font size for logo section */
             margin: 0 0 8px 0;
             color: #1a1a1a;
@@ -61,6 +62,8 @@
         .company-info p {
             margin: 4px 0;
             color: #666;
+            font-size: 16px;
+            /* Main content font size */
         }
 
         .company-info .email {
@@ -79,7 +82,7 @@
         }
 
         .title-section h2 {
-            font-size: 16px;
+            font-size: 28px;
             /* Heading font size for main title */
             margin: 0 0 8px 0;
             color: #1a1a1a;
@@ -87,7 +90,8 @@
 
         .title-section p {
             margin: 4px 0;
-            font-size: 11px;
+            font-size: 20px;
+            /* Subheading font size for subtitle/attn */
             color: #666;
         }
 
@@ -122,7 +126,7 @@
 
         .info-box h3 {
             margin: 0 0 10px 0;
-            font-size: 14px;
+            font-size: 20px;
             /* Subheading font size */
             font-weight: bold;
             text-transform: uppercase;
@@ -132,7 +136,8 @@
 
         .info-box p {
             margin: 6px 0;
-            font-size: 11px;
+            font-size: 16px;
+            /* Main content font size */
             line-height: 1.5;
             color: #666;
         }
@@ -162,7 +167,7 @@
         }
 
         .specs-grid h3 {
-            font-size: 14px;
+            font-size: 20px;
             /* Subheading font size */
             margin: 0 0 6px 0;
             text-transform: uppercase;
@@ -172,7 +177,8 @@
 
         .specs-grid p {
             margin: 0;
-            font-size: 11px;
+            font-size: 16px;
+            /* Main content font size */
             color: #666;
         }
 
@@ -186,7 +192,7 @@
         .products-table th {
             background: #f8f9fa;
             padding: 10px;
-            font-size: 14px;
+            font-size: 20px;
             /* Subheading font size for table headers */
             font-weight: bold;
             text-align: left;
@@ -196,7 +202,7 @@
 
         .products-table td {
             padding: 10px;
-            font-size: 12px;
+            font-size: 16px;
             /* Main content font size for table cells */
             border-bottom: 1px solid #e5e5e5;
             color: #666;
@@ -216,7 +222,7 @@
             display: flex;
             justify-content: space-between;
             margin: 4px 0;
-            font-size: 12px;
+            font-size: 16px;
             /* Main content font size for totals */
             color: #666;
         }
@@ -235,6 +241,8 @@
             border: 1px solid #e5e5e5;
             border-radius: 6px;
             margin: 25px 0;
+            font-size: 16px;
+            /* Main content font size */
         }
 
         .terms-section {
@@ -242,7 +250,7 @@
         }
 
         .terms-section h3 {
-            font-size: 16px;
+            font-size: 28px;
             /* Heading font size for section title */
             margin: 0 0 15px 0;
             color: #1a1a1a;
@@ -260,7 +268,7 @@
         }
 
         .terms-grid h4 {
-            font-size: 14px;
+            font-size: 20px;
             /* Subheading font size for terms */
             margin: 0 0 8px 0;
             color: #1a1a1a;
@@ -268,7 +276,8 @@
 
         .terms-grid p {
             margin: 0;
-            font-size: 11px;
+            font-size: 16px;
+            /* Main content font size */
             color: #666;
         }
 
@@ -301,14 +310,16 @@
         }
 
         .signature-name {
-            font-size: 11px;
+            font-size: 20px;
+            /* Subheading font size for signature */
             font-weight: bold;
             color: #1a1a1a;
         }
 
         .generated-date {
             text-align: right;
-            font-size: 10px;
+            font-size: 16px;
+            /* Main content font size */
             color: #666;
         }
 
@@ -386,20 +397,20 @@
     <div class="separator"></div>
     <table style="width: 100%; margin: 24px 0 16px 0;">
         <tr>
-            <td style="font-size: 12px; font-weight: 500; color: #1a237e; text-align: left;">
+            <td style="font-size: 20px; font-weight: 500; color: #1a237e; text-align: left;">
                 Reference: {{ $quotation->reference }}
             </td>
-            <td style="font-size: 12px; color: #666; text-align: right;">
+            <td style="font-size: 20px; color: #666; text-align: right;">
                 Date: {{ \Carbon\Carbon::parse($quotation->estimate_date)->format('d/m/Y') }}
             </td>
         </tr>
     </table>
     <div class="separator"></div>
     <div class="title-section">
-        <h2>{{ $quotation->title }}</h2>
-        <p style="font-weight: 500">Kind Attn: {{ optional($quotation->account_contact)->name }}<br>
-        {{ optional($quotation->account_contact)->role }}</p>
-        <p>{{ $quotation->description }}</p>
+        <h2 style="font-size: 28px; color: #1a1a1a; margin: 0 0 8px 0;">{{ $quotation->title }}</h2>
+        <p style="font-size: 20px; color: #666;">Kind Attn: {{ optional($quotation->account_contact)->name }}<br>
+            {{ optional($quotation->account_contact)->role }}</p>
+        <p style="font-size: 15px; color: #333;">{{ $quotation->description }}</p>
     </div>
 
     <div class="separator"></div>
@@ -408,23 +419,27 @@
         <tr>
             <td>
                 <div class="info-box">
-                    <h3>Bill To</h3>
+                    <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Bill To</h3>
                     <p class="business-name">{{ optional($quotation->account)->business_name }}</p>
-                    <p>{{ $quotation->billing_address }}</p>
-                    <p>{{ $quotation->billing_city }}, {{ $quotation->billing_location }}
+                    <p style="font-size: 16px; color: #333;">{{ $quotation->billing_address }}</p>
+                    <p style="font-size: 16px; color: #333;">{{ $quotation->billing_city }},
+                        {{ $quotation->billing_location }}
                         {{ $quotation->billing_zip_code }}</p>
-                    <p style="margin-top: 8px"><span style="font-weight: 500">GST NO:</span>
+                    <p style="margin-top: 8px; font-size: 16px; color: #333;"><span style="font-weight: 500">GST
+                            NO:</span>
                         {{ optional($quotation->account)->gst_number }}</p>
                 </div>
             </td>
             <td>
                 <div class="info-box">
-                    <h3>Ship To</h3>
+                    <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Ship To</h3>
                     <p class="business-name">{{ optional($quotation->account_contact)->name }}</p>
-                    <p>{{ $quotation->shipping_address }}</p>
-                    <p>{{ $quotation->shipping_city }}, {{ $quotation->shipping_location }}
+                    <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_address }}</p>
+                    <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_city }},
+                        {{ $quotation->shipping_location }}
                         {{ $quotation->shipping_zip_code }}</p>
-                    <p style="margin-top: 8px"><span style="font-weight: 500">GST NO:</span>
+                    <p style="margin-top: 8px; font-size: 16px; color: #333;"><span style="font-weight: 500">GST
+                            NO:</span>
                         {{ optional($quotation->account)->gst_number }}</p>
                 </div>
             </td>
@@ -433,8 +448,9 @@
 
     <div class="separator"></div>
     <div class="specs-section">
-        <h3>Installation Type</h3>
-        <p>{{ $quotation->facade_type ?? '-' }} : {{ $quotation->facade_notes ?? '-' }}</p>
+        <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Installation Type</h3>
+        <p style="font-size: 16px; color: #333;">{{ $quotation->facade_type ?? '-' }} :
+            {{ $quotation->facade_notes ?? '-' }}</p>
     </div>
     <div class="separator"></div>
     @foreach ($quotation->items as $index => $item)
@@ -476,17 +492,18 @@
             $proposed_sqft = $proposed_width_ft * $proposed_height_ft;
         @endphp
         @if (in_array($item->product->product_type, ['indoor_led', 'outdoor_led']))
-    <div class="specs-section">
+            <div class="specs-section">
                 <h3 style="margin-bottom: 8px; color: #333;">Product Specifications - {{ $item->product->name }}</h3>
-        <table class="specs-grid">
-            <tr>
-                <td>
-                            <h3>SIZE AVAILABLE AT LOCATION</h3>
-                            <p>{{ number_format($available_width_mm, 2) }} mm W x
+                <table class="specs-grid">
+                    <tr>
+                        <td>
+                            <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">SIZE AVAILABLE AT LOCATION
+                            </h3>
+                            <p style="font-size: 16px; color: #333;">{{ number_format($available_width_mm, 2) }} mm W x
                                 {{ number_format($available_height_mm, 2) }} mm H</p>
                             <div style="margin-top: 8px;">
-                                <h3>SUGGESTED SIZE</h3>
-                        <p>
+                                <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">SUGGESTED SIZE</h3>
+                                <p style="font-size: 16px; color: #333;">
                                     {{ number_format($proposed_width_mm, 2) }} mm W x
                                     {{ number_format($proposed_height_mm, 2) }} mm H |
                                     {{ number_format($proposed_width_ft, 2) }} ft W x
@@ -494,40 +511,47 @@
                                     {{ number_format($proposed_sqft, 2) }} Sq ft |
                                     {{ $boxes_in_height }} R x {{ $boxes_in_width }} C of {{ $unit_width_mm }} W x
                                     {{ $unit_height_mm }} H mm
-                        </p>
-                    </div>
+                                </p>
+                            </div>
                             <div style="margin-top: 8px;">
-                                <h3>NO OF PIXELS</h3>
-                                <p>{{ number_format($proposed_width_mm * 512, 0) }} Pixels</p>
-                    </div>
-                </td>
-                <td>
+                                <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">NO OF PIXELS</h3>
+                                <p style="font-size: 16px; color: #333;">
+                                    {{ number_format($proposed_width_mm * 512, 0) }} Pixels</p>
+                            </div>
+                        </td>
+                        <td>
                             <table style="width: 100%;">
                                 <tr>
                                     <td style="vertical-align: top; padding-right: 16px;">
-                                        <h3>BRAND NAME</h3>
-                                        <p>{{ $item->product->brand ?? '-' }}</p>
+                                        <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">BRAND NAME</h3>
+                                        <p style="font-size: 16px; color: #333;">{{ $item->product->brand ?? '-' }}</p>
                                         <div style="margin-top: 8px;">
-                                            <h3>PIXEL PITCH</h3>
-                                            <p>{{ $item->product->pixel_pitch ? $item->product->pixel_pitch . ' mm' : 'N/A' }}
+                                            <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">PIXEL PITCH
+                                            </h3>
+                                            <p style="font-size: 16px; color: #333;">
+                                                {{ $item->product->pixel_pitch ? $item->product->pixel_pitch . ' mm' : 'N/A' }}
                                             </p>
-                    </div>
+                                        </div>
                                     </td>
                                     <td style="vertical-align: top;">
-                                        <h3>REFRESH RATE</h3>
-                                        <p>{{ $item->product->refresh_rate ? $item->product->refresh_rate . ' Hz' : 'N/A' }}
+                                        <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">REFRESH RATE
+                                        </h3>
+                                        <p style="font-size: 16px; color: #333;">
+                                            {{ $item->product->refresh_rate ? $item->product->refresh_rate . ' Hz' : 'N/A' }}
                                         </p>
                                         <div style="margin-top: 8px;">
-                                            <h3>CABINET TYPE</h3>
-                                            <p>{{ $item->product->cabinet_type ?? 'N/A' }}</p>
-                    </div>
+                                            <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">CABINET
+                                                TYPE</h3>
+                                            <p style="font-size: 16px; color: #333;">
+                                                {{ $item->product->cabinet_type ?? 'N/A' }}</p>
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
-                </td>
-            </tr>
-        </table>
-    </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         @endif
     @endforeach
 
@@ -535,7 +559,7 @@
         <thead>
             <tr>
                 <th style="width: 40px; text-align: center">#</th>
-                <th>Product Description</th>
+                <th style="font-size: 20px; color: #1a1a1a;">Product Description</th>
                 @if ($quotation->show_hsn_code)
                     <th>HSN</th>
                 @endif
@@ -558,7 +582,7 @@
                     @if ($quotation->show_hsn_code)
                         <td>{{ $item->product->hsn_code }}</td>
                     @endif
-                    <td class="text-right">{{ $item->quantity }}</td>
+                    <td style="font-size: 16px; color: #666;">{{ $item->quantity }}</td>
                     <td class="text-right">₹{{ number_format($item->proposed_unit_price, 2) }}</td>
                     <td class="text-right">{{ $item->tax_percentage }}%</td>
                     <td class="text-right" style="font-weight: 500">₹{{ number_format($item->total, 2) }}</td>
@@ -569,51 +593,53 @@
 
     <div class="totals-section">
         <div class="totals-row">
-            <span>Subtotal:</span>
+            <span style="font-size: 16px; color: #333;">Subtotal:</span>
             <span style="float: right; font-weight: 500">₹{{ number_format($quotation->subtotal, 2) }}</span>
         </div>
         <div class="totals-row">
-            <span>Tax Total:</span>
+            <span style="font-size: 16px; color: #333;">Tax Total:</span>
             <span style="float: right; font-weight: 500">₹{{ number_format($quotation->tax_amount, 2) }}</span>
         </div>
         <div class="totals-row final">
-            <span>Total Amount:</span>
+            <span style="font-size: 16px; color: #333;">Total Amount:</span>
             <span style="float: right">₹{{ number_format($quotation->total_amount, 2) }}</span>
         </div>
     </div>
 
     <div class="note-box">
-        <p><span style="font-weight: 500">Note:</span> {{ $quotation->notes }}</p>
+        <p style="font-size: 16px; color: #333;"><span style="font-weight: 500">Note:</span> {{ $quotation->notes }}
+        </p>
     </div>
 
     <div class="separator"></div>
 
     <div class="terms-section">
-        <h3>Terms and Conditions</h3>
+        <h3 style="font-size: 28px; color: #1a1a1a; margin: 0 0 15px 0;">Terms and Conditions</h3>
         <table class="terms-grid">
             <tr>
                 <td>
                     <div style="margin-bottom: 15px">
-                        <h4>Taxes</h4>
-                        <p>{{ $quotation->taxes_terms }}</p>
+                        <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Taxes</h4>
+                        <p style="font-size: 16px; color: #333;">{{ $quotation->taxes_terms }}</p>
                     </div>
                     <div style="margin-bottom: 15px">
-                        <h4>Warranty</h4>
-                        <p>{{ $quotation->warranty_terms }}</p>
+                        <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Warranty</h4>
+                        <p style="font-size: 16px; color: #333;">{{ $quotation->warranty_terms }}</p>
                     </div>
                     <div>
-                        <h4>Electrical Points and Installation</h4>
-                        <p>{{ $quotation->electrical_terms }}</p>
+                        <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Electrical Points and
+                            Installation</h4>
+                        <p style="font-size: 16px; color: #333;">{{ $quotation->electrical_terms }}</p>
                     </div>
                 </td>
                 <td>
                     <div style="margin-bottom: 15px">
-                        <h4>Delivery Terms</h4>
-                        <p>{{ $quotation->delivery_terms }}</p>
+                        <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Delivery Terms</h4>
+                        <p style="font-size: 16px; color: #333;">{{ $quotation->delivery_terms }}</p>
                     </div>
                     <div>
-                        <h4>Payment Terms</h4>
-                        <p>{{ $quotation->payment_terms }}</p>
+                        <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Payment Terms</h4>
+                        <p style="font-size: 16px; color: #333;">{{ $quotation->payment_terms }}</p>
                     </div>
                 </td>
             </tr>
