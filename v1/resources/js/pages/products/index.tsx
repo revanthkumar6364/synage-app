@@ -41,11 +41,9 @@ interface IndexProps {
 const Index: FC<IndexProps> = ({ products, categories, filters }) => {
     const { auth } = usePage<{ auth: any }>().props;
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
-    const [selectedCategory, setSelectedCategory] = useState(filters.category || '');
 
     useEffect(() => {
         setSearchTerm(filters.search || '');
-        setSelectedCategory(filters.category || '');
         // eslint-disable-next-line
     }, []); // Only run on mount
 
@@ -54,7 +52,6 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
         const timeoutId = setTimeout(() => {
             const params: any = { page: 1 };
             if (searchTerm) params.search = searchTerm;
-            if (selectedCategory) params.category = selectedCategory;
             router.get(route('products.index'), params, {
                 preserveState: true,
                 replace: true
@@ -62,7 +59,7 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
         }, 300); // 300ms delay to avoid too many requests
 
         return () => clearTimeout(timeoutId);
-    }, [searchTerm, selectedCategory]);
+    }, [searchTerm]);
 
     const formatPrice = (price: number | string | null | undefined): string => {
         if (!price) return 'N/A';
@@ -80,19 +77,6 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
     const handleSearch = () => {
         const params: any = { page: 1 };
         if (searchTerm) params.search = searchTerm;
-        if (selectedCategory) params.category = selectedCategory;
-        router.get(route('products.index'), params, {
-            preserveState: true,
-            replace: true
-        });
-    };
-
-    const handleCategoryChange = (value: string) => {
-        setSelectedCategory(value === 'all' ? '' : value);
-        // Optionally trigger search immediately on category change:
-        const params: any = { page: 1 };
-        if (searchTerm) params.search = searchTerm;
-        if (value && value !== 'all') params.category = value;
         router.get(route('products.index'), params, {
             preserveState: true,
             replace: true
@@ -102,7 +86,6 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
     const handlePageChange = (page: number) => {
         const params: any = { page };
         if (searchTerm) params.search = searchTerm;
-        if (selectedCategory) params.category = selectedCategory;
         router.get(route('products.index'), params, {
             preserveState: true
         });
@@ -110,7 +93,6 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
 
     const clearSearch = () => {
         setSearchTerm('');
-        setSelectedCategory('');
         router.get(route('products.index'), { page: 1 }, {
             preserveState: true,
             replace: true
@@ -153,22 +135,7 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
                                     </Button>
                                 )}
                             </div>
-                            <div className="w-48">
-                                <Select value={selectedCategory || "all"} onValueChange={handleCategoryChange}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All Categories" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Categories</SelectItem>
-                                        {categories.map((category) => (
-                                            <SelectItem key={category.id} value={category.id.toString()}>
-                                                {category.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            {(searchTerm || selectedCategory) && (
+                            {searchTerm && (
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -183,6 +150,7 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead className="w-16">Sr. No.</TableHead>
                                     <TableHead>Name</TableHead>
                                     <TableHead>SKU</TableHead>
                                     <TableHead>Category</TableHead>
@@ -196,8 +164,12 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
                             </TableHeader>
                             <TableBody>
                                 {products.data.map((product, index) => {
+                                    // Calculate serial number based on current page and items per page
+                                    const serialNumber = (products.current_page - 1) * products.per_page + index + 1;
+
                                     return (
                                         <TableRow key={product.id}>
+                                            <TableCell className="font-medium text-center">{serialNumber}</TableCell>
                                             <TableCell className="font-medium">{product.name}</TableCell>
                                             <TableCell>{product.sku || '-'}</TableCell>
                                             <TableCell>{product.category?.name || '-'}</TableCell>
