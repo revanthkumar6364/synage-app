@@ -39,7 +39,7 @@ class ProductSeeder extends Seeder
             ['name'=>'Absen CP 1.8','sku'=>'CP1.8','size'=>'320 mm X 480 mm','hsn_code'=>'85285900','brand'=>'Absen','type'=>'Active LED Al diecast Indoor','gst_percentage'=>28,'pixel_pitch'=>1.8,'refresh_rate'=>3840,'cabinet_type'=>'Al diecast','category_slug'=>'indoor_led'],
             ['name'=>'Absen CP 2.5','sku'=>'CP2.5','size'=>'320 mm X 480 mm','hsn_code'=>'85285900','brand'=>'Absen','type'=>'Active LED Al diecast Indoor','gst_percentage'=>28,'pixel_pitch'=>2.5,'refresh_rate'=>3840,'cabinet_type'=>'Al diecast','category_slug'=>'indoor_led'],
 
-            // Indoor LED with MS Cabinet
+                // Indoor LED with MS Cabinet
             ['name'=>'Unilumin P2.5','sku'=>'Uni Fix P2.5','size'=>'320 mm X 160 mm','hsn_code'=>'85299090','brand'=>'Unilumin','type'=>'Active LED Indoor with MS Cabinet','gst_percentage'=>18,'pixel_pitch'=>2.5,'refresh_rate'=>3840,'cabinet_type'=>'MS Cabinet','category_slug'=>'indoor_led'],
             ['name'=>'Unilumin P1.8','sku'=>'Uni Fix P1.8','size'=>'320 mm X 160 mm','hsn_code'=>'85299090','brand'=>'Unilumin','type'=>'Active LED Indoor with MS Cabinet','gst_percentage'=>18,'pixel_pitch'=>1.8,'refresh_rate'=>3840,'cabinet_type'=>'MS Cabinet','category_slug'=>'indoor_led'],
             ['name'=>'Unilumin P1.5','sku'=>'Uni Fix P1.5','size'=>'320 mm X 160 mm','hsn_code'=>'85299090','brand'=>'Unilumin','type'=>'Active LED Indoor with MS Cabinet','gst_percentage'=>18,'pixel_pitch'=>1.5,'refresh_rate'=>3840,'cabinet_type'=>'MS Cabinet','category_slug'=>'indoor_led'],
@@ -75,7 +75,7 @@ class ProductSeeder extends Seeder
             ['name'=>'SONY 55" DISPLAY','sku'=>'FW55EZ20L','size'=>'55 Inch','hsn_code'=>'85285900','brand'=>'SONY','type'=>'Commercial Display','gst_percentage'=>28,'pixel_pitch'=>null,'refresh_rate'=>null,'cabinet_type'=>null,'category_slug'=>'tv_screens'],
             ['name'=>'SONY 65" DISPLAY','sku'=>'65FWEZ20L','size'=>'65 Inch','hsn_code'=>'85285900','brand'=>'SONY','type'=>'Commercial Display','gst_percentage'=>28,'pixel_pitch'=>null,'refresh_rate'=>null,'cabinet_type'=>null,'category_slug'=>'tv_screens'],
 
-            // Kiosks
+                // Kiosks
             ['name'=>'A FRAME STANDEE 43"','sku'=>'BLACK','size'=>'43 Inch','hsn_code'=>'732690','brand'=>'Radiant Synage','type'=>'KIOSK','gst_percentage'=>18,'pixel_pitch'=>null,'refresh_rate'=>null,'cabinet_type'=>null,'category_slug'=>'kiosk'],
             ['name'=>'STANDY KIOSKS 55"','sku'=>'BLACK','size'=>'55 Inch','hsn_code'=>'732690','brand'=>'Radiant Synage','type'=>'KIOSK','gst_percentage'=>18,'pixel_pitch'=>null,'refresh_rate'=>null,'cabinet_type'=>null,'category_slug'=>'kiosk'],
             ['name'=>'STANDY KIOSKS 50"','sku'=>'BLACK','size'=>'50 Inch','hsn_code'=>'732690','brand'=>'Radiant Synage','type'=>'KIOSK','gst_percentage'=>18,'pixel_pitch'=>null,'refresh_rate'=>null,'cabinet_type'=>null,'category_slug'=>'kiosk'],
@@ -85,7 +85,7 @@ class ProductSeeder extends Seeder
             ['name'=>'24" STANDEE ENCLOSURE','sku'=>'BLACK','size'=>'24 Inch','hsn_code'=>'732690','brand'=>'Radiant Synage','type'=>'KIOSK','gst_percentage'=>18,'pixel_pitch'=>null,'refresh_rate'=>null,'cabinet_type'=>null,'category_slug'=>'kiosk'],
             ['name'=>'32" STANDEE ENCLOSURE','sku'=>'BLACK','size'=>'32 Inch','hsn_code'=>'732690','brand'=>'Radiant Synage','type'=>'KIOSK','gst_percentage'=>18,'pixel_pitch'=>null,'refresh_rate'=>null,'cabinet_type'=>null,'category_slug'=>'kiosk'],
 
-            // Controllers
+                // Controllers
             ['name'=>'LED Controller Media Players','sku'=>'TB40','size'=>'Upto 130000 pixel','hsn_code'=>'85437049','brand'=>'Novastar','type'=>'Controllers','gst_percentage'=>18,'pixel_pitch'=>null,'refresh_rate'=>null,'cabinet_type'=>null,'category_slug'=>'controllers'],
             ['name'=>'LED Controller Media Players','sku'=>'TB60','size'=>'upto 230000 pixel','hsn_code'=>'85437049','brand'=>'Novastar','type'=>'Controllers','gst_percentage'=>18,'pixel_pitch'=>null,'refresh_rate'=>null,'cabinet_type'=>null,'category_slug'=>'controllers'],
             ['name'=>'LED Controller','sku'=>'X6','size'=>'Upto 130000 pixel','hsn_code'=>'85437042','brand'=>'Novastar','type'=>'Controllers','gst_percentage'=>18,'pixel_pitch'=>null,'refresh_rate'=>null,'cabinet_type'=>null,'category_slug'=>'controllers'],
@@ -142,19 +142,19 @@ class ProductSeeder extends Seeder
             $data['size_inch'] = null;
 
             // Parse size for all product types
-            if (preg_match('/([\d\.]+)\s*mm\s*X\s*([\d\.]+)\s*mm/i', $data['size'], $m)) {
-                $data['w_mm'] = (float)$m[1];
-                $data['h_mm'] = (float)$m[2];
-            } elseif (preg_match('/([\d\.]+)\s*Inch\s*X\s*([\d\.]+)\s*Inch/i', $data['size'], $i)) {
-                // e.g. 43 Inch X 24 Inch
-                $data['w_mm'] = round((float)$i[1] * 25.4, 2);
-                $data['h_mm'] = round((float)$i[2] * 25.4, 2);
-                $data['size_inch'] = (float)$i[1];
-            } elseif (preg_match('/([\d\.]+)\s*Inch/i', $data['size'], $i)) {
+                if (preg_match('/([\d\.]+)\s*mm\s*X\s*([\d\.]+)\s*mm/i', $data['size'], $m)) {
+                    $data['w_mm'] = (float)$m[1];
+                    $data['h_mm'] = (float)$m[2];
+                } elseif (preg_match('/([\d\.]+)\s*Inch\s*X\s*([\d\.]+)\s*Inch/i', $data['size'], $i)) {
+                    // e.g. 43 Inch X 24 Inch
+                    $data['w_mm'] = round((float)$i[1] * 25.4, 2);
+                    $data['h_mm'] = round((float)$i[2] * 25.4, 2);
+                    $data['size_inch'] = (float)$i[1];
+                } elseif (preg_match('/([\d\.]+)\s*Inch/i', $data['size'], $i)) {
                 // For single inch measurements (like TV screens and kiosks)
                 $data['w_mm'] = 0;
                 $data['h_mm'] = 0;
-                $data['size_inch'] = (float)$i[1];
+                    $data['size_inch'] = (float)$i[1];
             }
 
             // Parse upto_pix (keeping your existing logic)

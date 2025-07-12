@@ -26,6 +26,10 @@ interface IndexProps {
         data: Product[];
         current_page: number;
         last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
     };
     categories: Category[];
     filters: {
@@ -45,6 +49,21 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
         // eslint-disable-next-line
     }, []); // Only run on mount
 
+    // Add live search functionality
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            const params: any = { page: 1 };
+            if (searchTerm) params.search = searchTerm;
+            if (selectedCategory) params.category = selectedCategory;
+            router.get(route('products.index'), params, {
+                preserveState: true,
+                replace: true
+            });
+        }, 300); // 300ms delay to avoid too many requests
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm, selectedCategory]);
+
     const formatPrice = (price: number | string | null | undefined): string => {
         if (!price) return 'N/A';
         const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
@@ -56,46 +75,34 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
         return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
     };
 
-    // Combined filter effect with debouncing
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            const hasSearchChanged = searchTerm !== filters.search;
-            const hasCategoryChanged = selectedCategory !== filters.category;
+    // Remove debounced useEffect for search/category
+    // Add a function to trigger search
+    const handleSearch = () => {
+        const params: any = { page: 1 };
+        if (searchTerm) params.search = searchTerm;
+        if (selectedCategory) params.category = selectedCategory;
+        router.get(route('products.index'), params, {
+            preserveState: true,
+            replace: true
+        });
+    };
 
-            if (hasSearchChanged || hasCategoryChanged) {
-                const params: any = {
-                    page: 1
-                };
-
-                if (searchTerm) {
-                    params.search = searchTerm;
-                }
-
-                if (selectedCategory) {
-                    params.category = selectedCategory;
-                }
-
-                router.get(route('products.index'), params, {
-                    preserveState: true,
-                    replace: true
-                });
-            }
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [searchTerm, selectedCategory]);
+    const handleCategoryChange = (value: string) => {
+        setSelectedCategory(value === 'all' ? '' : value);
+        // Optionally trigger search immediately on category change:
+        const params: any = { page: 1 };
+        if (searchTerm) params.search = searchTerm;
+        if (value && value !== 'all') params.category = value;
+        router.get(route('products.index'), params, {
+            preserveState: true,
+            replace: true
+        });
+    };
 
     const handlePageChange = (page: number) => {
         const params: any = { page };
-
-        if (searchTerm) {
-            params.search = searchTerm;
-        }
-
-        if (selectedCategory) {
-            params.category = selectedCategory;
-        }
-
+        if (searchTerm) params.search = searchTerm;
+        if (selectedCategory) params.category = selectedCategory;
         router.get(route('products.index'), params, {
             preserveState: true
         });
@@ -147,7 +154,7 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
                                 )}
                             </div>
                             <div className="w-48">
-                                <Select value={selectedCategory || "all"} onValueChange={(value) => setSelectedCategory(value === "all" ? "" : value)}>
+                                <Select value={selectedCategory || "all"} onValueChange={handleCategoryChange}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="All Categories" />
                                     </SelectTrigger>
@@ -191,8 +198,7 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
                             <TableBody>
                                 {products.data.map((product, index) => {
                                     // Calculate serial number based on current page and items per page
-                                    const itemsPerPage = 10; // Assuming 10 items per page
-                                    const serialNumber = (products.current_page - 1) * itemsPerPage + index + 1;
+                                    const serialNumber = (products.current_page - 1) * products.per_page + index + 1;
 
                                     return (
                                         <TableRow key={product.id}>
