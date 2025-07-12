@@ -394,7 +394,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                         />
                                         <Label htmlFor="standard_led" className="cursor-pointer">
                                             <div className="font-medium">Display And Other</div>
-                                            <div className="text-sm text-gray-500">Kiosks, controllers, TV screens</div>
+                                            <div className="text-sm text-gray-500">Kiosks, controllers, TV screens and other</div>
                                         </Label>
                                     </div>
                                 </div>

@@ -115,7 +115,7 @@ class Product extends Model
             case 'outdoor':
                 return $query->where('product_type', 'outdoor_led');
             case 'standard_led':
-                return $query->whereIn('product_type', ['kiosk', 'controllers', 'tv_screens']);
+                return $query->whereNotIn('product_type', ['indoor_led', 'outdoor_led']);
             default:
                 return $query;
         }
