@@ -183,7 +183,6 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-16">Sr. No.</TableHead>
                                     <TableHead>Name</TableHead>
                                     <TableHead>SKU</TableHead>
                                     <TableHead>Category</TableHead>
@@ -197,12 +196,8 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
                             </TableHeader>
                             <TableBody>
                                 {products.data.map((product, index) => {
-                                    // Calculate serial number based on current page and items per page
-                                    const serialNumber = (products.current_page - 1) * products.per_page + index + 1;
-
                                     return (
                                         <TableRow key={product.id}>
-                                            <TableCell className="font-medium text-center">{serialNumber}</TableCell>
                                             <TableCell className="font-medium">{product.name}</TableCell>
                                             <TableCell>{product.sku || '-'}</TableCell>
                                             <TableCell>{product.category?.name || '-'}</TableCell>
