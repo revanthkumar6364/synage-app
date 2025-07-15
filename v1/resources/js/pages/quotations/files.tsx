@@ -138,6 +138,12 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
                                     <ArrowLeftIcon className="mr-2 h-4 w-4" />
                                     Back
                                 </Button>
+                                <Button
+                                    variant="default"
+                                    onClick={() => router.visit(route('quotations.products', quotation.id))}
+                                >
+                                    Next
+                                </Button>
                             </div>
                         </div>
                     </CardHeader>

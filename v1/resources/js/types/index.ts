@@ -168,6 +168,7 @@ export interface Quotation {
     payment_terms?: string;
     electrical_terms?: string;
     show_hsn_code?: boolean;
+    show_no_of_pixels?: boolean;
     subtotal: number;
     tax_rate: number;
     tax_amount: number;

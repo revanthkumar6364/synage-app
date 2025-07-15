@@ -33,7 +33,7 @@ class ProductController extends Controller
             $query->where('category_id', (int) $request->category);
         }
 
-        $products = $query->latest()->paginate(10);
+        $products = $query->orderBy('id', 'desc')->paginate(10);
         $categories = Category::orderBy('name')->get();
 
         return Inertia::render('products/index', [

@@ -67,6 +67,7 @@ class Quotation extends Model
         'payment_terms',
         'electrical_terms',
         'show_hsn_code',
+        'show_no_of_pixels',
         'subtotal',
         'tax_rate',
         'tax_amount',
@@ -91,6 +92,7 @@ class Quotation extends Model
         'estimate_date' => 'date',
         'same_as_billing' => 'boolean',
         'show_hsn_code' => 'boolean',
+        'show_no_of_pixels' => 'boolean',
         'total_amount' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
@@ -249,8 +251,8 @@ class Quotation extends Model
         // Get region (you might want to add a region field to accounts or quotations)
         $region = $this->account->region ?? 'MUM';
 
-        // Get current date in YYYY-MM-DD format
-        $date = date('Y-m-d');
+        // Get current date in MM-DD format (without year)
+        $date = date('m-d');
 
         // Find the highest sequence number for this client and date
         $basePattern = sprintf('%s/%s/%s - %s/', $prefix, $clientName, $region, $date);
@@ -309,8 +311,8 @@ class Quotation extends Model
         // Get region
         $region = 'MUM';
 
-        // Get current date in YYYY-MM-DD format
-        $date = date('Y-m-d');
+        // Get current date in MM-DD format (without year)
+        $date = date('m-d');
 
         // Find the highest sequence number for this client and date
         $basePattern = sprintf('%s/%s/%s - %s/', $prefix, $clientName, $region, $date);

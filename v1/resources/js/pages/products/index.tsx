@@ -168,49 +168,49 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
                                     const serialNumber = (products.current_page - 1) * products.per_page + index + 1;
 
                                     return (
-                                        <TableRow key={product.id}>
+                                    <TableRow key={product.id}>
                                             <TableCell className="font-medium text-center">{serialNumber}</TableCell>
-                                            <TableCell className="font-medium">{product.name}</TableCell>
-                                            <TableCell>{product.sku || '-'}</TableCell>
-                                            <TableCell>{product.category?.name || '-'}</TableCell>
-                                            <TableCell>{formatProductType(product.product_type)}</TableCell>
-                                            <TableCell>
-                                                {product.min_price && product.max_price
-                                                    ? `${formatPrice(product.min_price)} - ${formatPrice(product.max_price)}`
-                                                    : formatPrice(product.price)}
-                                            </TableCell>
-                                            <TableCell>{product.unit || '-'}</TableCell>
-                                            <TableCell>{product.brand || '-'}</TableCell>
-                                            <TableCell>
-                                                <span
-                                                    className={`rounded-full px-2 py-1 text-xs ${
-                                                        product.status === 'active'
-                                                            ? 'bg-green-100 text-green-800'
-                                                            : 'bg-red-100 text-red-800'
-                                                    }`}
-                                                >
-                                                    {product.status}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    {product.can.view && (
-                                                        <Link href={route('products.show', product.id)}>
-                                                            <Button variant="outline" size="sm">
-                                                                View
-                                                            </Button>
-                                                        </Link>
-                                                    )}
-                                                    {product.can.update && (
-                                                        <Link href={route('products.edit', product.id)}>
-                                                            <Button variant="outline" size="sm">
-                                                                Edit
-                                                            </Button>
-                                                        </Link>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
+                                        <TableCell className="font-medium">{product.name}</TableCell>
+                                        <TableCell>{product.sku || '-'}</TableCell>
+                                        <TableCell>{product.category?.name || '-'}</TableCell>
+                                        <TableCell>{formatProductType(product.product_type)}</TableCell>
+                                        <TableCell>
+                                            {product.min_price && product.max_price
+                                                ? `${formatPrice(product.min_price)} - ${formatPrice(product.max_price)}`
+                                                : formatPrice(product.price)}
+                                        </TableCell>
+                                        <TableCell>{product.unit || '-'}</TableCell>
+                                        <TableCell>{product.brand || '-'}</TableCell>
+                                        <TableCell>
+                                            <span
+                                                className={`rounded-full px-2 py-1 text-xs ${
+                                                    product.status === 'active'
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-red-100 text-red-800'
+                                                }`}
+                                            >
+                                                {product.status}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-2">
+                                                {product.can.view && (
+                                                    <Link href={route('products.show', product.id)}>
+                                                        <Button variant="outline" size="sm">
+                                                            View
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                                {product.can.update && (
+                                                    <Link href={route('products.edit', product.id)}>
+                                                        <Button variant="outline" size="sm">
+                                                            Edit
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
                                     );
                                 })}
                             </TableBody>

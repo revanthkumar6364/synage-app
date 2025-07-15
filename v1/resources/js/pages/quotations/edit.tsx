@@ -78,8 +78,7 @@ interface FormData extends Record<string, any> {
     shipping_zip_code: string;
     same_as_billing: boolean;
     show_hsn_code: boolean;
-    facade_type: string;
-    facade_notes: string;
+    show_no_of_pixels: boolean;
     product_type: string;
     selected_product_id: number | undefined;
 }
@@ -124,8 +123,8 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
         category: quotation.category || 'custom',
         same_as_billing: false,
         show_hsn_code: quotation.show_hsn_code || false,
-        facade_type: quotation.facade_type || '',
-        facade_notes: quotation.facade_notes || '',
+        show_no_of_pixels: quotation.show_no_of_pixels ?? true,
+
         product_type: quotation.product_type || '',
         selected_product_id: quotation.selected_product_id,
     });
@@ -261,6 +260,19 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         put(route('quotations.update', quotation.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success("Quotation details updated successfully");
+            },
+            onError: () => {
+                toast.error("Failed to update quotation details");
+            }
+        });
+    };
+
+    const handleSaveAndNext = (e: React.FormEvent) => {
+        e.preventDefault();
+        put(route('quotations.update', quotation.id) + '?action=save_and_next', {
             preserveScroll: true,
             onSuccess: () => {
                 toast.success("Quotation details updated successfully");
@@ -488,6 +500,14 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                                 onCheckedChange={(checked) => setData('show_hsn_code', checked as boolean)}
                                             />
                                             <Label htmlFor="show_hsn_code" className="text-sm">Show HSN Code in Printout</Label>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id="show_no_of_pixels"
+                                                checked={data.show_no_of_pixels}
+                                                onCheckedChange={(checked) => setData('show_no_of_pixels', checked as boolean)}
+                                            />
+                                            <Label htmlFor="show_no_of_pixels" className="text-sm">Show Number of Pixels</Label>
                                         </div>
                                     </div>
 
@@ -812,37 +832,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                     </>
                                 )}
 
-                                {/* Facade Type Dropdown and Facade Notes */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <Label>Installation Type <span className="text-red-500">*</span></Label>
-                                        <Select
-                                            value={data.facade_type || ''}
-                                            onValueChange={val => setData('facade_type', val)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select facade type" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {Object.entries(facadeTypes).map(([key, label]) => (
-                                                    <SelectItem key={key} value={key}>
-                                                        {label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.facade_type && <p className="text-sm text-red-500">{errors.facade_type}</p>}
-                                    </div>
-                                    <div>
-                                        <Label>Installation Notes</Label>
-                                        <Input
-                                            value={data.facade_notes || ''}
-                                            onChange={e => setData('facade_notes', e.target.value)}
-                                            placeholder="Enter notes for Installation"
-                                        />
-                                        {errors.facade_notes && <p className="text-sm text-red-500">{errors.facade_notes}</p>}
-                                    </div>
-                                </div>
+
 
                                 <div>
                                     <Label>Description</Label>
@@ -877,6 +867,9 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                             <div className="flex justify-end gap-4">
                                 <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancel</Button>
                                 <Button type="submit" disabled={processing}>{processing ? 'Saving...' : 'Save'}</Button>
+                                <Button type="button" onClick={handleSaveAndNext} disabled={processing}>
+                                    {processing ? 'Saving...' : 'Save and Next'}
+                                </Button>
                             </div>
                         </form>
                     </CardContent>

@@ -490,9 +490,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-sm text-muted-foreground">For any information or clarifications</p>
-                                            <p className="text-sm font-medium">Contact: 8884491377</p>
                                         </div>
-                                        <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50" />
                                     </div>
                                     <Separator />
                                     <div className="flex items-end justify-between">

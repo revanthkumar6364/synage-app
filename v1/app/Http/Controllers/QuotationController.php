@@ -57,7 +57,6 @@ class QuotationController extends Controller
         return Inertia::render('quotations/create', [
             'accounts' => Account::with('contacts')->get(),
             'salesUsers' => User::where('role', 'sales')->get(),
-            'facadeTypes' => config('all.quotation_facade_types'),
             'productsByType' => [
                 'indoor' => Product::byType('indoor')->get(),
                 'outdoor' => Product::byType('outdoor')->get(),
@@ -93,9 +92,8 @@ class QuotationController extends Controller
             'status' => 'required|in:draft,pending,approved,rejected',
             'notes' => 'nullable|string',
             'client_scope' => 'nullable|string',
-            'facade_type' => 'required|string|in:facade,cashback,standalone,uni_pole,custom',
-            'facade_notes' => 'nullable|string',
             'show_hsn_code' => 'boolean',
+            'show_no_of_pixels' => 'boolean',
         ];
 
         // Add size-related validation rules based on product_type
@@ -216,6 +214,8 @@ class QuotationController extends Controller
         }
     }
 
+
+
     public function show(Request $request, $quotationId)
     {
         $quotation = Quotation::with(['items', 'account'])->find($quotationId);
@@ -239,7 +239,6 @@ class QuotationController extends Controller
                 'outdoor' => Product::byType('outdoor')->get(),
                 'standard_led' => Product::byType('standard_led')->get(),
             ],
-            'facadeTypes' => config('all.quotation_facade_types'),
             'salesUsers' => User::where('role', 'sales')->get(),
         ]);
     }
@@ -266,9 +265,8 @@ class QuotationController extends Controller
             'shipping_city' => 'required|string|max:100',
             'shipping_zip_code' => 'required|string|max:20',
             'same_as_billing' => 'boolean',
-            'facade_type' => 'required|string|in:facade,cashback,standalone,uni_pole,custom',
-            'facade_notes' => 'nullable|string',
             'show_hsn_code' => 'boolean',
+            'show_no_of_pixels' => 'boolean',
         ];
 
         // Add size-related validation rules based on product_type
@@ -323,8 +321,17 @@ class QuotationController extends Controller
         $validated['last_action'] = 'updated';
         $quotation->update($validated);
 
-        return back()->with('success', 'Quotation details updated successfully.');
+        // Check if this is a "save and next" action
+        if ($request->has('action') && $request->action === 'save_and_next') {
+            return redirect()->route('quotations.files', $quotation)
+                ->with('success', 'Quotation updated successfully. Now add products.');
+        } else {
+            // Regular save - stay on edit page
+            return back()->with('success', 'Quotation details updated successfully.');
+        }
     }
+
+
 
     public function products(Quotation $quotation)
     {
@@ -394,7 +401,14 @@ class QuotationController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Quotation products updated successfully.');
+            // Check if this is a "save and preview" action
+            if ($request->has('action') && $request->action === 'save_and_preview') {
+                return redirect()->route('quotations.preview', $quotation)
+                    ->with('success', 'Quotation products updated successfully. Now preview your quotation.');
+            } else {
+                // Regular save - stay on products page
+                return back()->with('success', 'Quotation products updated successfully.');
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Failed to update quotation products: ' . $e->getMessage()]);

@@ -214,6 +214,45 @@ export default function QuotationProducts({ quotation, products }: Props) {
         });
     };
 
+    const handleSaveAndPreview = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (selectedProducts.length === 0) {
+            toast.error("Please add at least one product");
+            return;
+        }
+
+        // Check for any price errors before submitting (only for non-manager users)
+        if (auth.user.role !== 'manager') {
+            const hasErrors = selectedProducts.some(product => {
+                const productDetails = products.find(p => p.id === product.id);
+                if (productDetails) {
+                    const minPrice = productDetails.min_price || 0;
+                    const proposedPrice = parseFloat(product.proposed_unit_price.toString());
+                    return proposedPrice < minPrice;
+                }
+                return false;
+            });
+
+            if (hasErrors) {
+                toast.error("Please fix the price errors before submitting");
+                return;
+            }
+        }
+
+        form.post(route('quotations.update.products', quotation.id) + '?action=save_and_preview', {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success("Quotation products updated successfully");
+            },
+            onError: (errors) => {
+                Object.entries(errors).forEach(([key, value]) => {
+                    toast.error(`${key}: ${value}`);
+                });
+            }
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Quotation Products" />
@@ -508,6 +547,9 @@ export default function QuotationProducts({ quotation, products }: Props) {
                             <div className="flex justify-end gap-4">
                                 <Button type="button" variant="outline" onClick={() => window.history.back()}>Cancel</Button>
                                 <Button type="submit" disabled={form.processing}>{form.processing ? 'Saving...' : 'Save'}</Button>
+                                <Button type="button" onClick={handleSaveAndPreview} disabled={form.processing}>
+                                    {form.processing ? 'Saving...' : 'Save and Preview'}
+                                </Button>
                             </div>
                         </form>
                     </CardContent>

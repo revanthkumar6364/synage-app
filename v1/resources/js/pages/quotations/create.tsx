@@ -71,9 +71,8 @@ interface FormData {
     shipping_zip_code: string;
     same_as_billing: boolean;
     show_hsn_code: boolean;
+    show_no_of_pixels: boolean;
     status: 'draft';
-    facade_type?: string;
-    facade_notes?: string;
 }
 
 // Add categories constant
@@ -125,9 +124,9 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
         shipping_zip_code: "",
         same_as_billing: false,
         show_hsn_code: false,
+        show_no_of_pixels: true,
         status: 'draft',
-        facade_type: undefined,
-        facade_notes: undefined,
+
     });
 
     // Get available products based on selected type
@@ -286,6 +285,11 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('quotations.store'));
+    };
+
+    const handleSaveAndNext = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(route('quotations.store-and-next'));
     };
 
     return (
@@ -697,6 +701,15 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                 <Label htmlFor="show_hsn_code">Show HSN Code in Printout</Label>
                             </div>
 
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="show_no_of_pixels"
+                                    checked={data.show_no_of_pixels}
+                                    onCheckedChange={(checked) => setData('show_no_of_pixels', checked as boolean)}
+                                />
+                                <Label htmlFor="show_no_of_pixels">Show Number of Pixels</Label>
+                            </div>
+
                             <div className="space-y-4">
                                 <h3 className="font-medium">Shipping Address</h3>
                                 <Textarea
@@ -752,37 +765,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                 </div>
                             )}
 
-                            {/* Facade Type Dropdown and Facade Notes */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <Label>Installation Type <span className="text-red-500">*</span></Label>
-                                    <Select
-                                        value={data.facade_type || ''}
-                                        onValueChange={val => setData('facade_type', val)}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select installation type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {Object.entries(facadeTypes).map(([key, label]) => (
-                                                <SelectItem key={key} value={key}>
-                                                    {label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.facade_type && <p className="text-sm text-red-500">{errors.facade_type}</p>}
-                                </div>
-                                <div>
-                                    <Label>Installation Notes</Label>
-                                    <Input
-                                        value={data.facade_notes || ''}
-                                        onChange={e => setData('facade_notes', e.target.value)}
-                                        placeholder="Enter notes for Installation"
-                                    />
-                                    {errors.facade_notes && <p className="text-sm text-red-500">{errors.facade_notes}</p>}
-                                </div>
-                            </div>
+
 
                             <div className="flex justify-end gap-4">
                                 <Button type="button" variant="outline" onClick={() => window.history.back()}>

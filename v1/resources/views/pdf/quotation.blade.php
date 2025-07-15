@@ -41,7 +41,7 @@
         }
 
         .logo {
-            max-height: 50px;
+            max-height: 100px;
             width: auto;
         }
 
@@ -375,10 +375,18 @@
     <div class="header">
         <table class="header-table">
             <tr>
-                <td class="logo-section">
-                    <img src="{{ public_path('images/logo.png') }}" alt="Logo" class="logo">
+                <td style="width: 60%;">
+                    <div style="margin-bottom: 15px;">
+                        <img src="{{ public_path('images/logo.png') }}" alt="Logo" class="logo" height="180px"
+                            width="auto">
+                    </div>
+                    <div style="margin-top: 50px;">
+                        <p style="font-size: 20px; font-weight: 500; color: #1a237e;">
+                            Reference: {{ $quotation->reference }}
+                        </p>
+                    </div>
                 </td>
-                <td class="company-info">
+                <td style="width: 40%;" class="company-info">
                     <h3>Radiant Synage Pvt Ltd</h3>
                     <p>
                         317, 2nd Floor, East of NGEF Layout<br>
@@ -389,6 +397,7 @@
                         <span style="font-weight: 500">GSTIN/UIN:</span> 29AAHCR7203C1ZJ<br>
                         <span style="font-weight: 500">CIN:</span> U74999KA2016PTC092481
                     </p>
+
                 </td>
             </tr>
         </table>
@@ -397,9 +406,6 @@
     <div class="separator"></div>
     <table style="width: 100%; margin: 24px 0 16px 0;">
         <tr>
-            <td style="font-size: 20px; font-weight: 500; color: #1a237e; text-align: left;">
-                Reference: {{ $quotation->reference }}
-            </td>
             <td style="font-size: 20px; color: #666; text-align: right;">
                 Date: {{ \Carbon\Carbon::parse($quotation->estimate_date)->format('d/m/Y') }}
             </td>
@@ -446,13 +452,7 @@
         </tr>
     </table>
 
-    <div class="separator"></div>
-    <div class="specs-section">
-        <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Installation Type</h3>
-        <p style="font-size: 16px; color: #333;">{{ $quotation->facade_type ?? '-' }} :
-            {{ $quotation->facade_notes ?? '-' }}</p>
-    </div>
-    <div class="separator"></div>
+
     @foreach ($quotation->items as $index => $item)
         @php
             $isSelected = $item->product_id == $quotation->selected_product_id;
@@ -513,11 +513,13 @@
                                     {{ $unit_height_mm }} H mm
                         </p>
                     </div>
-                            <div style="margin-top: 8px;">
-                                <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">NO OF PIXELS</h3>
-                                <p style="font-size: 16px; color: #333;">
-                                    {{ number_format($proposed_width_mm * 512, 0) }} Pixels</p>
+                            @if ($quotation->show_no_of_pixels)
+                                <div style="margin-top: 8px;">
+                                    <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">NO OF PIXELS</h3>
+                                    <p style="font-size: 16px; color: #333;">
+                                        {{ number_format($proposed_width_mm * 512, 0) }} Pixels</p>
                     </div>
+                            @endif
                 </td>
                 <td>
                             <table style="width: 100%;">
@@ -651,18 +653,13 @@
     <div class="footer">
         <div class="footer-top">
             <div>
-                For any information or clarifications<br>
-                <b>Contact: 8884491377</b>
+                For any information or clarifications
             </div>
-
-            <img src="{{ public_path('images/logo.png') }}" alt="Logo" class="footer-logo">
         </div>
         <div class="separator"></div>
         <div class="signature-section">
             <div class="signature-block">
                 For Radiant Synage Pvt Ltd.,<br>
-                <img src="{{ public_path('images/signature.png') }}" alt="Signature"
-                    style="height: 40px; margin: 8px 0;">
                 <div class="signature-name">{{ auth()->user()->name ?? '' }}</div>
                 <div class="signature-name">{{ auth()->user()->email ?? '' }}, {{ auth()->user()->mobile ?? '' }}
                 </div>

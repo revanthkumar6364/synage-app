@@ -415,14 +415,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                     </div>
                                 </div>
 
-                                <Separator className="my-4" />
 
-                                {/* Facade Type */}
-                                <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
-                                    <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Installation Type</h3>
-                                    <p className="text-sm text-muted-foreground">{quotation.facade_type} : {quotation.facade_notes}</p>
-                                </div>
-                                <Separator className="my-4" />
 
 
                                 {/* Product Specifications */}
@@ -511,12 +504,14 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                                                 {boxesInHeight} R x {boxesInWidth} C of {unitWidthMm} W x {unitHeightMm} H mm
                                                             </p>
                                                         </div>
-                                                        <div>
-                                                            <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">RESOLUTION</h4>
-                                                            <p className="text-sm text-muted-foreground">
-                                                                {Math.round(proposedWidthMm * 512)} Pixels
-                                                            </p>
-                                                        </div>
+                                                        {quotation.show_no_of_pixels && (
+                                                            <div>
+                                                                <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">RESOLUTION</h4>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    {Math.round(proposedWidthMm * 512)} Pixels
+                                                                </p>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div className="space-y-4">
@@ -685,9 +680,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                     <div className="flex items-center justify-between">
                                         <div>
                                             <p className="text-sm text-muted-foreground">For any information or clarifications</p>
-                                            <p className="text-sm font-medium">Contact: 8884491377</p>
                                         </div>
-                                        <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-8 object-contain opacity-50" />
                                     </div>
                                     <Separator />
                                     <div className="flex items-end justify-between">

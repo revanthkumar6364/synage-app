@@ -1,0 +1,32 @@
+-- Database Changes for Production
+-- Run these SQL queries manually in your production database
+
+-- Task 3: Remove Year from Reference Number
+-- This change affects the reference number generation logic in the application
+-- No direct database changes needed - handled in PHP code
+
+-- Task 4: Remove Installation Type & Notes
+-- This change affects the UI only - no database changes needed
+
+-- Task 5: Add Checkbox for Number of Pixels
+-- Add the show_no_of_pixels field to quotations table
+
+ALTER TABLE quotations ADD COLUMN show_no_of_pixels BOOLEAN DEFAULT TRUE AFTER show_hsn_code;
+
+-- Verify the change
+DESCRIBE quotations;
+
+-- Optional: Update existing quotations to have show_no_of_pixels = true (if needed)
+-- UPDATE quotations SET show_no_of_pixels = TRUE WHERE show_no_of_pixels IS NULL;
+
+-- Task 6: Remove Contact Number
+-- This change affects the UI only - no database changes needed
+-- Contact number "8884491377" has been removed from PDF template and preview/show pages
+
+-- Task 7: Remove Logo from PDF Footer
+-- This change affects the UI only - no database changes needed
+-- Logo has been removed from the PDF footer section, preview page, and show page
+
+-- Task 8: Remove Signature Label
+-- This change affects the UI only - no database changes needed
+-- Signature image has been removed from the PDF footer section
