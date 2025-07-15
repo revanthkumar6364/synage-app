@@ -361,6 +361,15 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                     </div>
                                 </div>
                             )}
+                            {quotation.items.length === 1 && (
+                                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                                    <div className="flex items-center">
+                                        <div className="text-green-800 text-sm">
+                                            <strong>✓ Synchronized Product:</strong> The product matches your selection from Step 1. You can modify the details or add more products as needed.
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             <Table>
                                 <TableHeader>
                                     <TableRow>

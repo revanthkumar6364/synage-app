@@ -335,8 +335,64 @@ class QuotationController extends Controller
 
     public function products(Quotation $quotation)
     {
+        // Check if we need to handle product synchronization
+        if ($quotation->selected_product_id && $quotation->selectedProduct) {
+            $selectedProduct = $quotation->selectedProduct;
+            $calculatedQuantity = $quotation->max_quantity ?: $quotation->quantity ?: 1;
+
+            // Case 1: No items exist - create the item
+            if ($quotation->items->isEmpty()) {
+                $quotationItem = new QuotationItem([
+                    'quotation_id' => $quotation->id,
+                    'product_id' => $selectedProduct->id,
+                    'quantity' => $calculatedQuantity,
+                    'unit_price' => $selectedProduct->price,
+                    'proposed_unit_price' => $selectedProduct->price,
+                    'discount_percentage' => 0,
+                    'tax_percentage' => $selectedProduct->gst_percentage ?: 0,
+                    'notes' => null,
+                    'available_size_width_mm' => $quotation->available_size_width_mm,
+                    'available_size_height_mm' => $quotation->available_size_height_mm,
+                ]);
+
+                $quotationItem->calculateTotals();
+                $quotationItem->save();
+
+                session()->flash('info', 'Product from Step 1 has been automatically added with calculated quantity.');
+            }
+            // Case 2: Items exist but product has changed - update the first item
+            elseif ($quotation->items->count() === 1 && $quotation->items->first()->product_id !== $selectedProduct->id) {
+                $firstItem = $quotation->items->first();
+
+                // Update the existing item with new product details
+                $firstItem->update([
+                    'product_id' => $selectedProduct->id,
+                    'quantity' => $calculatedQuantity,
+                    'unit_price' => $selectedProduct->price,
+                    'proposed_unit_price' => $selectedProduct->price,
+                    'tax_percentage' => $selectedProduct->gst_percentage ?: 0,
+                    'available_size_width_mm' => $quotation->available_size_width_mm,
+                    'available_size_height_mm' => $quotation->available_size_height_mm,
+                ]);
+
+                // Recalculate totals
+                $firstItem->calculateTotals();
+                $firstItem->save();
+
+                session()->flash('info', 'Product has been updated to match the selection from Step 1.');
+            }
+            // Case 3: Multiple items exist - don't auto-update, let user manage manually
+            elseif ($quotation->items->count() > 1) {
+                // Check if any item matches the selected product
+                $matchingItem = $quotation->items->where('product_id', $selectedProduct->id)->first();
+                if (!$matchingItem) {
+                    session()->flash('warning', 'Multiple products exist. The selected product from Step 1 is not in the list. You may want to add it manually.');
+                }
+            }
+        }
+
         return Inertia::render('quotations/products', [
-            'quotation' => $quotation->load('items'),
+            'quotation' => $quotation->load(['items', 'selectedProduct']),
             'products' => Product::get(),
             'productsByType' => [
                 'indoor' => Product::byType('indoor')->get(),
