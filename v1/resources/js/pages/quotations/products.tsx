@@ -141,10 +141,10 @@ export default function QuotationProducts({ quotation, products }: Props) {
                 // Remove any previous error
                 delete newProducts[index].priceError;
 
-                // For managers, show suggested range but don't enforce validation
-                if (auth.user.role === 'manager') {
+                // For admins, show suggested range but don't enforce validation
+                if (auth.user.role === 'admin') {
                     if (numericValue < minPrice) {
-                        newProducts[index].priceError = `Suggested minimum: ₹${minPrice} (You can set any price as manager)`;
+                        newProducts[index].priceError = `Suggested minimum: ₹${minPrice} (You can set any price as admin)`;
                     }
                 } else {
                     // For other users, enforce validation
@@ -183,8 +183,8 @@ export default function QuotationProducts({ quotation, products }: Props) {
             return;
         }
 
-        // Check for any price errors before submitting (only for non-manager users)
-        if (auth.user.role !== 'manager') {
+        // Check for any price errors before submitting (only for non-admin users)
+        if (auth.user.role !== 'admin') {
             const hasErrors = selectedProducts.some(product => {
                 const productDetails = products.find(p => p.id === product.id);
                 if (productDetails) {
@@ -222,8 +222,8 @@ export default function QuotationProducts({ quotation, products }: Props) {
             return;
         }
 
-        // Check for any price errors before submitting (only for non-manager users)
-        if (auth.user.role !== 'manager') {
+        // Check for any price errors before submitting (only for non-admin users)
+        if (auth.user.role !== 'admin') {
             const hasErrors = selectedProducts.some(product => {
                 const productDetails = products.find(p => p.id === product.id);
                 if (productDetails) {
@@ -352,11 +352,11 @@ export default function QuotationProducts({ quotation, products }: Props) {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            {auth.user.role === 'manager' && (
+                            {auth.user.role === 'admin' && (
                                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                                     <div className="flex items-center">
                                         <div className="text-blue-800 text-sm">
-                                            <strong>Manager Note:</strong> You can set any price for products. The system will show suggested price ranges (₹min - ₹max) when you enter prices outside the normal range, but you are not restricted by these limits.
+                                            <strong>Admin Note:</strong> You can set any price for products. The system will show suggested price ranges (₹min - ₹max) when you enter prices outside the normal range, but you are not restricted by these limits.
                                         </div>
                                     </div>
                                 </div>
