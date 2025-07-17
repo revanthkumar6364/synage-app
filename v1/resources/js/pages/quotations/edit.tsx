@@ -79,6 +79,8 @@ interface FormData extends Record<string, any> {
     same_as_billing: boolean;
     show_hsn_code: boolean;
     show_no_of_pixels: boolean;
+    show_billing_in_print: boolean;
+    show_shipping_in_print: boolean;
     product_type: string;
     selected_product_id: number | undefined;
 }
@@ -124,7 +126,8 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
         same_as_billing: false,
         show_hsn_code: quotation.show_hsn_code || false,
         show_no_of_pixels: quotation.show_no_of_pixels ?? true,
-
+        show_billing_in_print: quotation.show_billing_in_print ?? true,
+        show_shipping_in_print: quotation.show_shipping_in_print ?? true,
         product_type: quotation.product_type || '',
         selected_product_id: quotation.selected_product_id,
     });
@@ -155,11 +158,11 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
     }, [data.billing_address, data.billing_location, data.billing_city, data.billing_zip_code, data.same_as_billing]);
 
     useEffect(() => {
-            const width = parseFloat(data.available_size_width) || 0;
-            const height = parseFloat(data.available_size_height) || 0;
-            const unit = data.available_size_unit;
+        const width = parseFloat(data.available_size_width) || 0;
+        const height = parseFloat(data.available_size_height) || 0;
+        const unit = data.available_size_unit;
         const selectedProduct = getSelectedProduct();
-            let width_mm, height_mm, width_ft, height_ft, sqft;
+        let width_mm, height_mm, width_ft, height_ft, sqft;
         if (unit === 'mm') {
             width_mm = width;
             height_mm = height;
@@ -171,34 +174,34 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
             width_mm = width * 304.8;
             height_mm = height * 304.8;
         }
-            sqft = width_ft * height_ft;
+        sqft = width_ft * height_ft;
         // Use product-specific unit size if available, otherwise fallback to default
         const unitSize = selectedProduct?.unit_size || { width_mm: 320, height_mm: 160 };
         const boxWidth = unitSize.width_mm;
         const boxHeight = unitSize.height_mm;
-            const boxesInWidth = Math.floor(width_mm / boxWidth);
-            const boxesInHeight = Math.floor(height_mm / boxHeight);
-            const maxPossibleBoxes = boxesInWidth * boxesInHeight;
-            const proposedWidth = boxWidth * boxesInWidth;
+        const boxesInWidth = Math.floor(width_mm / boxWidth);
+        const boxesInHeight = Math.floor(height_mm / boxHeight);
+        const maxPossibleBoxes = boxesInWidth * boxesInHeight;
+        const proposedWidth = boxWidth * boxesInWidth;
         const proposedHeight = boxHeight * Math.ceil(maxPossibleBoxes / boxesInWidth);
         setData((prev: any) => ({
-                ...prev,
-                available_size_width_mm: width_mm.toFixed(2),
-                available_size_height_mm: height_mm.toFixed(2),
-                available_size_width_ft: width_ft.toFixed(2),
-                available_size_height_ft: height_ft.toFixed(2),
-                available_size_sqft: sqft.toFixed(2),
-                max_quantity: maxPossibleBoxes.toString(),
-                quantity: maxPossibleBoxes.toString(),
-                proposed_size_width: proposedWidth.toString(),
-                proposed_size_height: proposedHeight.toString(),
-                proposed_size_unit: "mm",
-                proposed_size_width_mm: proposedWidth.toFixed(2),
-                proposed_size_height_mm: proposedHeight.toFixed(2),
-                proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
-                proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
-                proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2)
-            }));
+            ...prev,
+            available_size_width_mm: width_mm.toFixed(2),
+            available_size_height_mm: height_mm.toFixed(2),
+            available_size_width_ft: width_ft.toFixed(2),
+            available_size_height_ft: height_ft.toFixed(2),
+            available_size_sqft: sqft.toFixed(2),
+            max_quantity: maxPossibleBoxes.toString(),
+            quantity: maxPossibleBoxes.toString(),
+            proposed_size_width: proposedWidth.toString(),
+            proposed_size_height: proposedHeight.toString(),
+            proposed_size_unit: "mm",
+            proposed_size_width_mm: proposedWidth.toFixed(2),
+            proposed_size_height_mm: proposedHeight.toFixed(2),
+            proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
+            proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
+            proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2)
+        }));
     }, [data.available_size_width, data.available_size_height, data.available_size_unit, data.selected_product_id, data.product_type]);
 
     useEffect(() => {
@@ -228,7 +231,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
         // Generate suggested reference number and populate billing address based on selected account
         if (value) {
             const selectedAccount = accounts.find(acc => acc.id.toString() === value);
-        if (selectedAccount) {
+            if (selectedAccount) {
                 // Generate suggested reference number
                 const clientName = selectedAccount.business_name.substring(0, 4).toUpperCase();
                 const today = new Date().toISOString().split('T')[0];
@@ -250,7 +253,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                 }
 
                 // Set account contacts
-            setAccountContacts(selectedAccount.contacts || []);
+                setAccountContacts(selectedAccount.contacts || []);
             }
         } else {
             setAccountContacts([]);
@@ -493,22 +496,6 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                             />
                                             <Label htmlFor="same_as_billing" className="text-sm">Same as billing</Label>
                                         </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id="show_hsn_code"
-                                                checked={data.show_hsn_code}
-                                                onCheckedChange={(checked) => setData('show_hsn_code', checked as boolean)}
-                                            />
-                                            <Label htmlFor="show_hsn_code" className="text-sm">Show HSN Code in Printout</Label>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id="show_no_of_pixels"
-                                                checked={data.show_no_of_pixels}
-                                                onCheckedChange={(checked) => setData('show_no_of_pixels', checked as boolean)}
-                                            />
-                                            <Label htmlFor="show_no_of_pixels" className="text-sm">Show Number of Pixels</Label>
-                                        </div>
                                     </div>
 
                                     <div>
@@ -554,7 +541,44 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                     </div>
                                 </div>
                             </div>
-
+                            {/* Print Options */}
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-medium">Print Options</h3>
+                                <div className="flex flex-wrap gap-4">
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="show_hsn_code"
+                                            checked={data.show_hsn_code}
+                                            onCheckedChange={(checked) => setData('show_hsn_code', checked as boolean)}
+                                        />
+                                        <Label htmlFor="show_hsn_code" className="text-sm">Show HSN Code in Printout</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="show_no_of_pixels"
+                                            checked={data.show_no_of_pixels}
+                                            onCheckedChange={(checked) => setData('show_no_of_pixels', checked as boolean)}
+                                        />
+                                        <Label htmlFor="show_no_of_pixels" className="text-sm">Show Number of Pixels</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="show_billing_in_print"
+                                            checked={data.show_billing_in_print}
+                                            onCheckedChange={(checked) => setData('show_billing_in_print', checked as boolean)}
+                                        />
+                                        <Label htmlFor="show_billing_in_print" className="text-sm">Show Billing in Print</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="show_shipping_in_print"
+                                            checked={data.show_shipping_in_print}
+                                            onCheckedChange={(checked) => setData('show_shipping_in_print', checked as boolean)}
+                                        />
+                                        <Label htmlFor="show_shipping_in_print" className="text-sm">Show Shipping in Print</Label>
+                                    </div>
+                                </div>
+                            </div>
                             {/* Product Type Selection */}
                             <div className="space-y-4">
                                 <Label>LED Display Type <span className="text-red-500">*</span></Label>

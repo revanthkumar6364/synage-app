@@ -94,6 +94,8 @@ class QuotationController extends Controller
             'client_scope' => 'nullable|string',
             'show_hsn_code' => 'boolean',
             'show_no_of_pixels' => 'boolean',
+            'show_billing_in_print' => 'boolean',
+            'show_shipping_in_print' => 'boolean',
         ];
 
         // Add size-related validation rules based on product_type
@@ -267,6 +269,8 @@ class QuotationController extends Controller
             'same_as_billing' => 'boolean',
             'show_hsn_code' => 'boolean',
             'show_no_of_pixels' => 'boolean',
+            'show_billing_in_print' => 'boolean',
+            'show_shipping_in_print' => 'boolean',
         ];
 
         // Add size-related validation rules based on product_type

@@ -404,53 +404,58 @@
     </div>
 
     <div class="separator"></div>
-    <table style="width: 100%; margin: 24px 0 16px 0;">
-        <tr>
-            <td style="font-size: 20px; color: #666; text-align: right;">
-                Date: {{ \Carbon\Carbon::parse($quotation->estimate_date)->format('d/m/Y') }}
-            </td>
-        </tr>
-    </table>
-    <div class="separator"></div>
     <div class="title-section">
+        <table style="width: 100%; margin-bottom: 16px;">
+            <tr>
+                <td style="text-align: right;">
+                    <span style="font-size: 20px; color: #666;">Date: {{ \Carbon\Carbon::parse($quotation->estimate_date)->format('d/m/Y') }}</span>
+                </td>
+            </tr>
+        </table>
         <h2 style="font-size: 28px; color: #1a1a1a; margin: 0 0 8px 0;">{{ $quotation->title }}</h2>
         <p style="font-size: 20px; color: #666;">Kind Attn: {{ optional($quotation->account_contact)->name }}<br>
-        {{ optional($quotation->account_contact)->role }}</p>
+            {{ optional($quotation->account_contact)->role }}</p>
         <p style="font-size: 15px; color: #333;">{{ $quotation->description }}</p>
     </div>
 
     <div class="separator"></div>
 
-    <table class="info-grid">
-        <tr>
-            <td>
-                <div class="info-box">
-                    <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Bill To</h3>
-                    <p class="business-name">{{ optional($quotation->account)->business_name }}</p>
-                    <p style="font-size: 16px; color: #333;">{{ $quotation->billing_address }}</p>
-                    <p style="font-size: 16px; color: #333;">{{ $quotation->billing_city }},
-                        {{ $quotation->billing_location }}
-                        {{ $quotation->billing_zip_code }}</p>
-                    <p style="margin-top: 8px; font-size: 16px; color: #333;"><span style="font-weight: 500">GST
-                            NO:</span>
-                        {{ optional($quotation->account)->gst_number }}</p>
-                </div>
-            </td>
-            <td>
-                <div class="info-box">
-                    <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Ship To</h3>
-                    <p class="business-name">{{ optional($quotation->account_contact)->name }}</p>
-                    <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_address }}</p>
-                    <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_city }},
-                        {{ $quotation->shipping_location }}
-                        {{ $quotation->shipping_zip_code }}</p>
-                    <p style="margin-top: 8px; font-size: 16px; color: #333;"><span style="font-weight: 500">GST
-                            NO:</span>
-                        {{ optional($quotation->account)->gst_number }}</p>
-                </div>
-            </td>
-        </tr>
-    </table>
+    @if ($quotation->show_billing_in_print || $quotation->show_shipping_in_print)
+        <table class="info-grid">
+            <tr>
+                @if ($quotation->show_billing_in_print)
+                <td>
+                    <div class="info-box">
+                        <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Bill To</h3>
+                        <p class="business-name">{{ optional($quotation->account)->business_name }}</p>
+                        <p style="font-size: 16px; color: #333;">{{ $quotation->billing_address }}</p>
+                        <p style="font-size: 16px; color: #333;">{{ $quotation->billing_city }},
+                            {{ $quotation->billing_location }}
+                            {{ $quotation->billing_zip_code }}</p>
+                        <p style="margin-top: 8px; font-size: 16px; color: #333;"><span style="font-weight: 500">GST
+                                NO:</span>
+                            {{ optional($quotation->account)->gst_number }}</p>
+                    </div>
+                </td>
+                @endif
+                @if ($quotation->show_shipping_in_print)
+                <td>
+                    <div class="info-box">
+                        <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Ship To</h3>
+                        <p class="business-name">{{ optional($quotation->account_contact)->name }}</p>
+                        <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_address }}</p>
+                        <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_city }},
+                            {{ $quotation->shipping_location }}
+                            {{ $quotation->shipping_zip_code }}</p>
+                        <p style="margin-top: 8px; font-size: 16px; color: #333;"><span style="font-weight: 500">GST
+                                NO:</span>
+                            {{ optional($quotation->account)->gst_number }}</p>
+                    </div>
+                </td>
+                @endif
+            </tr>
+        </table>
+    @endif
 
 
     @foreach ($quotation->items as $index => $item)
@@ -492,11 +497,11 @@
             $proposed_sqft = $proposed_width_ft * $proposed_height_ft;
         @endphp
         @if (in_array($item->product->product_type, ['indoor_led', 'outdoor_led']))
-    <div class="specs-section">
+            <div class="specs-section">
                 <h3 style="margin-bottom: 8px; color: #333;">Product Specifications - {{ $item->product->name }}</h3>
-        <table class="specs-grid">
-            <tr>
-                <td>
+                <table class="specs-grid">
+                    <tr>
+                        <td>
                             <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">SIZE AVAILABLE AT LOCATION
                             </h3>
                             <p style="font-size: 16px; color: #333;">{{ number_format($available_width_mm, 2) }} mm W x
@@ -511,17 +516,17 @@
                                     {{ number_format($proposed_sqft, 2) }} Sq ft |
                                     {{ $boxes_in_height }} R x {{ $boxes_in_width }} C of {{ $unit_width_mm }} W x
                                     {{ $unit_height_mm }} H mm
-                        </p>
-                    </div>
+                                </p>
+                            </div>
                             @if ($quotation->show_no_of_pixels)
                                 <div style="margin-top: 8px;">
                                     <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">NO OF PIXELS</h3>
                                     <p style="font-size: 16px; color: #333;">
                                         {{ number_format($proposed_width_mm * 512, 0) }} Pixels</p>
-                    </div>
+                                </div>
                             @endif
-                </td>
-                <td>
+                        </td>
+                        <td>
                             <table style="width: 100%;">
                                 <tr>
                                     <td style="vertical-align: top; padding-right: 16px;">
@@ -533,7 +538,7 @@
                                             <p style="font-size: 16px; color: #333;">
                                                 {{ $item->product->pixel_pitch ? $item->product->pixel_pitch . ' mm' : 'N/A' }}
                                             </p>
-                    </div>
+                                        </div>
                                     </td>
                                     <td style="vertical-align: top;">
                                         <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">REFRESH RATE
@@ -546,14 +551,14 @@
                                                 TYPE</h3>
                                             <p style="font-size: 16px; color: #333;">
                                                 {{ $item->product->cabinet_type ?? 'N/A' }}</p>
-                    </div>
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
-                </td>
-            </tr>
-        </table>
-    </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         @endif
     @endforeach
 
@@ -661,7 +666,9 @@
             <div class="signature-block">
                 For Radiant Synage Pvt Ltd.,<br>
                 <div class="signature-name">{{ auth()->user()->name ?? '' }}</div>
-                <div class="signature-name">{{ auth()->user()->email ?? '' }}, {{ auth()->user()->mobile ?? '' }}
+                <div class="signature-name">
+                    EMAIL: {{ auth()->user()->email ?? '' }}<br>
+                    MOBILE: {{ auth()->user()->mobile ?? '' }}
                 </div>
                 <div style="margin-top: 8px; font-size: 11px;">
                     <a href="https://wa.me/918884491377"

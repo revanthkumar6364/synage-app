@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::table('quotations', function (Blueprint $table) {
             $table->boolean('show_no_of_pixels')->default(true)->after('show_hsn_code');
+            $table->boolean('show_billing_in_print')->default(true)->after('show_no_of_pixels');
+            $table->boolean('show_shipping_in_print')->default(true)->after('show_billing_in_print');
         });
     }
 
@@ -23,6 +25,8 @@ return new class extends Migration
     {
         Schema::table('quotations', function (Blueprint $table) {
             $table->dropColumn('show_no_of_pixels');
+            $table->dropColumn('show_billing_in_print');
+            $table->dropColumn('show_shipping_in_print');
         });
     }
 };

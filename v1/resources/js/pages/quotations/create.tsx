@@ -72,6 +72,7 @@ interface FormData {
     same_as_billing: boolean;
     show_hsn_code: boolean;
     show_no_of_pixels: boolean;
+    show_billing_shipping: boolean;
     status: 'draft';
 }
 
@@ -125,6 +126,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
         same_as_billing: false,
         show_hsn_code: false,
         show_no_of_pixels: true,
+        show_billing_shipping: false,
         status: 'draft',
 
     });
@@ -708,6 +710,23 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                     onCheckedChange={(checked) => setData('show_no_of_pixels', checked as boolean)}
                                 />
                                 <Label htmlFor="show_no_of_pixels">Show Number of Pixels</Label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="show_billing_in_print"
+                                    checked={data.show_billing_in_print}
+                                    onCheckedChange={(checked) => setData('show_billing_in_print', checked as boolean)}
+                                />
+                                <Label htmlFor="show_billing_in_print">Show Billing in Print</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="show_shipping_in_print"
+                                    checked={data.show_shipping_in_print}
+                                    onCheckedChange={(checked) => setData('show_shipping_in_print', checked as boolean)}
+                                />
+                                <Label htmlFor="show_shipping_in_print">Show Shipping in Print</Label>
                             </div>
 
                             <div className="space-y-4">

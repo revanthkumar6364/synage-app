@@ -192,6 +192,8 @@ export interface Quotation {
     account_contact?: AccountContact;
     selected_product?: Product;
     items: QuotationItem[];
+    show_billing_in_print?: boolean;
+    show_shipping_in_print?: boolean;
     can: {
         update: boolean;
         delete: boolean;
