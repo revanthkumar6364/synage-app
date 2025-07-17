@@ -152,7 +152,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     Edit
                                 </Button>
                             )}
-                            {quotation.status === 'pending' && (
+                            {(quotation.status === 'pending' || quotation.status === 'approved') && (
                                 <Button
                                     variant="outline"
                                     onClick={() => {
