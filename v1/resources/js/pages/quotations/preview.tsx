@@ -342,6 +342,9 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                     <div className="flex items-start space-x-6">
                                         <div className="flex flex-col items-start gap-3">
                                             <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-14 object-contain" />
+                                            <div className="text-sm font-medium text-primary">
+                                                Reference: {quotation.reference}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="text-right">
@@ -364,18 +367,13 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
 
                                 <Separator />
 
-                                {/* Reference and Date Row */}
-                                <div className="flex items-center justify-between my-8">
-                                    <div className="text-sm font-medium text-primary">
-                                        Reference: {quotation.reference}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                        Date: {quotation.estimate_date ? new Date(quotation.estimate_date).toLocaleDateString('en-IN') : ''}
-                                    </div>
-                                </div>
-                                <Separator />
                                 {/* Title Section */}
                                 <div className="text-center space-y-3 my-8">
+                                    <div className="text-right">
+                                        <div className="text-sm text-muted-foreground">
+                                            Date: {quotation.estimate_date ? new Date(quotation.estimate_date).toLocaleDateString('en-IN') : ''}
+                                        </div>
+                                    </div>
                                     <h2 className="text-2xl font-semibold text-primary tracking-tight">{quotation.title}</h2>
                                     <div className="space-y-1">
                                         <p className="text-sm font-medium text-muted-foreground">
@@ -386,73 +384,44 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                         <p className="text-sm text-muted-foreground">{quotation.description}</p>
                                     </div>
                                 </div>
+                                {(quotation.show_billing_in_print || quotation.show_shipping_in_print) && (
+                                    <>
+                                        <Separator className="my-8" />
 
-                                <Separator className="my-8" />
-
-                                {/* Billing and Shipping */}
-                                <div className="grid grid-cols-2 gap-8">
-                                    <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
-                                        <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Bill To</h3>
-                                        <div className="text-sm space-y-2">
-                                            <p className="font-medium text-foreground">{quotation.account?.business_name}</p>
-                                            <div className="text-muted-foreground space-y-1">
-                                                <p>{quotation.billing_address}</p>
-                                                <p>{quotation.billing_city}, {quotation.billing_location} {quotation.billing_zip_code}</p>
-                                                <p className="font-medium mt-2">GST NO: {quotation.account?.gst_number}</p>
-                                            </div>
+                                        <div className="grid grid-cols-2 gap-8">
+                                            {quotation.show_billing_in_print && (
+                                                <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
+                                                    <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Bill To</h3>
+                                                    <div className="text-sm space-y-2">
+                                                        <p className="font-medium text-foreground">{quotation.account?.business_name}</p>
+                                                        <div className="text-muted-foreground space-y-1">
+                                                            <p>{quotation.billing_address}</p>
+                                                            <p>{quotation.billing_city}, {quotation.billing_location} {quotation.billing_zip_code}</p>
+                                                            <p className="font-medium mt-2">GST NO: {quotation.account?.gst_number}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {quotation.show_shipping_in_print && (
+                                                <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
+                                                    <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Ship To</h3>
+                                                    <div className="text-sm space-y-2">
+                                                        <p className="font-medium text-foreground">{quotation.account_contact?.name}</p>
+                                                        <div className="text-muted-foreground space-y-1">
+                                                            <p>{quotation.shipping_address}</p>
+                                                            <p>{quotation.shipping_city}, {quotation.shipping_location} {quotation.shipping_zip_code}</p>
+                                                            <p className="font-medium mt-2">GST NO: {quotation.account?.gst_number}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                    <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
-                                        <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Ship To</h3>
-                                        <div className="text-sm space-y-2">
-                                            <p className="font-medium text-foreground">{quotation.account_contact?.name}</p>
-                                            <div className="text-muted-foreground space-y-1">
-                                                <p>{quotation.shipping_address}</p>
-                                                <p>{quotation.shipping_city}, {quotation.shipping_location} {quotation.shipping_zip_code}</p>
-                                                <p className="font-medium mt-2">GST NO: {quotation.account?.gst_number}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-
+                                    </>
+                                )}
 
                                 {/* Product Specifications */}
-
+                                <Separator className="my-8" />
                                 <div className="space-y-6">
-                                    {/* <div className="bg-muted/30 p-5 rounded-lg border border-border/50 space-y-4">
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <h3 className="text-sm font-medium text-primary uppercase tracking-wide">Size available at location</h3>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {quotation.available_size_width_mm} mm W x {quotation.available_size_height_mm} mm H
-                                                </p>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <h3 className="text-sm font-medium text-primary uppercase tracking-wide">Resolution</h3>
-                                                <p className="text-sm text-muted-foreground">
-                                                    512 x {Number(quotation.proposed_size_width_mm)} = {Number(quotation.proposed_size_width_mm) * 512} Pixels
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <Separator />
-                                        <div>
-                                            <h3 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">Proposed Size</h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                {quotation.proposed_size_width_mm} mm W x {quotation.proposed_size_height_mm} mm H |
-                                                {quotation.proposed_size_width_ft} ft W x {quotation.proposed_size_height_ft} ft H =
-                                                {quotation.proposed_size_sqft} Sq ft |
-                                                {(() => {
-                                                    const width = parseInt(quotation.proposed_size_width_mm || '0');
-                                                    const height = parseInt(quotation.proposed_size_height_mm || '0');
-                                                    const rows = Math.ceil(height / 160);
-                                                    const cols = Math.ceil(width / 320);
-                                                    return `${rows} R x ${cols} C of 320 W x 160 H mm`;
-                                                })()}
-                                            </p>
-                                        </div>
-                                    </div> */}
 
                                     {/* Per-Item Product Specifications for LED Products */}
                                     {quotation.items.map((item, index) => {
@@ -686,15 +655,9 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                     <div className="flex items-end justify-between">
                                         <div>
                                             <p className="text-sm">For Radiant Synage Pvt Ltd.,</p>
-                                            <img
-                                                alt="Blue signature stamp of Radiant Synage Pvt Ltd."
-                                                className="my-2"
-                                                height="40"
-                                                width="200"
-                                                src="/placeholder.svg?height=40&width=60"
-                                            />
                                             <p className="text-sm font-semibold text-primary">{auth.user.name}</p>
-                                            <p className="text-sm font-semibold text-primary">{auth.user.email}, {auth.user.mobile}</p>
+                                            <p className="text-sm font-semibold text-primary">EMAIL: {auth.user.email}</p>
+                                            <p className="text-sm font-semibold text-primary">MOBILE: {auth.user.mobile}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-muted-foreground">Generated on</p>
