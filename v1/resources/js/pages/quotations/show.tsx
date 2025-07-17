@@ -185,11 +185,56 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                     <CardContent className="p-0">
                         <ScrollArea className="h-[calc(100vh-16rem)] rounded-lg">
                             <div ref={contentRef} className="w-[210mm] mx-auto bg-background p-8 shadow-sm">
+                                {/* Active Print Settings */}
+                                <div className="bg-muted/30 p-4 rounded-lg border border-border/50 mb-6">
+                                    <h4 className="text-sm font-medium text-primary mb-2">Active Print Settings:</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {quotation.show_hsn_code ? (
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                ✓ HSN Code
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                ✗ HSN Code
+                                            </span>
+                                        )}
+                                        {quotation.show_no_of_pixels ? (
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                ✓ Number of Pixels
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                ✗ Number of Pixels
+                                            </span>
+                                        )}
+                                        {quotation.show_billing_in_print ? (
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                ✓ Billing Address
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                ✗ Billing Address
+                                            </span>
+                                        )}
+                                        {quotation.show_shipping_in_print ? (
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                ✓ Shipping Address
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                ✗ Shipping Address
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
                                 {/* Header with Logo and Company Info */}
                                 <div className="flex items-start justify-between pb-6">
                                     <div className="flex items-start space-x-6">
                                         <div className="flex flex-col items-start gap-3">
                                             <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-14 object-contain" />
+                                            <div className="text-sm font-medium text-primary">
+                                                Reference: {quotation.reference}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="text-right">
@@ -212,27 +257,26 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
 
                                 <Separator />
 
-                                {/* Reference and Date Row */}
-                                <div className="flex items-center justify-between my-8">
-                                    <div className="text-sm font-medium text-primary">
-                                        Reference: {quotation.reference}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                        Date: {quotation.estimate_date ? new Date(quotation.estimate_date).toLocaleDateString('en-IN') : ''}
-                                    </div>
-                                </div>
-                                <Separator />
 
-                                {/* Title Section */}
-                                <div className="text-center space-y-3 my-8">
-                                    <h2 className="text-2xl font-semibold text-primary tracking-tight">{quotation.title}</h2>
-                                    <div className="space-y-1">
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            Kind Attn: {quotation.account_contact?.name}
-                                            <br/>
-                                            {quotation.account_contact?.role}
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">{quotation.description}</p>
+
+                                {/* Title and Date Section */}
+                                <div className="my-8 space-y-6">
+                                    <div className="flex items-center justify-end">
+                                        <div className="text-sm text-muted-foreground">
+                                            Date: {quotation.estimate_date ? new Date(quotation.estimate_date).toLocaleDateString('en-IN') : ''}
+                                        </div>
+                                    </div>
+
+                                    <div className="text-center space-y-3">
+                                        <h2 className="text-2xl font-semibold text-primary tracking-tight">{quotation.title}</h2>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-medium text-muted-foreground">
+                                                Kind Attn: {quotation.account_contact?.name}
+                                                <br />
+                                                {quotation.account_contact?.role}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">{quotation.description}</p>
+                                        </div>
                                     </div>
                                 </div>
 
