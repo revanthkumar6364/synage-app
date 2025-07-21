@@ -540,15 +540,9 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     <div className="flex items-end justify-between">
                                         <div>
                                             <p className="text-sm">For Radiant Synage Pvt Ltd.,</p>
-                                            <img
-                                                alt="Blue signature stamp of Radiant Synage Pvt Ltd."
-                                                className="my-2"
-                                                height="40"
-                                                width="200"
-                                                src="/placeholder.svg?height=40&width=60"
-                                            />
                                             <p className="text-sm font-semibold text-primary">{auth.user.name}</p>
-                                            <p className="text-sm font-semibold text-primary">{auth.user.email}, {auth.user.mobile}</p>
+                                            <p className="text-sm font-semibold text-primary">EMAIL: {auth.user.email}</p>
+                                            <p className="text-sm font-semibold text-primary">MOBILE: {auth.user.mobile}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-muted-foreground">Generated on</p>
