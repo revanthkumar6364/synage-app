@@ -132,6 +132,41 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
             <Toaster position="top-right" />
 
             <div className="container mx-auto py-6 space-y-6">
+                {/* Approval Actions - moved to top */}
+                {quotation.status === 'pending' && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Approval Actions</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <Textarea
+                                    placeholder="Add comments (required for cancellation)"
+                                    value={comments}
+                                    onChange={(e) => setComments(e.target.value)}
+                                    className="min-h-[100px]"
+                                />
+                                <div className="flex justify-end gap-4">
+                                    <Button
+                                        onClick={handleApprove}
+                                        disabled={loading}
+                                        className="bg-green-500 hover:bg-green-600 text-white"
+                                    >
+                                        {loading ? 'Processing...' : 'Approve Quotation'}
+                                    </Button>
+                                    <Button
+                                        onClick={handleReject}
+                                        disabled={loading || !comments.trim()}
+                                        variant="destructive"
+                                    >
+                                        {loading ? 'Processing...' : 'Cancel Quotation'}
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
                 <Card className="border-0 shadow-md">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
                         <div>
@@ -627,40 +662,6 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                     </CardContent>
                 </Card>
 
-                {/* Approval Actions */}
-                {quotation.status === 'pending' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Approval Actions</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <Textarea
-                                    placeholder="Add comments (required for cancellation)"
-                                    value={comments}
-                                    onChange={(e) => setComments(e.target.value)}
-                                    className="min-h-[100px]"
-                                />
-                                <div className="flex justify-end gap-4">
-                                    <Button
-                                        onClick={handleApprove}
-                                        disabled={loading}
-                                        className="bg-green-500 hover:bg-green-600 text-white"
-                                    >
-                                        {loading ? 'Processing...' : 'Approve Quotation'}
-                                    </Button>
-                                    <Button
-                                        onClick={handleReject}
-                                        disabled={loading || !comments.trim()}
-                                        variant="destructive"
-                                    >
-                                        {loading ? 'Processing...' : 'Cancel Quotation'}
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
 
                 <div className="flex justify-between">
                     <Button
