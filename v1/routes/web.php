@@ -10,6 +10,7 @@ use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\QuotationMediaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\ReportController;
 
 Route::redirect('/', '/dashboard', 301)->name('home');
 
@@ -41,23 +42,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('quotations.reject');
     Route::post('/quotations/{quotation}/create-version', [QuotationController::class, 'createVersion'])
         ->name('quotations.create-version');
-    Route::get('quotations/{quotation}/files', [QuotationController::class, 'files'])->name('quotations.files');
-    Route::post('quotations/{quotation}/files', [QuotationController::class, 'filesStore'])->name('quotations.files.store');
-    Route::get('quotations/{quotation}/pdf', [QuotationController::class, 'downloadPdf'])->name('quotations.pdf');
+    Route::get('quotations/{quotation}/pdf', [QuotationController::class, 'generatePdf'])->name('quotations.pdf');
+    Route::resource('quotation-media', QuotationMediaController::class);
 
-});
-
-// Quotation Media Management
-Route::middleware(['auth'])->group(function () {
-    Route::get('quotation-media', [QuotationMediaController::class, 'index'])->name('quotation-media.index');
-    Route::get('quotation-media/create', [QuotationMediaController::class, 'create'])->name('quotation-media.create');
-    Route::post('quotation-media', [QuotationMediaController::class, 'store'])->name('quotation-media.store');
-    Route::get('quotation-media/{id}/edit', [QuotationMediaController::class, 'edit'])->name('quotation-media.edit');
-    Route::put('quotation-media/{id}', [QuotationMediaController::class, 'update'])->name('quotation-media.update');
-    Route::delete('quotation-media/{id}', [QuotationMediaController::class, 'destroy'])->name('quotation-media.destroy');
-    Route::post('quotation-media/sort', [QuotationMediaController::class, 'updateSortOrder'])->name('quotation-media.sort');
-    Route::patch('quotation-media/{id}/attach', [QuotationMediaController::class, 'attach'])->name('quotation-media.attach');
-    Route::patch('quotation-media/{id}/detach', [QuotationMediaController::class, 'detach'])->name('quotation-media.detach');
+    // Reports and Analytics Routes
+    Route::prefix('reports')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/client-based', [ReportController::class, 'clientBased'])->name('reports.client-based');
+        Route::get('/sales', [ReportController::class, 'sales'])->name('reports.sales');
+        Route::get('/charts', [ReportController::class, 'charts'])->name('reports.charts');
+        Route::get('/estimates', [ReportController::class, 'estimates'])->name('reports.estimates');
+    });
 });
 
 require __DIR__.'/settings.php';
