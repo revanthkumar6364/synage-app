@@ -3,11 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, usePage, router } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
-import { Search, Eye, Filter, Calendar, DollarSign, User, Building } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Search, Filter, Calendar, DollarSign, Building, User, Download, FileDown, Printer } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -27,14 +30,16 @@ interface ReportData {
     validUntil: string;
 }
 
+interface Pagination {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+}
+
 interface Props {
     reportData: ReportData[];
-    pagination: {
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-    };
+    pagination: Pagination;
     filters: {
         search?: string;
         status?: string;
@@ -58,24 +63,42 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
     const [accountFilter, setAccountFilter] = useState(filters.account || 'All');
     const [salesPersonFilter, setSalesPersonFilter] = useState(filters.salesPerson || 'All');
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const reportsContainerRef = useRef<HTMLDivElement>(null);
+    const [librariesAvailable, setLibrariesAvailable] = useState({
+        html2canvas: false,
+        jsPDF: false
+    });
 
-    // Get unique accounts and sales persons for filter options
-    const uniqueAccounts = [...new Set(reportData.map(item => item.accountName))].sort();
-    const uniqueSalesPersons = [...new Set(reportData.map(item => item.salesPerson))].sort();
-
-    // Debug: Log the first item to check data structure
+    // Check library availability on component mount
     useEffect(() => {
-        if (reportData.length > 0) {
-            console.log('First report item:', reportData[0]);
-            console.log('Amount field:', reportData[0]?.amount);
-        }
-    }, [reportData]);
+        const checkLibraries = () => {
+            const html2canvasAvailable = typeof html2canvas !== 'undefined';
+            const jsPDFAvailable = typeof jsPDF !== 'undefined';
+
+            console.log('Library check - html2canvas:', html2canvasAvailable, 'jsPDF:', jsPDFAvailable);
+
+            setLibrariesAvailable({
+                html2canvas: html2canvasAvailable,
+                jsPDF: jsPDFAvailable
+            });
+        };
+
+        // Check immediately
+        checkLibraries();
+
+        // Also check after a short delay in case libraries load asynchronously
+        setTimeout(checkLibraries, 1000);
+    }, []);
+
+    // Get unique accounts and sales persons for filters
+    const uniqueAccounts = [...new Set(reportData.map(item => item.accountName))];
+    const uniqueSalesPersons = [...new Set(reportData.map(item => item.salesPerson))];
 
     // Debounced search
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             router.get('/reports/client-based', {
-                search: searchTerm,
+                search: searchTerm || undefined,
                 status: statusFilter === 'All' ? undefined : statusFilter,
                 dateFrom: dateFrom || undefined,
                 dateTo: dateTo || undefined,
@@ -92,41 +115,6 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
         return () => clearTimeout(timeoutId);
     }, [searchTerm, statusFilter, dateFrom, dateTo, amountFrom, amountTo, accountFilter, salesPersonFilter]);
 
-    const getStatusBadge = (status: string) => {
-        const baseClasses = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-        switch (status.toLowerCase()) {
-            case 'sent':
-                return `${baseClasses} bg-blue-100 text-blue-800`;
-            case 'converted':
-            case 'approved':
-                return `${baseClasses} bg-green-100 text-green-800`;
-            case 'expired':
-            case 'rejected':
-                return `${baseClasses} bg-red-100 text-red-800`;
-            case 'pending':
-                return `${baseClasses} bg-yellow-100 text-yellow-800`;
-            default:
-                return `${baseClasses} bg-gray-100 text-gray-800`;
-        }
-    };
-
-    const handlePageChange = (page: number) => {
-        router.get('/reports/client-based', {
-            search: searchTerm,
-            status: statusFilter === 'All' ? undefined : statusFilter,
-            dateFrom: dateFrom || undefined,
-            dateTo: dateTo || undefined,
-            amountFrom: amountFrom || undefined,
-            amountTo: amountTo || undefined,
-            account: accountFilter === 'All' ? undefined : accountFilter,
-            salesPerson: salesPersonFilter === 'All' ? undefined : salesPersonFilter,
-            page,
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
-    };
-
     const resetFilters = () => {
         setSearchTerm('');
         setStatusFilter('All');
@@ -138,6 +126,156 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
         setSalesPersonFilter('All');
     };
 
+    const exportReport = async () => {
+        if (!reportsContainerRef.current) {
+            alert('No content to export. Please try again.');
+            return;
+        }
+
+        try {
+            // Try to use html2canvas if available, otherwise fallback to print
+            if (typeof html2canvas !== 'undefined') {
+                const canvas = await html2canvas(reportsContainerRef.current, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                });
+
+                const link = document.createElement('a');
+                link.download = `client-reports-${new Date().toISOString().split('T')[0]}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                // Fallback to print dialog
+                alert('PNG export not available. Please use browser print function (Ctrl+P) to save as image.');
+                window.print();
+            }
+        } catch (error) {
+            console.error('Error exporting report:', error);
+            alert('Failed to export. Please use browser print function (Ctrl+P) to save as image.');
+        }
+    };
+
+    const exportAsPDF = async () => {
+        if (!reportsContainerRef.current) {
+            alert('No content to export. Please try again.');
+            return;
+        }
+
+        try {
+            // Try to use jsPDF if available, otherwise fallback to print
+            if (typeof jsPDF !== 'undefined' && typeof html2canvas !== 'undefined') {
+                const canvas = await html2canvas(reportsContainerRef.current, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                });
+
+                const imgData = canvas.toDataURL('image/png', 1.0);
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                const imgWidth = 297; // A4 width in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= imgHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= imgHeight;
+                }
+
+                pdf.save(`client-reports-${new Date().toISOString().split('T')[0]}.pdf`);
+            } else {
+                // Fallback to print dialog
+                alert('PDF export not available. Please use browser print function (Ctrl+P) to save as PDF.');
+                window.print();
+            }
+        } catch (error) {
+            console.error('Error exporting as PDF:', error);
+            alert('Failed to export as PDF. Please use browser print function (Ctrl+P) to save as PDF.');
+        }
+    };
+
+    const printReport = async () => {
+        if (!reportsContainerRef.current) {
+            alert('No content to print. Please try again.');
+            return;
+        }
+
+        try {
+            // Use browser's built-in print
+            window.print();
+        } catch (error) {
+            console.error('Error printing report:', error);
+            alert('Failed to print report. Please use browser print function (Ctrl+P).');
+        }
+    };
+
+    const exportAsCSV = () => {
+        try {
+            // Create CSV data from report data
+            const csvData = [];
+
+            // Add header
+            csvData.push(['SL No.', 'Quotation No.', 'Account Name', 'Contact Person', 'Sales Person', 'Amount', 'Status', 'Created Date', 'Valid Until']);
+
+            // Add data rows
+            reportData.forEach((item, index) => {
+                csvData.push([
+                    (index + 1).toString().padStart(2, '0'),
+                    item.quotationNumber || 'N/A',
+                    item.accountName,
+                    item.contactPerson,
+                    item.salesPerson,
+                    item.amount,
+                    item.status,
+                    item.createdAt,
+                    item.validUntil
+                ]);
+            });
+
+            // Convert to CSV string
+            const csvContent = csvData.map(row => row.join(',')).join('\n');
+
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `client-reports-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Error exporting as CSV:', error);
+            alert('Failed to export as CSV. Please try again.');
+        }
+    };
+
+    const getStatusBadge = (status: string) => {
+        const statusConfig = {
+            draft: { variant: 'secondary' as const, text: 'Draft' },
+            pending: { variant: 'default' as const, text: 'Pending' },
+            approved: { variant: 'default' as const, text: 'Approved' },
+            rejected: { variant: 'destructive' as const, text: 'Rejected' },
+        };
+
+        const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+        return <Badge variant={config.variant}>{config.text}</Badge>;
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Client-Based Reports" />
@@ -147,18 +285,45 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Client-Based Reports</h1>
                         <p className="text-muted-foreground">
-                            Detailed reports by client, estimate status, and conversion rates
+                            Detailed reports by client, contact person, and sales performance
                         </p>
                     </div>
-                    <Button variant="outline">
-                        Download PDF
-                    </Button>
+                    <div className="flex gap-2">
+                        {/* Only show PDF button if jsPDF is available */}
+                        {librariesAvailable.jsPDF && (
+                            <Button variant="outline" onClick={exportAsPDF} className="flex items-center gap-2">
+                                <Download className="h-4 w-4" />
+                                Export PDF
+                            </Button>
+                        )}
+
+                        {/* Only show PNG button if html2canvas is available */}
+                        {librariesAvailable.html2canvas && (
+                            <Button variant="outline" onClick={exportReport} className="flex items-center gap-2">
+                                <FileDown className="h-4 w-4" />
+                                Export PNG
+                            </Button>
+                        )}
+
+                        {/* Always show print and CSV buttons */}
+                        <Button variant="outline" onClick={printReport} className="flex items-center gap-2">
+                            <Printer className="h-4 w-4" />
+                            Print
+                        </Button>
+                        <Button variant="outline" onClick={exportAsCSV} className="flex items-center gap-2">
+                            <FileDown className="h-4 w-4" />
+                            Export CSV
+                        </Button>
+                    </div>
                 </div>
 
-                {/* Search and Filters */}
+                {/* Filters and Table */}
                 <Card>
-                    <CardContent className="pt-6">
-                        <div className="space-y-4">
+                    <CardHeader>
+                        <CardTitle>Client Performance Details</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div ref={reportsContainerRef} className="space-y-4">
                             {/* Basic Filters */}
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <div className="flex-1">
@@ -212,18 +377,8 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
                                             Date Range
                                         </label>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <Input
-                                                type="date"
-                                                placeholder="From"
-                                                value={dateFrom}
-                                                onChange={(e) => setDateFrom(e.target.value)}
-                                            />
-                                            <Input
-                                                type="date"
-                                                placeholder="To"
-                                                value={dateTo}
-                                                onChange={(e) => setDateTo(e.target.value)}
-                                            />
+                                            <Input type="date" placeholder="From" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+                                            <Input type="date" placeholder="To" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
                                         </div>
                                     </div>
 
@@ -234,18 +389,8 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
                                             Amount Range (₹)
                                         </label>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <Input
-                                                type="number"
-                                                placeholder="From"
-                                                value={amountFrom}
-                                                onChange={(e) => setAmountFrom(e.target.value)}
-                                            />
-                                            <Input
-                                                type="number"
-                                                placeholder="To"
-                                                value={amountTo}
-                                                onChange={(e) => setAmountTo(e.target.value)}
-                                            />
+                                            <Input type="number" placeholder="From" value={amountFrom} onChange={(e) => setAmountFrom(e.target.value)} />
+                                            <Input type="number" placeholder="To" value={amountTo} onChange={(e) => setAmountTo(e.target.value)} />
                                         </div>
                                     </div>
 
@@ -293,106 +438,87 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
                                 </div>
                             )}
                         </div>
-                    </CardContent>
-                </Card>
 
-                {/* Data Table */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Estimate Reports</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="rounded-md border">
+                        {/* Table */}
+                        <div className="mt-6">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-12">#</TableHead>
+                                        <TableHead className="w-[80px]">SL No.</TableHead>
                                         <TableHead>Quotation No.</TableHead>
                                         <TableHead>Account Name</TableHead>
                                         <TableHead>Contact Person</TableHead>
                                         <TableHead>Sales Person</TableHead>
+                                        <TableHead>Amount (₹)</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead>Created Date</TableHead>
                                         <TableHead>Valid Until</TableHead>
-                                        <TableHead className="text-right">Amount (₹)</TableHead>
-                                        <TableHead className="w-[100px]">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {reportData.map((item, index) => (
                                         <TableRow key={item.id}>
                                             <TableCell className="font-medium">
-                                                {((pagination.current_page - 1) * pagination.per_page + index + 1).toString().padStart(2, '0')}
+                                                {(index + 1).toString().padStart(2, '0')}
                                             </TableCell>
                                             <TableCell className="font-medium">
-                                                {item.quotationNumber}
+                                                {item.quotationNumber || 'N/A'}
                                             </TableCell>
-                                            <TableCell>{item.accountName}</TableCell>
-                                            <TableCell>{item.contactPerson}</TableCell>
-                                            <TableCell>{item.salesPerson}</TableCell>
-                                            <TableCell>
-                                                <span className={getStatusBadge(item.status)}>
-                                                    {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                                                </span>
+                                            <TableCell className="font-medium">
+                                                {item.accountName}
                                             </TableCell>
-                                            <TableCell>{item.createdAt}</TableCell>
-                                            <TableCell>{item.validUntil}</TableCell>
-                                            <TableCell className="text-right font-medium">
+                                            <TableCell className="font-medium">
+                                                {item.contactPerson}
+                                            </TableCell>
+                                            <TableCell className="font-medium">
+                                                {item.salesPerson}
+                                            </TableCell>
+                                            <TableCell className="font-medium">
                                                 ₹{(item.amount || 0).toLocaleString()}
                                             </TableCell>
                                             <TableCell>
-                                                <Link
-                                                    href={`/quotations/${item.id}`}
-                                                    className="text-blue-600 hover:text-blue-800 underline text-sm"
-                                                >
-                                                    <Eye className="h-4 w-4" />
-                                                </Link>
+                                                {getStatusBadge(item.status)}
+                                            </TableCell>
+                                            <TableCell>
+                                                {item.createdAt}
+                                            </TableCell>
+                                            <TableCell>
+                                                {item.validUntil}
                                             </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
-                        </div>
 
-                        {/* Pagination */}
-                        <div className="flex items-center justify-between space-x-2 py-4">
-                            <div className="text-sm text-muted-foreground">
-                                Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} results
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={pagination.current_page === 1}
-                                    onClick={() => handlePageChange(pagination.current_page - 1)}
-                                >
-                                    «
-                                </Button>
-                                <div className="flex items-center space-x-1">
-                                    {Array.from({ length: Math.min(9, pagination.last_page) }, (_, i) => {
-                                        const page = i + 1;
-                                        return (
-                                            <Button
-                                                key={page}
-                                                variant={page === pagination.current_page ? "default" : "outline"}
-                                                size="sm"
-                                                className="w-8 h-8"
-                                                onClick={() => handlePageChange(page)}
-                                            >
-                                                {page}
-                                            </Button>
-                                        );
-                                    })}
+                            {/* Pagination */}
+                            {pagination.last_page > 1 && (
+                                <div className="flex items-center justify-between space-x-2 py-4">
+                                    <div className="text-sm text-muted-foreground">
+                                        Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} results
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => router.get('/reports/client-based', { ...filters, page: pagination.current_page - 1 })}
+                                            disabled={pagination.current_page === 1}
+                                        >
+                                            Previous
+                                        </Button>
+                                        <div className="text-sm">
+                                            Page {pagination.current_page} of {pagination.last_page}
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => router.get('/reports/client-based', { ...filters, page: pagination.current_page + 1 })}
+                                            disabled={pagination.current_page === pagination.last_page}
+                                        >
+                                            Next
+                                        </Button>
+                                    </div>
                                 </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={pagination.current_page === pagination.last_page}
-                                    onClick={() => handlePageChange(pagination.current_page + 1)}
-                                >
-                                    »
-                                </Button>
-                            </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

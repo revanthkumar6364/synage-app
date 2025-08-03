@@ -665,14 +665,18 @@ class ReportController extends Controller
             $months->push(Carbon::now()->subMonths($i)->format('M'));
         }
 
-        // Estimates chart data
+        // Estimates chart data with proper amount calculations
         $estimatesData = $months->map(function ($month) use ($baseQuery) {
             $startDate = Carbon::parse($month)->startOfMonth();
             $endDate = Carbon::parse($month)->endOfMonth();
 
             $query = clone $baseQuery;
             $total = $query->whereBetween('created_at', [$startDate, $endDate])->count();
+
+            $query = clone $baseQuery;
             $approved = $query->where('quotations.status', 'approved')->whereBetween('created_at', [$startDate, $endDate])->count();
+
+            $query = clone $baseQuery;
             $pending = $query->where('quotations.status', 'pending')->whereBetween('created_at', [$startDate, $endDate])->count();
 
             return [
@@ -683,15 +687,31 @@ class ReportController extends Controller
             ];
         });
 
-        // Proforma invoice data (using approved quotations as proforma)
+        // Proforma invoice data with proper amount calculations
         $proformaData = $months->map(function ($month) use ($baseQuery) {
             $startDate = Carbon::parse($month)->startOfMonth();
             $endDate = Carbon::parse($month)->endOfMonth();
 
             $query = clone $baseQuery;
-            $value = $query->where('quotations.status', 'approved')
+            $quotations = $query->where('quotations.status', 'approved')
                 ->whereBetween('approved_at', [$startDate, $endDate])
-                ->sum('grand_total');
+                ->with('items')
+                ->get();
+
+            $value = $quotations->sum(function ($quotation) {
+                $amount = $quotation->grand_total;
+                if ($amount === null || $amount == 0) {
+                    $amount = $quotation->items->sum(function ($item) {
+                        $quantity = floatval($item->quantity ?? 0);
+                        $unitPrice = floatval($item->proposed_unit_price ?? 0);
+                        $taxPercentage = floatval($item->tax_percentage ?? 0);
+                        $subtotal = $quantity * $unitPrice;
+                        $taxAmount = $subtotal * ($taxPercentage / 100);
+                        return $subtotal + $taxAmount;
+                    });
+                }
+                return $amount ?? 0;
+            });
 
             return [
                 'month' => $month,
@@ -699,11 +719,12 @@ class ReportController extends Controller
             ];
         });
 
-        // Conversion ratios
+        // Conversion ratios with all statuses
         $totalEstimates = $baseQuery->count();
         $approvedEstimates = $baseQuery->where('quotations.status', 'approved')->count();
         $pendingEstimates = $baseQuery->where('quotations.status', 'pending')->count();
         $rejectedEstimates = $baseQuery->where('quotations.status', 'rejected')->count();
+        $draftEstimates = $baseQuery->where('quotations.status', 'draft')->count();
 
         $conversionData = [
             [

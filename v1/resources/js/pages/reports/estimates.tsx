@@ -3,11 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { Head, usePage, router } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
-import { Search, TrendingUp, FileText, Clock, CheckCircle, XCircle, Filter, Calendar, DollarSign, Download } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Search, Filter, Calendar, DollarSign, Download, FileDown, Printer } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -37,14 +40,16 @@ interface Analytics {
     averageResponseTime: number;
 }
 
+interface Pagination {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+}
+
 interface Props {
     estimateData: EstimateData[];
-    pagination: {
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-    };
+    pagination: Pagination;
     analytics: Analytics;
     filters: {
         search?: string;
@@ -65,12 +70,38 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
     const [amountFrom, setAmountFrom] = useState(filters.amountFrom || '');
     const [amountTo, setAmountTo] = useState(filters.amountTo || '');
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const estimatesContainerRef = useRef<HTMLDivElement>(null);
+    const [librariesAvailable, setLibrariesAvailable] = useState({
+        html2canvas: false,
+        jsPDF: false
+    });
+
+    // Check library availability on component mount
+    useEffect(() => {
+        const checkLibraries = () => {
+            const html2canvasAvailable = typeof html2canvas !== 'undefined';
+            const jsPDFAvailable = typeof jsPDF !== 'undefined';
+
+            console.log('Library check - html2canvas:', html2canvasAvailable, 'jsPDF:', jsPDFAvailable);
+
+            setLibrariesAvailable({
+                html2canvas: html2canvasAvailable,
+                jsPDF: jsPDFAvailable
+            });
+        };
+
+        // Check immediately
+        checkLibraries();
+
+        // Also check after a short delay in case libraries load asynchronously
+        setTimeout(checkLibraries, 1000);
+    }, []);
 
     // Debounced search
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             router.get('/reports/estimates', {
-                search: searchTerm,
+                search: searchTerm || undefined,
                 status: statusFilter === 'All' ? undefined : statusFilter,
                 dateFrom: dateFrom || undefined,
                 dateTo: dateTo || undefined,
@@ -85,37 +116,6 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
         return () => clearTimeout(timeoutId);
     }, [searchTerm, statusFilter, dateFrom, dateTo, amountFrom, amountTo]);
 
-    const getStatusBadge = (status: string) => {
-        const baseClasses = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-        switch (status.toLowerCase()) {
-            case 'draft':
-                return `${baseClasses} bg-gray-100 text-gray-800`;
-            case 'pending':
-                return `${baseClasses} bg-yellow-100 text-yellow-800`;
-            case 'approved':
-                return `${baseClasses} bg-green-100 text-green-800`;
-            case 'rejected':
-                return `${baseClasses} bg-red-100 text-red-800`;
-            default:
-                return `${baseClasses} bg-gray-100 text-gray-800`;
-        }
-    };
-
-    const handlePageChange = (page: number) => {
-        router.get('/reports/estimates', {
-            search: searchTerm,
-            status: statusFilter === 'All' ? undefined : statusFilter,
-            dateFrom: dateFrom || undefined,
-            dateTo: dateTo || undefined,
-            amountFrom: amountFrom || undefined,
-            amountTo: amountTo || undefined,
-            page,
-        }, {
-            preserveState: true,
-            preserveScroll: true,
-        });
-    };
-
     const resetFilters = () => {
         setSearchTerm('');
         setStatusFilter('All');
@@ -125,10 +125,169 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
         setAmountTo('');
     };
 
-    const exportReport = () => {
-        // TODO: Implement export functionality
-        console.log('Export report');
+    const exportReport = async () => {
+        if (!estimatesContainerRef.current) {
+            alert('No content to export. Please try again.');
+            return;
+        }
+
+        try {
+            // Try to use html2canvas if available, otherwise fallback to print
+            if (typeof html2canvas !== 'undefined') {
+                const canvas = await html2canvas(estimatesContainerRef.current, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                });
+
+                const link = document.createElement('a');
+                link.download = `estimates-report-${new Date().toISOString().split('T')[0]}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                // Fallback to print dialog
+                alert('PNG export not available. Please use browser print function (Ctrl+P) to save as image.');
+                window.print();
+            }
+        } catch (error) {
+            console.error('Error exporting report:', error);
+            alert('Failed to export. Please use browser print function (Ctrl+P) to save as image.');
+        }
     };
+
+    const exportAsPDF = async () => {
+        if (!estimatesContainerRef.current) {
+            alert('No content to export. Please try again.');
+            return;
+        }
+
+        try {
+            // Try to use jsPDF if available, otherwise fallback to print
+            if (typeof jsPDF !== 'undefined' && typeof html2canvas !== 'undefined') {
+                const canvas = await html2canvas(estimatesContainerRef.current, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                });
+
+                const imgData = canvas.toDataURL('image/png', 1.0);
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                const imgWidth = 297; // A4 width in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= imgHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= imgHeight;
+                }
+
+                pdf.save(`estimates-report-${new Date().toISOString().split('T')[0]}.pdf`);
+            } else {
+                // Fallback to print dialog
+                alert('PDF export not available. Please use browser print function (Ctrl+P) to save as PDF.');
+                window.print();
+            }
+        } catch (error) {
+            console.error('Error exporting as PDF:', error);
+            alert('Failed to export as PDF. Please use browser print function (Ctrl+P) to save as PDF.');
+        }
+    };
+
+    const printReport = async () => {
+        if (!estimatesContainerRef.current) {
+            alert('No content to print. Please try again.');
+            return;
+        }
+
+        try {
+            // Use browser's built-in print
+            window.print();
+        } catch (error) {
+            console.error('Error printing report:', error);
+            alert('Failed to print report. Please use browser print function (Ctrl+P).');
+        }
+    };
+
+    const exportAsCSV = () => {
+        try {
+            // Create CSV data from estimates data
+            const csvData = [];
+
+            // Add analytics summary
+            csvData.push(['Analytics Summary']);
+            csvData.push(['Metric', 'Value']);
+            csvData.push(['Total Estimates', analytics.totalEstimates]);
+            csvData.push(['Approved Estimates', analytics.approvedEstimates]);
+            csvData.push(['Pending Estimates', analytics.pendingEstimates]);
+            csvData.push(['Rejected Estimates', analytics.rejectedEstimates]);
+            csvData.push(['Draft Estimates', analytics.draftEstimates]);
+            csvData.push(['Total Amount', analytics.totalAmount]);
+            csvData.push(['Approved Amount', analytics.approvedAmount]);
+            csvData.push(['Average Response Time', analytics.averageResponseTime]);
+
+            // Add estimates data
+            csvData.push([]);
+            csvData.push(['Estimate Details']);
+            csvData.push(['SL No.', 'Estimate No.', 'Client Name', 'Sales Person', 'Amount', 'Status', 'Created Date', 'Valid Until']);
+            estimateData.forEach((item, index) => {
+                csvData.push([
+                    (index + 1).toString().padStart(2, '0'),
+                    item.estimateNumber || 'N/A',
+                    item.clientName,
+                    item.salesPerson,
+                    item.amount,
+                    item.status,
+                    item.createdAt,
+                    item.validUntil
+                ]);
+            });
+
+            // Convert to CSV string
+            const csvContent = csvData.map(row => row.join(',')).join('\n');
+
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `estimates-report-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Error exporting as CSV:', error);
+            alert('Failed to export as CSV. Please try again.');
+        }
+    };
+
+    const getStatusBadge = (status: string) => {
+        const statusConfig = {
+            draft: { variant: 'secondary' as const, text: 'Draft' },
+            pending: { variant: 'default' as const, text: 'Pending' },
+            approved: { variant: 'default' as const, text: 'Approved' },
+            rejected: { variant: 'destructive' as const, text: 'Rejected' },
+        };
+
+        const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+        return <Badge variant={config.variant}>{config.text}</Badge>;
+    };
+
+    const conversionRate = analytics.totalEstimates > 0 ? ((analytics.approvedEstimates / analytics.totalEstimates) * 100).toFixed(1) : '0.0';
+    const averageEstimateValue = analytics.totalEstimates > 0 ? (analytics.totalAmount / analytics.totalEstimates).toFixed(2) : '0.00';
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -139,18 +298,143 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Estimate Analytics</h1>
                         <p className="text-muted-foreground">
-                            Detailed analytics on estimate performance and trends
+                            Detailed analysis of estimates, conversion rates, and performance metrics
                         </p>
                     </div>
-                    <Button variant="outline" onClick={exportReport} className="flex items-center gap-2">
-                        <Download className="h-4 w-4" />
-                        Export Report
-                    </Button>
+                    <div className="flex gap-2">
+                        {/* Only show PDF button if jsPDF is available */}
+                        {librariesAvailable.jsPDF && (
+                            <Button variant="outline" onClick={exportAsPDF} className="flex items-center gap-2">
+                                <Download className="h-4 w-4" />
+                                Export PDF
+                            </Button>
+                        )}
+
+                        {/* Only show PNG button if html2canvas is available */}
+                        {librariesAvailable.html2canvas && (
+                            <Button variant="outline" onClick={exportReport} className="flex items-center gap-2">
+                                <FileDown className="h-4 w-4" />
+                                Export PNG
+                            </Button>
+                        )}
+
+                        {/* Always show print and CSV buttons */}
+                        <Button variant="outline" onClick={printReport} className="flex items-center gap-2">
+                            <Printer className="h-4 w-4" />
+                            Print
+                        </Button>
+                        <Button variant="outline" onClick={exportAsCSV} className="flex items-center gap-2">
+                            <FileDown className="h-4 w-4" />
+                            Export CSV
+                        </Button>
+                    </div>
                 </div>
 
-                {/* Search and Filters */}
+                {/* Analytics Cards */}
+                <div ref={estimatesContainerRef} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Estimates</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{analytics.totalEstimates.toLocaleString()}</div>
+                            <p className="text-xs text-muted-foreground">
+                                All estimates created
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Approved</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{analytics.approvedEstimates.toLocaleString()}</div>
+                            <p className="text-xs text-muted-foreground">
+                                {conversionRate}% success rate
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{analytics.pendingEstimates.toLocaleString()}</div>
+                            <p className="text-xs text-muted-foreground">
+                                Awaiting response
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{analytics.rejectedEstimates.toLocaleString()}</div>
+                            <p className="text-xs text-muted-foreground">
+                                {analytics.totalEstimates > 0 ? ((analytics.rejectedEstimates / analytics.totalEstimates) * 100).toFixed(1) : '0'}% rejection rate
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Value</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">₹{(analytics.totalAmount || 0).toLocaleString()}</div>
+                            <p className="text-xs text-muted-foreground">
+                                Combined estimate value
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Approved Value</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">₹{(analytics.approvedAmount || 0).toLocaleString()}</div>
+                            <p className="text-xs text-muted-foreground">
+                                Revenue from approved estimates
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Draft Estimates</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{analytics.draftEstimates.toLocaleString()}</div>
+                            <p className="text-xs text-muted-foreground">
+                                In progress estimates
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{analytics.averageResponseTime.toFixed(1)} days</div>
+                            <p className="text-xs text-muted-foreground">
+                                Average approval time
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Filters and Table */}
                 <Card>
-                    <CardContent className="pt-6">
+                    <CardHeader>
+                        <CardTitle>Estimate Performance Details</CardTitle>
+                    </CardHeader>
+                    <CardContent>
                         <div className="space-y-4">
                             {/* Basic Filters */}
                             <div className="flex flex-col sm:flex-row gap-4">
@@ -205,18 +489,8 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
                                             Date Range
                                         </label>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <Input
-                                                type="date"
-                                                placeholder="From"
-                                                value={dateFrom}
-                                                onChange={(e) => setDateFrom(e.target.value)}
-                                            />
-                                            <Input
-                                                type="date"
-                                                placeholder="To"
-                                                value={dateTo}
-                                                onChange={(e) => setDateTo(e.target.value)}
-                                            />
+                                            <Input type="date" placeholder="From" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+                                            <Input type="date" placeholder="To" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
                                         </div>
                                     </div>
 
@@ -227,133 +501,24 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
                                             Amount Range (₹)
                                         </label>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <Input
-                                                type="number"
-                                                placeholder="From"
-                                                value={amountFrom}
-                                                onChange={(e) => setAmountFrom(e.target.value)}
-                                            />
-                                            <Input
-                                                type="number"
-                                                placeholder="To"
-                                                value={amountTo}
-                                                onChange={(e) => setAmountTo(e.target.value)}
-                                            />
+                                            <Input type="number" placeholder="From" value={amountFrom} onChange={(e) => setAmountFrom(e.target.value)} />
+                                            <Input type="number" placeholder="To" value={amountTo} onChange={(e) => setAmountTo(e.target.value)} />
                                         </div>
                                     </div>
                                 </div>
                             )}
                         </div>
-                    </CardContent>
-                </Card>
 
-                {/* Summary Cards */}
-                <div className="grid gap-4 md:grid-cols-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Estimates</CardTitle>
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{analytics.totalEstimates.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">
-                                All estimates
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Approved</CardTitle>
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-green-600">{analytics.approvedEstimates.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">
-                                {analytics.totalEstimates > 0 ? Math.round((analytics.approvedEstimates / analytics.totalEstimates) * 100) : 0}% success rate
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                            <Clock className="h-4 w-4 text-yellow-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-yellow-600">{analytics.pendingEstimates.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">
-                                Awaiting response
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-                            <XCircle className="h-4 w-4 text-red-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-red-600">{analytics.rejectedEstimates.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">
-                                {analytics.totalEstimates > 0 ? Math.round((analytics.rejectedEstimates / analytics.totalEstimates) * 100) : 0}% rejection rate
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Additional Analytics Cards */}
-                <div className="grid gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Value</CardTitle>
-                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">₹{analytics.totalAmount.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">
-                                Combined estimate value
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Approved Value</CardTitle>
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-green-600">₹{analytics.approvedAmount.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">
-                                Revenue from approved estimates
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Draft Estimates</CardTitle>
-                            <FileText className="h-4 w-4 text-gray-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-gray-600">{analytics.draftEstimates.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">
-                                In progress estimates
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Analytics Table */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Estimate Performance Details</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="rounded-md border">
+                        {/* Table */}
+                        <div className="mt-6">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-12">#</TableHead>
+                                        <TableHead className="w-[80px]">SL No.</TableHead>
                                         <TableHead>Estimate No.</TableHead>
                                         <TableHead>Client Name</TableHead>
                                         <TableHead>Sales Person</TableHead>
-                                        <TableHead className="text-right">Amount (₹)</TableHead>
+                                        <TableHead>Amount (₹)</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead>Created Date</TableHead>
                                         <TableHead>Valid Until</TableHead>
@@ -363,94 +528,63 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
                                     {estimateData.map((item, index) => (
                                         <TableRow key={item.id}>
                                             <TableCell className="font-medium">
-                                                {((pagination.current_page - 1) * pagination.per_page + index + 1).toString().padStart(2, '0')}
+                                                {(index + 1).toString().padStart(2, '0')}
                                             </TableCell>
                                             <TableCell className="font-medium">
-                                                {item.estimateNumber}
+                                                {item.estimateNumber || 'N/A'}
                                             </TableCell>
-                                            <TableCell>{item.clientName}</TableCell>
-                                            <TableCell>{item.salesPerson}</TableCell>
-                                            <TableCell className="text-right font-medium">
+                                            <TableCell className="font-medium">
+                                                {item.clientName}
+                                            </TableCell>
+                                            <TableCell className="font-medium">
+                                                {item.salesPerson}
+                                            </TableCell>
+                                            <TableCell className="font-medium">
                                                 ₹{(item.amount || 0).toLocaleString()}
                                             </TableCell>
                                             <TableCell>
-                                                <span className={getStatusBadge(item.status)}>
-                                                    {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                                                </span>
+                                                {getStatusBadge(item.status)}
                                             </TableCell>
-                                            <TableCell>{item.createdAt}</TableCell>
-                                            <TableCell>{item.validUntil}</TableCell>
+                                            <TableCell>
+                                                {item.createdAt}
+                                            </TableCell>
+                                            <TableCell>
+                                                {item.validUntil}
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
-                        </div>
 
-                        {/* Pagination */}
-                        <div className="flex items-center justify-between space-x-2 py-4">
-                            <div className="text-sm text-muted-foreground">
-                                Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} results
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={pagination.current_page === 1}
-                                    onClick={() => handlePageChange(pagination.current_page - 1)}
-                                >
-                                    «
-                                </Button>
-                                <div className="flex items-center space-x-1">
-                                    {Array.from({ length: Math.min(9, pagination.last_page) }, (_, i) => {
-                                        const page = i + 1;
-                                        return (
-                                            <Button
-                                                key={page}
-                                                variant={page === pagination.current_page ? "default" : "outline"}
-                                                size="sm"
-                                                className="w-8 h-8"
-                                                onClick={() => handlePageChange(page)}
-                                            >
-                                                {page}
-                                            </Button>
-                                        );
-                                    })}
+                            {/* Pagination */}
+                            {pagination.last_page > 1 && (
+                                <div className="flex items-center justify-between space-x-2 py-4">
+                                    <div className="text-sm text-muted-foreground">
+                                        Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} results
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => router.get('/reports/estimates', { ...filters, page: pagination.current_page - 1 })}
+                                            disabled={pagination.current_page === 1}
+                                        >
+                                            Previous
+                                        </Button>
+                                        <div className="text-sm">
+                                            Page {pagination.current_page} of {pagination.last_page}
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => router.get('/reports/estimates', { ...filters, page: pagination.current_page + 1 })}
+                                            disabled={pagination.current_page === pagination.last_page}
+                                        >
+                                            Next
+                                        </Button>
+                                    </div>
                                 </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={pagination.current_page === pagination.last_page}
-                                    onClick={() => handlePageChange(pagination.current_page + 1)}
-                                >
-                                    »
-                                </Button>
-                            </div>
-                        </div>
-
-                        {/* Summary Stats */}
-                        <div className="mt-6 grid gap-4 md:grid-cols-3">
-                            <Card>
-                                <CardContent className="pt-6">
-                                    <div className="text-sm font-medium text-muted-foreground">Average Response Time</div>
-                                    <div className="text-2xl font-bold">{analytics.averageResponseTime} days</div>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardContent className="pt-6">
-                                    <div className="text-sm font-medium text-muted-foreground">Conversion Rate</div>
-                                    <div className="text-2xl font-bold">
-                                        {analytics.totalEstimates > 0 ? Math.round((analytics.approvedEstimates / analytics.totalEstimates) * 100) : 0}%
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardContent className="pt-6">
-                                    <div className="text-sm font-medium text-muted-foreground">Average Estimate Value</div>
-                                    <div className="text-2xl font-bold">
-                                        ₹{analytics.totalEstimates > 0 ? Math.round(analytics.totalAmount / analytics.totalEstimates).toLocaleString() : 0}
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
