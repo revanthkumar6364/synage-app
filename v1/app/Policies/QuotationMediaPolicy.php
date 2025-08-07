@@ -37,7 +37,18 @@ class QuotationMediaPolicy
      */
     public function update(User $user, QuotationMedia $quotationMedia): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        // Allow admin and manager to update any media
+        if (in_array($user->role, ['admin', 'manager'])) {
+            return true;
+        }
+
+        // Allow sales users to update media that belongs to their quotations
+        if ($user->role === 'sales' && $quotationMedia->quotation_id) {
+            // Check if the quotation belongs to the sales user
+            return $quotationMedia->quotation->created_by === $user->id;
+        }
+
+        return false;
     }
 
     /**

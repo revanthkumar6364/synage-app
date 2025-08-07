@@ -209,22 +209,38 @@ class QuotationMediaController extends Controller
     {
         $media = QuotationMedia::findOrFail($id);
         $quotationId = $request->input('quotation_id');
+
         if (!$quotationId) {
-            return response()->json(['error' => 'Quotation ID required'], 422);
+            return back()->with('error', 'Quotation ID required');
         }
+
+        // Check if user can update this media
+        if ($request->user()->cannot('update', $media)) {
+            return back()->with('error', 'Unauthorized');
+        }
+
         $media->quotation_id = $quotationId;
         $media->save();
-        return response()->json(['success' => true]);
+
+        return back()->with('success', 'File attached successfully');
     }
 
     public function detach(Request $request, $id)
     {
-        $media = QuotationMedia::findOrFail($id);
-        if ($request->user()->cannot('update', $media)) {
-            abort(403);
+        try {
+            $media = QuotationMedia::findOrFail($id);
+
+            if ($request->user()->cannot('update', $media)) {
+                return back()->with('error', 'Unauthorized');
+            }
+
+            $media->quotation_id = null;
+            $media->save();
+
+            return back()->with('success', 'File detached successfully');
+        } catch (\Exception $e) {
+            \Log::error('Failed to detach media: ' . $e->getMessage());
+            return back()->with('error', 'Failed to detach file');
         }
-        $media->quotation_id = null;
-        $media->save();
-        return response()->json(['success' => true]);
     }
 }

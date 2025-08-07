@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import { router } from '@inertiajs/core';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,11 +35,25 @@ interface Props {
     };
     quotationFiles: QuotationMedia[];
     commonFiles: QuotationMedia[];
+    flash?: {
+        success?: string;
+        error?: string;
+    };
 }
 
-export default function QuotationFiles({ quotation, quotationFiles = [], commonFiles = [] }: Props) {
+export default function QuotationFiles({ quotation, quotationFiles = [], commonFiles = [], flash }: Props) {
     const [uploading, setUploading] = useState(false);
     const [fileCategory, setFileCategory] = useState('image');
+
+    // Handle flash messages
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
@@ -71,27 +85,35 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
     };
 
     const handleAttach = (mediaId: number) => {
+        console.log('Attempting to attach media:', mediaId);
+
         router.patch(route('quotation-media.attach', { id: mediaId }), {
             quotation_id: quotation.id,
         }, {
-            onSuccess: () => toast.success('File attached successfully'),
-            onError: () => toast.error('Failed to attach file'),
+            onSuccess: () => {
+                console.log('Attach successful');
+                toast.success('File attached successfully');
+            },
+            onError: (errors) => {
+                console.error('Attach failed:', errors);
+                toast.error('Failed to attach file');
+            },
         });
     };
 
-    const handleDetach = async (mediaId: number) => {
-        try {
-            const response = await axios.patch(route('quotation-media.detach', { id: mediaId }));
-            if (response.data && response.data.success) {
+    const handleDetach = (mediaId: number) => {
+        console.log('Attempting to detach media:', mediaId);
+
+        router.patch(route('quotation-media.detach', { id: mediaId }), {}, {
+            onSuccess: () => {
+                console.log('Detach successful');
                 toast.success('File detached successfully');
-                window.location.reload();
-            } else {
+            },
+            onError: (errors) => {
+                console.error('Detach failed:', errors);
                 toast.error('Failed to detach file');
-            }
-        } catch (e) {
-            console.error(e);
-            toast.error('Failed to detach file');
-        }
+            },
+        });
     };
 
     return (
