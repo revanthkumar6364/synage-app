@@ -1,11 +1,28 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Head } from '@inertiajs/react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import {
+    BarChart3,
+    TrendingUp,
+    PieChart,
+    AreaChart,
+    Download,
+    Printer,
+    Filter,
+    RotateCcw,
+    TrendingDown,
+    Clock,
+    DollarSign,
+    Users,
+    FileText
+} from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
-import { Head, usePage, router } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
-import { BarChart3, Download, Printer, FileDown, TrendingUp, PieChart, LineChart, Activity } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -67,8 +84,39 @@ export default function VisualCharts({ chartData, filters }: Props) {
         return () => clearTimeout(timeoutId);
     }, [statusFilter, categoryFilter, sessionFilter]);
 
-    const maxValue = Math.max(1, ...chartData.estimatesData.map(d => Math.max(d.series1, d.series2, d.series3)));
-    const maxProformaValue = Math.max(1, ...chartData.proformaData.map(d => d.value));
+    // Calculate chart data
+    const maxValue = Math.max(1, ...chartData.estimatesData.flatMap(data => [data.series1, data.series2, data.series3]));
+    const maxProformaValue = Math.max(1, ...chartData.proformaData.map(data => data.value));
+
+    // Calculate revenue path for line chart with better scaling for low data
+    const maxRevenueForScale = Math.max(maxProformaValue, 1000); // Minimum scale of 1000 for revenue
+    const revenuePath = chartData.proformaData.map((data, index) => {
+        const x = (index / (chartData.proformaData.length - 1)) * 80 + 10;
+        const y = 90 - ((data.value / maxRevenueForScale) * 80);
+        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+    }).join(' ') + ` L ${(chartData.proformaData.length - 1) / (chartData.proformaData.length - 1) * 80 + 10} 90 L 10 90 Z`;
+
+    // Calculate total revenue
+    const totalRevenue = chartData.proformaData.reduce((sum, data) => sum + data.value, 0);
+
+    // Calculate cumulative data for area chart with better scaling
+    let cumulative = 0;
+    const cumulativeData = chartData.proformaData.map(data => {
+        cumulative += data.value;
+        return { ...data, cumulative };
+    });
+    const maxCumulative = Math.max(1, ...cumulativeData.map(d => d.cumulative));
+    const maxCumulativeForScale = Math.max(maxCumulative, 1000); // Minimum scale of 1000 for cumulative
+
+    // Calculate cumulative path
+    const cumulativePath = cumulativeData.map((data, index) => {
+        const x = (index / (cumulativeData.length - 1)) * 80 + 10;
+        const y = 90 - ((data.cumulative / maxCumulativeForScale) * 80);
+        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+    }).join(' ') + ` L ${(cumulativeData.length - 1) / (cumulativeData.length - 1) * 80 + 10} 90 L 10 90 Z`;
+
+    // Calculate cumulative revenue
+    const cumulativeRevenue = cumulativeData[cumulativeData.length - 1]?.cumulative || 0;
 
     const resetFilters = () => {
         setStatusFilter('All');
@@ -153,7 +201,7 @@ export default function VisualCharts({ chartData, filters }: Props) {
                             Print Charts
                         </Button>
                         <Button onClick={exportCSV} variant="outline" size="lg">
-                            <FileDown className="h-5 w-5 mr-2" />
+                            <FileText className="h-5 w-5 mr-2" />
                             Export as CSV
                         </Button>
                     </div>
@@ -257,7 +305,7 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                         {chartData.estimatesData.reduce((sum, data) => sum + data.series2, 0)}
                                     </p>
                                 </div>
-                                <Activity className="h-8 w-8 text-green-600" />
+                                <Users className="h-8 w-8 text-green-600" />
                             </div>
                         </CardContent>
                     </Card>
@@ -283,67 +331,69 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                         ₹{chartData.proformaData.reduce((sum, data) => sum + data.value, 0).toLocaleString()}
                                     </p>
                                 </div>
-                                <PieChart className="h-8 w-8 text-purple-600" />
+                                <DollarSign className="h-8 w-8 text-purple-600" />
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
                 {/* Charts Grid */}
-                <div ref={chartsContainerRef} className="grid gap-8 lg:grid-cols-2">
-                    {/* Estimates Bar Chart */}
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                <div className="space-y-6">
+                    {/* Estimates Trend Chart */}
+                    <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl font-semibold flex items-center gap-2">
+                            <CardTitle className="flex items-center gap-2">
                                 <BarChart3 className="h-5 w-5 text-blue-600" />
                                 Estimates Trend
                             </CardTitle>
-                            <p className="text-sm text-muted-foreground">Monthly estimates breakdown by status</p>
+                            <CardDescription>Weekly estimates breakdown by status</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="h-80 space-y-2">
+                            <div className="max-h-80 overflow-y-auto space-y-2">
                                 <div className="space-y-2">
                                     {chartData.estimatesData.map((data, index) => {
-                                        const totalHeight = (data.series1 / maxValue) * 100;
-                                        const approvedHeight = (data.series2 / maxValue) * 100;
-                                        const pendingHeight = (data.series3 / maxValue) * 100;
+                                        // Use a minimum scale to ensure bars are visible even with low data
+                                        const maxValueForScale = Math.max(maxValue, 5); // Minimum scale of 5
+                                        const totalHeight = (data.series1 / maxValueForScale) * 100;
+                                        const approvedHeight = (data.series2 / maxValueForScale) * 100;
+                                        const pendingHeight = (data.series3 / maxValueForScale) * 100;
 
                                         return (
-                                            <div key={index} className="flex items-end gap-2 h-12 border-b border-gray-200">
-                                                <div className="flex items-end gap-1 flex-1">
+                                            <div key={index} className="flex items-end gap-4 h-14 border-b border-gray-200 pb-2">
+                                                <div className="flex items-end gap-2 flex-1">
                                                     <div
                                                         className="bg-blue-500 rounded-t border border-blue-600"
                                                         style={{
-                                                            height: `${Math.max(totalHeight, 8)}%`,
-                                                            minHeight: '8px',
-                                                            width: '30px'
+                                                            height: `${Math.max(totalHeight, 12)}%`,
+                                                            minHeight: '12px',
+                                                            width: '35px'
                                                         }}
                                                         title={`Total: ${data.series1} (${totalHeight.toFixed(1)}%)`}
                                                     ></div>
                                                     <div
                                                         className="bg-green-500 rounded-t border border-green-600"
                                                         style={{
-                                                            height: `${Math.max(approvedHeight, 8)}%`,
-                                                            minHeight: '8px',
-                                                            width: '30px'
+                                                            height: `${Math.max(approvedHeight, 12)}%`,
+                                                            minHeight: '12px',
+                                                            width: '35px'
                                                         }}
                                                         title={`Approved: ${data.series2} (${approvedHeight.toFixed(1)}%)`}
                                                     ></div>
                                                     <div
                                                         className="bg-yellow-500 rounded-t border border-yellow-600"
                                                         style={{
-                                                            height: `${Math.max(pendingHeight, 8)}%`,
-                                                            minHeight: '8px',
-                                                            width: '30px'
+                                                            height: `${Math.max(pendingHeight, 12)}%`,
+                                                            minHeight: '12px',
+                                                            width: '35px'
                                                         }}
                                                         title={`Pending: ${data.series3} (${pendingHeight.toFixed(1)}%)`}
                                                     ></div>
                                                 </div>
-                                                <div className="flex flex-col items-center min-w-[100px] max-w-[120px]">
-                                                    <span className="text-xs text-muted-foreground truncate w-full text-center">
+                                                <div className="flex flex-col items-center min-w-[110px] max-w-[130px]">
+                                                    <span className="text-sm text-muted-foreground truncate w-full text-center font-medium">
                                                         {data.month}
                                                     </span>
-                                                    <span className="text-xs text-gray-500 truncate w-full text-center">
+                                                    <span className="text-xs text-gray-500 truncate w-full text-center mt-1">
                                                         T:{data.series1} A:{data.series2} P:{data.series3}
                                                     </span>
                                                 </div>
@@ -352,146 +402,141 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                     })}
                                 </div>
                             </div>
-                            <div className="mt-4 flex items-center justify-center gap-6 text-xs">
+                            <div className="mt-4 flex items-center justify-center gap-6 text-sm">
                                 <div className="flex items-center gap-2">
                                     <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                                    <span>Total</span>
+                                    <span className="font-medium">Total</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <div className="w-3 h-3 bg-green-500 rounded"></div>
-                                    <span>Approved</span>
+                                    <span className="font-medium">Approved</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                                    <span>Pending</span>
+                                    <span className="font-medium">Pending</span>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* Proforma Line Chart */}
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                    {/* Revenue Trend Chart */}
+                    <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                                <LineChart className="h-5 w-5 text-green-600" />
+                            <CardTitle className="flex items-center gap-2">
+                                <TrendingUp className="h-5 w-5 text-green-600" />
                                 Revenue Trend
                             </CardTitle>
-                            <p className="text-sm text-muted-foreground">Monthly revenue from approved estimates</p>
+                            <CardDescription>Weekly revenue from approved estimates</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="h-80 relative">
-                                <svg className="w-full h-full" viewBox="0 0 400 300">
+                                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                                     <defs>
-                                        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.3"/>
-                                            <stop offset="100%" stopColor="#10b981" stopOpacity="0.1"/>
+                                        <linearGradient id="revenueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
+                                            <stop offset="100%" stopColor="#10b981" stopOpacity="0.2" />
                                         </linearGradient>
                                     </defs>
                                     <path
-                                        d={chartData.proformaData.map((data, index) => {
-                                            const x = (index / (chartData.proformaData.length - 1)) * 350 + 25;
-                                            const y = 275 - ((data.value / maxProformaValue) * 250);
-                                            return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                        }).join(' ')}
+                                        d={revenuePath}
+                                        fill="url(#revenueGradient)"
                                         stroke="#10b981"
-                                        strokeWidth="3"
-                                        fill="none"
+                                        strokeWidth="2"
+                                        className="transition-all duration-300 hover:stroke-2"
                                     />
-                                    <path
-                                        d={chartData.proformaData.map((data, index) => {
-                                            const x = (index / (chartData.proformaData.length - 1)) * 350 + 25;
-                                            const y = 275 - ((data.value / maxProformaValue) * 250);
-                                            return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                        }).join(' ') + ` L ${(chartData.proformaData.length - 1) / (chartData.proformaData.length - 1) * 350 + 25} 275 L 25 275 Z`}
-                                        fill="url(#lineGradient)"
-                                    />
-                                    {chartData.proformaData.map((data, index) => {
-                                        const x = (index / (chartData.proformaData.length - 1)) * 350 + 25;
-                                        const y = 275 - ((data.value / maxProformaValue) * 250);
-                                        return (
-                                            <circle
-                                                key={index}
-                                                cx={x}
-                                                cy={y}
-                                                r="4"
-                                                fill="#10b981"
-                                                className="hover:r-6 transition-all"
-                                            />
-                                        );
-                                    })}
                                 </svg>
-                                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-muted-foreground px-6">
-                                    {chartData.proformaData.map((data, index) => (
-                                        <span key={index} className="px-2 truncate max-w-[60px] text-center">
-                                            {data.month}
-                                        </span>
-                                    ))}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-green-600">
+                                            ₹{totalRevenue.toLocaleString()}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">Total Revenue</div>
+                                    </div>
                                 </div>
+                            </div>
+                            <div className="mt-6 flex justify-between text-xs text-muted-foreground px-4">
+                                {chartData.proformaData.map((data, index) => (
+                                    <span key={index} className="px-2 truncate max-w-[80px] text-center font-medium">
+                                        {data.month}
+                                    </span>
+                                ))}
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* Conversion Pie Chart */}
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                    {/* Status Distribution Chart */}
+                    <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl font-semibold flex items-center gap-2">
+                            <CardTitle className="flex items-center gap-2">
                                 <PieChart className="h-5 w-5 text-purple-600" />
                                 Status Distribution
                             </CardTitle>
-                            <p className="text-sm text-muted-foreground">Breakdown of estimates by status</p>
+                            <CardDescription>Breakdown of estimates by status</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="h-80 flex items-center justify-center">
-                                <div className="relative w-48 h-48">
-                                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                <div className="relative w-56 h-56">
+                                    <svg className="w-full h-full" viewBox="0 0 100 100">
                                         {chartData.conversionData.map((data, index) => {
                                             const total = chartData.conversionData.reduce((sum, item) => sum + item.value, 0);
                                             const percentage = total > 0 ? (data.value / total) * 100 : 0;
-                                            const radius = 40;
-                                            const circumference = 2 * Math.PI * radius;
-                                            const strokeDasharray = circumference;
-                                            const strokeDashoffset = circumference - (percentage / 100) * circumference;
-                                            const colors = ['#3b82f6', '#10b981', '#ef4444', '#f59e0b'];
-                                            const startAngle = chartData.conversionData.slice(0, index).reduce((sum, item) => {
-                                                const itemTotal = chartData.conversionData.reduce((s, i) => s + i.value, 0);
-                                                const itemPercentage = itemTotal > 0 ? (item.value / itemTotal) * 100 : 0;
-                                                return sum + (itemPercentage / 100) * 360;
-                                            }, 0);
-                                            const endAngle = startAngle + (percentage / 100) * 360;
-                                            const x1 = 50 + radius * Math.cos(startAngle * Math.PI / 180);
-                                            const y1 = 50 + radius * Math.sin(startAngle * Math.PI / 180);
-                                            const x2 = 50 + radius * Math.cos(endAngle * Math.PI / 180);
-                                            const y2 = 50 + radius * Math.sin(endAngle * Math.PI / 180);
-                                            const largeArcFlag = percentage > 50 ? 1 : 0;
+                                            const startAngle = chartData.conversionData
+                                                .slice(0, index)
+                                                .reduce((sum, item) => sum + (item.value / total) * 360, 0);
+                                            const endAngle = startAngle + (data.value / total) * 360;
+                                            const colors = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
+                                            const color = colors[index % colors.length];
+
+                                            const x1 = 50 + 40 * Math.cos((startAngle - 90) * Math.PI / 180);
+                                            const y1 = 50 + 40 * Math.sin((startAngle - 90) * Math.PI / 180);
+                                            const x2 = 50 + 40 * Math.cos((endAngle - 90) * Math.PI / 180);
+                                            const y2 = 50 + 40 * Math.sin((endAngle - 90) * Math.PI / 180);
+
+                                            const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
+
+                                            const pathData = [
+                                                `M 50 50`,
+                                                `L ${x1} ${y1}`,
+                                                `A 40 40 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                                                'Z'
+                                            ].join(' ');
 
                                             return (
                                                 <g key={index}>
                                                     <path
-                                                        d={`M 50 50 L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`}
-                                                        fill={colors[index]}
-                                                        className="hover:opacity-80 transition-opacity"
+                                                        d={pathData}
+                                                        fill={color}
+                                                        className="transition-all duration-300 hover:opacity-80 cursor-pointer"
                                                     />
                                                 </g>
                                             );
                                         })}
-                                        <circle cx="50" cy="50" r="15" fill="white" />
+                                        <circle cx="50" cy="50" r="20" fill="white" />
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <div className="text-center">
-                                            <div className="text-2xl font-bold">{chartData.conversionData.reduce((sum, data) => sum + data.value, 0)}</div>
-                                            <div className="text-xs text-muted-foreground">Total</div>
+                                            <div className="text-2xl font-bold text-gray-700">
+                                                {chartData.conversionData.reduce((sum, item) => sum + item.value, 0)}
+                                            </div>
+                                            <div className="text-sm text-muted-foreground">Total</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-4 grid grid-cols-2 gap-2">
+                            <div className="mt-6 grid grid-cols-2 gap-4">
                                 {chartData.conversionData.map((data, index) => {
-                                    const colors = ['#3b82f6', '#10b981', '#ef4444', '#f59e0b'];
+                                    const colors = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
+                                    const color = colors[index % colors.length];
                                     return (
-                                        <div key={index} className="flex items-center gap-2 text-sm">
-                                            <div className="w-3 h-3 rounded" style={{ backgroundColor: colors[index] }}></div>
-                                            <span className="flex-1">{data.category}</span>
-                                            <span className="font-medium">{data.value}</span>
+                                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }}></div>
+                                            <div className="flex-1">
+                                                <span className="text-sm font-medium">{data.category}</span>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm font-bold">{data.value}</div>
+                                                <div className="text-xs text-muted-foreground">({data.percentage}%)</div>
+                                            </div>
                                         </div>
                                     );
                                 })}
@@ -499,82 +544,47 @@ export default function VisualCharts({ chartData, filters }: Props) {
                         </CardContent>
                     </Card>
 
-                    {/* Revenue Area Chart */}
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                    {/* Revenue Overview Chart */}
+                    <Card>
                         <CardHeader>
-                            <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                                <Activity className="h-5 w-5 text-emerald-600" />
+                            <CardTitle className="flex items-center gap-2">
+                                <AreaChart className="h-5 w-5 text-indigo-600" />
                                 Revenue Overview
                             </CardTitle>
-                            <p className="text-sm text-muted-foreground">Cumulative revenue trends over time</p>
+                            <CardDescription>Cumulative revenue trends over time</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="h-80 relative">
-                                <svg className="w-full h-full" viewBox="0 0 400 300">
+                                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                                     <defs>
-                                        <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="0%" stopColor="#059669" stopOpacity="0.4"/>
-                                            <stop offset="100%" stopColor="#059669" stopOpacity="0.1"/>
+                                        <linearGradient id="cumulativeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.8" />
+                                            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.2" />
                                         </linearGradient>
                                     </defs>
-                                    {/* Calculate cumulative data */}
-                                    {(() => {
-                                        let cumulative = 0;
-                                        const cumulativeData = chartData.proformaData.map(data => {
-                                            cumulative += data.value;
-                                            return { ...data, cumulative };
-                                        });
-                                        const maxCumulative = Math.max(...cumulativeData.map(d => d.cumulative));
-
-                                        return (
-                                            <>
-                                                <path
-                                                    d={cumulativeData.map((data, index) => {
-                                                        const x = (index / (cumulativeData.length - 1)) * 350 + 25;
-                                                        const y = 275 - ((data.cumulative / maxCumulative) * 250);
-                                                        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                                    }).join(' ') + ` L ${(cumulativeData.length - 1) / (cumulativeData.length - 1) * 350 + 25} 275 L 25 275 Z`}
-                                                    fill="url(#areaGradient)"
-                                                />
-                                                <path
-                                                    d={cumulativeData.map((data, index) => {
-                                                        const x = (index / (cumulativeData.length - 1)) * 350 + 25;
-                                                        const y = 275 - ((data.cumulative / maxCumulative) * 250);
-                                                        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                                    }).join(' ')}
-                                                    stroke="#059669"
-                                                    strokeWidth="2"
-                                                    fill="none"
-                                                />
-                                                {cumulativeData.map((data, index) => {
-                                                    const x = (index / (cumulativeData.length - 1)) * 350 + 25;
-                                                    const y = 275 - ((data.cumulative / maxCumulative) * 250);
-                                                    return (
-                                                        <circle
-                                                            key={index}
-                                                            cx={x}
-                                                            cy={y}
-                                                            r="3"
-                                                            fill="#059669"
-                                                            className="hover:r-5 transition-all"
-                                                        />
-                                                    );
-                                                })}
-                                            </>
-                                        );
-                                    })()}
+                                    <path
+                                        d={cumulativePath}
+                                        fill="url(#cumulativeGradient)"
+                                        stroke="#6366f1"
+                                        strokeWidth="2"
+                                        className="transition-all duration-300 hover:stroke-2"
+                                    />
                                 </svg>
-                                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-muted-foreground px-6">
-                                    {chartData.proformaData.map((data, index) => (
-                                        <span key={index} className="px-2 truncate max-w-[60px] text-center">
-                                            {data.month}
-                                        </span>
-                                    ))}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-indigo-600">
+                                            ₹{cumulativeRevenue.toLocaleString()}
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">Cumulative Revenue</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="mt-4 text-center text-sm text-muted-foreground">
-                                <span className="font-medium">Total Cumulative Revenue: </span>
-                                ₹{chartData.proformaData.reduce((sum, data) => sum + data.value, 0).toLocaleString()}
+                            <div className="mt-6 flex justify-between text-xs text-muted-foreground px-4">
+                                {chartData.proformaData.map((data, index) => (
+                                    <span key={index} className="px-2 truncate max-w-[80px] text-center font-medium">
+                                        {data.month}
+                                    </span>
+                                ))}
                             </div>
                         </CardContent>
                     </Card>
