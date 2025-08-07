@@ -169,18 +169,13 @@ class ReportController extends Controller
     {
         $query = Quotation::with(['account', 'salesUser']);
 
-        // Debug logging
-        \Log::info('Charts request filters:', $request->only(['status', 'category', 'session']));
-
         // Apply filters
         if ($request->filled('status') && $request->status !== 'All') {
             $query->where('quotations.status', $request->status);
-            \Log::info('Applied status filter:', ['status' => $request->status]);
         }
 
         if ($request->filled('category') && $request->category !== 'All') {
             $query->where('category', $request->category);
-            \Log::info('Applied category filter:', ['category' => $request->category]);
         }
 
         // Apply role-based filtering
@@ -191,9 +186,6 @@ class ReportController extends Controller
 
         // Get session filter (weekly, monthly, yearly)
         $sessionFilter = $request->get('session', 'monthly');
-
-        // Debug: Log the final query count
-        \Log::info('Final query count:', ['count' => $query->count()]);
 
         // Get chart data
         $chartData = $this->getChartData($query, $sessionFilter);

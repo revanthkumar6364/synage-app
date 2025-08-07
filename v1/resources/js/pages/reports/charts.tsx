@@ -199,6 +199,8 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                         <SelectItem value="All">All Categories</SelectItem>
                                         <SelectItem value="unilumin">Unilumin</SelectItem>
                                         <SelectItem value="absen">Absen</SelectItem>
+                                        <SelectItem value="radiant_synage">Radiant Synage</SelectItem>
+                                        <SelectItem value="custom">Custom</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -297,272 +299,296 @@ export default function VisualCharts({ chartData, filters }: Props) {
                 {/* Charts Grid */}
                 <div ref={chartsContainerRef} className="grid gap-8 lg:grid-cols-2">
                     {/* Estimates Bar Chart */}
-                    <Card>
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <BarChart3 className="h-5 w-5" />
-                                Estimates Trend (Bar Chart)
+                            <CardTitle className="text-xl font-semibold flex items-center gap-2">
+                                <BarChart3 className="h-5 w-5 text-blue-600" />
+                                Estimates Trend
                             </CardTitle>
+                            <p className="text-sm text-muted-foreground">Monthly estimates breakdown by status</p>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-4">
-                                {/* Legend */}
-                                <div className="flex items-center gap-4 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                        <span>Total</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                        <span>Approved</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                        <span>Pending</span>
-                                    </div>
+                            <div className="h-80 space-y-2">
+                                {/* Debug Info */}
+                                <div className="text-xs text-gray-500 mb-2">
+                                    Debug: Max Value = {maxValue}, Data Points = {chartData.estimatesData.length}
                                 </div>
-
-                                {/* Bar Chart */}
-                                <div className="h-80 space-y-2 overflow-x-auto">
-                                    {/* Debug Info */}
-                                    <div className="text-xs text-gray-500 mb-2">
-                                        Debug: Max Value = {maxValue}, Data Points = {chartData.estimatesData.length}
-                                    </div>
-                                    <div className="min-w-[600px]">
-                                        {chartData.estimatesData.map((data, index) => {
-                                            const totalHeight = (data.series1 / maxValue) * 100;
-                                            const approvedHeight = (data.series2 / maxValue) * 100;
-                                            const pendingHeight = (data.series3 / maxValue) * 100;
-
-                                            // Debug logging for each bar
-                                            console.log(`${data.month}: Total=${data.series1} (${totalHeight.toFixed(1)}%), Approved=${data.series2} (${approvedHeight.toFixed(1)}%), Pending=${data.series3} (${pendingHeight.toFixed(1)}%)`);
-
-                                            return (
-                                                <div key={index} className="flex items-end gap-2 h-12 border-b border-gray-200">
-                                                    <div className="flex items-end gap-1 flex-1">
-                                                        <div
-                                                            className="bg-blue-500 rounded-t border border-blue-600"
-                                                            style={{
-                                                                height: `${Math.max(totalHeight, 8)}%`,
-                                                                minHeight: '8px',
-                                                                width: '30px'
-                                                            }}
-                                                            title={`Total: ${data.series1} (${totalHeight.toFixed(1)}%)`}
-                                                        ></div>
-                                                        <div
-                                                            className="bg-green-500 rounded-t border border-green-600"
-                                                            style={{
-                                                                height: `${Math.max(approvedHeight, 8)}%`,
-                                                                minHeight: '8px',
-                                                                width: '30px'
-                                                            }}
-                                                            title={`Approved: ${data.series2} (${approvedHeight.toFixed(1)}%)`}
-                                                        ></div>
-                                                        <div
-                                                            className="bg-yellow-500 rounded-t border border-yellow-600"
-                                                            style={{
-                                                                height: `${Math.max(pendingHeight, 8)}%`,
-                                                                minHeight: '8px',
-                                                                width: '30px'
-                                                            }}
-                                                            title={`Pending: ${data.series3} (${pendingHeight.toFixed(1)}%)`}
-                                                        ></div>
-                                                    </div>
-                                                    <div className="flex flex-col items-center min-w-[100px] max-w-[120px]">
-                                                        <span className="text-xs text-muted-foreground truncate w-full text-center">
-                                                            {data.month}
-                                                        </span>
-                                                        <span className="text-xs text-gray-500 truncate w-full text-center">
-                                                            T:{data.series1} A:{data.series2} P:{data.series3}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Proforma Invoice Line Chart */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <LineChart className="h-5 w-5" />
-                                Proforma Invoice Value (Line Chart)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-64 relative">
-                                {/* Line Chart */}
-                                <svg className="w-full h-full" viewBox="0 0 100 100">
-                                    {/* Grid Lines */}
-                                    {[0, 25, 50, 75, 100].map((y, i) => (
-                                        <line
-                                            key={i}
-                                            x1="0"
-                                            y1={y}
-                                            x2="100"
-                                            y2={y}
-                                            stroke="#e5e7eb"
-                                            strokeWidth="0.5"
-                                        />
-                                    ))}
-
-                                    {/* Data Line */}
-                                    <polyline
-                                        points={chartData.proformaData.map((data, index) => {
-                                            const x = (index / (chartData.proformaData.length - 1)) * 80 + 10;
-                                            const y = 90 - ((data.value / maxProformaValue) * 80);
-                                            return `${x},${y}`;
-                                        }).join(' ')}
-                                        fill="none"
-                                        stroke="#3b82f6"
-                                        strokeWidth="2"
-                                    />
-
-                                    {/* Data Points */}
-                                    {chartData.proformaData.map((data, index) => {
-                                        const x = (index / (chartData.proformaData.length - 1)) * 80 + 10;
-                                        const y = 90 - ((data.value / maxProformaValue) * 80);
-                                        return (
-                                            <circle
-                                                key={index}
-                                                cx={x}
-                                                cy={y}
-                                                r="2"
-                                                fill="#3b82f6"
-                                            />
-                                        );
-                                    })}
-                                </svg>
-
-                                {/* Month Labels */}
-                                <div className="flex justify-between text-xs text-muted-foreground mt-2 px-2">
-                                    {chartData.proformaData.map((data, index) => (
-                                        <span key={index} className="truncate max-w-[60px] text-center">
-                                            {data.month}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Area Chart - Monthly Trends */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Activity className="h-5 w-5" />
-                                Monthly Trends (Area Chart)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-64 relative">
-                                <svg className="w-full h-full" viewBox="0 0 100 100">
-                                    {/* Area Chart for Approved Estimates */}
-                                    <path
-                                        d={chartData.estimatesData.map((data, index) => {
-                                            const x = (index / (chartData.estimatesData.length - 1)) * 80 + 10;
-                                            const y = 90 - ((data.series2 / maxValue) * 80);
-                                            return index === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
-                                        }).join(' ') + ' L 90 90 L 10 90 Z'}
-                                        fill="rgba(34, 197, 94, 0.2)"
-                                        stroke="#22c55e"
-                                        strokeWidth="1"
-                                    />
-
-                                    {/* Data Points */}
+                                <div className="space-y-2">
                                     {chartData.estimatesData.map((data, index) => {
-                                        const x = (index / (chartData.estimatesData.length - 1)) * 80 + 10;
-                                        const y = 90 - ((data.series2 / maxValue) * 80);
+                                        const totalHeight = (data.series1 / maxValue) * 100;
+                                        const approvedHeight = (data.series2 / maxValue) * 100;
+                                        const pendingHeight = (data.series3 / maxValue) * 100;
+
+                                        // Debug logging for each bar
+                                        console.log(`${data.month}: Total=${data.series1} (${totalHeight.toFixed(1)}%), Approved=${data.series2} (${approvedHeight.toFixed(1)}%), Pending=${data.series3} (${pendingHeight.toFixed(1)}%)`);
+
                                         return (
-                                            <circle
-                                                key={index}
-                                                cx={x}
-                                                cy={y}
-                                                r="1.5"
-                                                fill="#22c55e"
-                                            />
-                                        );
-                                    })}
-                                </svg>
-
-                                {/* Month Labels */}
-                                <div className="flex justify-between text-xs text-muted-foreground mt-2 px-2">
-                                    {chartData.estimatesData.map((data, index) => (
-                                        <span key={index} className="truncate max-w-[60px] text-center">
-                                            {data.month}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Pie Chart - Status Distribution */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <PieChart className="h-5 w-5" />
-                                Status Distribution (Pie Chart)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center justify-center space-x-8">
-                                {/* Pie Chart */}
-                                <div className="relative w-48 h-48">
-                                    <svg className="w-full h-full" viewBox="0 0 100 100">
-                                        {/* Pie Chart Segments */}
-                                        {chartData.conversionData.map((item, index) => {
-                                            const startAngle = chartData.conversionData
-                                                .slice(0, index)
-                                                .reduce((sum, d) => sum + d.percentage, 0) * 3.6;
-                                            const endAngle = startAngle + (item.percentage * 3.6);
-
-                                            const colors = ['#22c55e', '#f59e0b', '#ef4444', '#6b7280'];
-
-                                            return (
-                                                <circle
-                                                    key={index}
-                                                    cx="50"
-                                                    cy="50"
-                                                    r="40"
-                                                    fill="none"
-                                                    stroke={colors[index]}
-                                                    strokeWidth="20"
-                                                    strokeDasharray={`${item.percentage * 3.6} ${360 - item.percentage * 3.6}`}
-                                                    strokeDashoffset={90 - startAngle}
-                                                />
-                                            );
-                                        })}
-
-                                        {/* Center Text */}
-                                        <text x="50" y="50" textAnchor="middle" dy=".3em" className="text-sm font-medium fill-current">
-                                            {chartData.conversionData.reduce((sum, item) => sum + item.value, 0)}
-                                        </text>
-                                    </svg>
-                                </div>
-
-                                {/* Legend */}
-                                <div className="space-y-4">
-                                    {chartData.conversionData.map((item, index) => {
-                                        const colors = ['#22c55e', '#f59e0b', '#ef4444', '#6b7280'];
-                                        return (
-                                            <div key={index} className="flex items-center gap-3">
-                                                <div
-                                                    className="w-4 h-4 rounded-full"
-                                                    style={{ backgroundColor: colors[index] }}
-                                                ></div>
-                                                <div>
-                                                    <div className="text-sm font-medium">{item.category}</div>
-                                                    <div className="text-xs text-muted-foreground">{item.value} ({item.percentage}%)</div>
+                                            <div key={index} className="flex items-end gap-2 h-12 border-b border-gray-200">
+                                                <div className="flex items-end gap-1 flex-1">
+                                                    <div
+                                                        className="bg-blue-500 rounded-t border border-blue-600"
+                                                        style={{
+                                                            height: `${Math.max(totalHeight, 8)}%`,
+                                                            minHeight: '8px',
+                                                            width: '30px'
+                                                        }}
+                                                        title={`Total: ${data.series1} (${totalHeight.toFixed(1)}%)`}
+                                                    ></div>
+                                                    <div
+                                                        className="bg-green-500 rounded-t border border-green-600"
+                                                        style={{
+                                                            height: `${Math.max(approvedHeight, 8)}%`,
+                                                            minHeight: '8px',
+                                                            width: '30px'
+                                                        }}
+                                                        title={`Approved: ${data.series2} (${approvedHeight.toFixed(1)}%)`}
+                                                    ></div>
+                                                    <div
+                                                        className="bg-yellow-500 rounded-t border border-yellow-600"
+                                                        style={{
+                                                            height: `${Math.max(pendingHeight, 8)}%`,
+                                                            minHeight: '8px',
+                                                            width: '30px'
+                                                        }}
+                                                        title={`Pending: ${data.series3} (${pendingHeight.toFixed(1)}%)`}
+                                                    ></div>
+                                                </div>
+                                                <div className="flex flex-col items-center min-w-[100px] max-w-[120px]">
+                                                    <span className="text-xs text-muted-foreground truncate w-full text-center">
+                                                        {data.month}
+                                                    </span>
+                                                    <span className="text-xs text-gray-500 truncate w-full text-center">
+                                                        T:{data.series1} A:{data.series2} P:{data.series3}
+                                                    </span>
                                                 </div>
                                             </div>
                                         );
                                     })}
                                 </div>
+                            </div>
+                            <div className="mt-4 flex items-center justify-center gap-6 text-xs">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                                    <span>Total</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 bg-green-500 rounded"></div>
+                                    <span>Approved</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                                    <span>Pending</span>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Proforma Line Chart */}
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                        <CardHeader>
+                            <CardTitle className="text-xl font-semibold flex items-center gap-2">
+                                <LineChart className="h-5 w-5 text-green-600" />
+                                Revenue Trend
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground">Monthly revenue from approved estimates</p>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-80 relative">
+                                <svg className="w-full h-full" viewBox="0 0 400 300">
+                                    <defs>
+                                        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.3"/>
+                                            <stop offset="100%" stopColor="#10b981" stopOpacity="0.1"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path
+                                        d={chartData.proformaData.map((data, index) => {
+                                            const x = (index / (chartData.proformaData.length - 1)) * 350 + 25;
+                                            const y = 275 - ((data.value / maxProformaValue) * 250);
+                                            return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                        }).join(' ')}
+                                        stroke="#10b981"
+                                        strokeWidth="3"
+                                        fill="none"
+                                    />
+                                    <path
+                                        d={chartData.proformaData.map((data, index) => {
+                                            const x = (index / (chartData.proformaData.length - 1)) * 350 + 25;
+                                            const y = 275 - ((data.value / maxProformaValue) * 250);
+                                            return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                        }).join(' ') + ` L ${(chartData.proformaData.length - 1) / (chartData.proformaData.length - 1) * 350 + 25} 275 L 25 275 Z`}
+                                        fill="url(#lineGradient)"
+                                    />
+                                    {chartData.proformaData.map((data, index) => {
+                                        const x = (index / (chartData.proformaData.length - 1)) * 350 + 25;
+                                        const y = 275 - ((data.value / maxProformaValue) * 250);
+                                        return (
+                                            <circle
+                                                key={index}
+                                                cx={x}
+                                                cy={y}
+                                                r="4"
+                                                fill="#10b981"
+                                                className="hover:r-6 transition-all"
+                                            />
+                                        );
+                                    })}
+                                </svg>
+                                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-muted-foreground px-6">
+                                    {chartData.proformaData.map((data, index) => (
+                                        <span key={index} className="px-2 truncate max-w-[60px] text-center">
+                                            {data.month}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Conversion Pie Chart */}
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                        <CardHeader>
+                            <CardTitle className="text-xl font-semibold flex items-center gap-2">
+                                <PieChart className="h-5 w-5 text-purple-600" />
+                                Status Distribution
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground">Breakdown of estimates by status</p>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-80 flex items-center justify-center">
+                                <div className="relative w-48 h-48">
+                                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                        {chartData.conversionData.map((data, index) => {
+                                            const total = chartData.conversionData.reduce((sum, item) => sum + item.value, 0);
+                                            const percentage = total > 0 ? (data.value / total) * 100 : 0;
+                                            const radius = 40;
+                                            const circumference = 2 * Math.PI * radius;
+                                            const strokeDasharray = circumference;
+                                            const strokeDashoffset = circumference - (percentage / 100) * circumference;
+                                            const colors = ['#3b82f6', '#10b981', '#ef4444', '#f59e0b'];
+                                            const startAngle = chartData.conversionData.slice(0, index).reduce((sum, item) => {
+                                                const itemTotal = chartData.conversionData.reduce((s, i) => s + i.value, 0);
+                                                const itemPercentage = itemTotal > 0 ? (item.value / itemTotal) * 100 : 0;
+                                                return sum + (itemPercentage / 100) * 360;
+                                            }, 0);
+                                            const endAngle = startAngle + (percentage / 100) * 360;
+                                            const x1 = 50 + radius * Math.cos(startAngle * Math.PI / 180);
+                                            const y1 = 50 + radius * Math.sin(startAngle * Math.PI / 180);
+                                            const x2 = 50 + radius * Math.cos(endAngle * Math.PI / 180);
+                                            const y2 = 50 + radius * Math.sin(endAngle * Math.PI / 180);
+                                            const largeArcFlag = percentage > 50 ? 1 : 0;
+
+                                            return (
+                                                <g key={index}>
+                                                    <path
+                                                        d={`M 50 50 L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`}
+                                                        fill={colors[index]}
+                                                        className="hover:opacity-80 transition-opacity"
+                                                    />
+                                                </g>
+                                            );
+                                        })}
+                                        <circle cx="50" cy="50" r="15" fill="white" />
+                                    </svg>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold">{chartData.conversionData.reduce((sum, data) => sum + data.value, 0)}</div>
+                                            <div className="text-xs text-muted-foreground">Total</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-4 grid grid-cols-2 gap-2">
+                                {chartData.conversionData.map((data, index) => {
+                                    const colors = ['#3b82f6', '#10b981', '#ef4444', '#f59e0b'];
+                                    return (
+                                        <div key={index} className="flex items-center gap-2 text-sm">
+                                            <div className="w-3 h-3 rounded" style={{ backgroundColor: colors[index] }}></div>
+                                            <span className="flex-1">{data.category}</span>
+                                            <span className="font-medium">{data.value}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Revenue Area Chart */}
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+                        <CardHeader>
+                            <CardTitle className="text-xl font-semibold flex items-center gap-2">
+                                <Activity className="h-5 w-5 text-emerald-600" />
+                                Revenue Overview
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground">Cumulative revenue trends over time</p>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-80 relative">
+                                <svg className="w-full h-full" viewBox="0 0 400 300">
+                                    <defs>
+                                        <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stopColor="#059669" stopOpacity="0.4"/>
+                                            <stop offset="100%" stopColor="#059669" stopOpacity="0.1"/>
+                                        </linearGradient>
+                                    </defs>
+                                    {/* Calculate cumulative data */}
+                                    {(() => {
+                                        let cumulative = 0;
+                                        const cumulativeData = chartData.proformaData.map(data => {
+                                            cumulative += data.value;
+                                            return { ...data, cumulative };
+                                        });
+                                        const maxCumulative = Math.max(...cumulativeData.map(d => d.cumulative));
+
+                                        return (
+                                            <>
+                                                <path
+                                                    d={cumulativeData.map((data, index) => {
+                                                        const x = (index / (cumulativeData.length - 1)) * 350 + 25;
+                                                        const y = 275 - ((data.cumulative / maxCumulative) * 250);
+                                                        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                                    }).join(' ') + ` L ${(cumulativeData.length - 1) / (cumulativeData.length - 1) * 350 + 25} 275 L 25 275 Z`}
+                                                    fill="url(#areaGradient)"
+                                                />
+                                                <path
+                                                    d={cumulativeData.map((data, index) => {
+                                                        const x = (index / (cumulativeData.length - 1)) * 350 + 25;
+                                                        const y = 275 - ((data.cumulative / maxCumulative) * 250);
+                                                        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                                    }).join(' ')}
+                                                    stroke="#059669"
+                                                    strokeWidth="2"
+                                                    fill="none"
+                                                />
+                                                {cumulativeData.map((data, index) => {
+                                                    const x = (index / (cumulativeData.length - 1)) * 350 + 25;
+                                                    const y = 275 - ((data.cumulative / maxCumulative) * 250);
+                                                    return (
+                                                        <circle
+                                                            key={index}
+                                                            cx={x}
+                                                            cy={y}
+                                                            r="3"
+                                                            fill="#059669"
+                                                            className="hover:r-5 transition-all"
+                                                        />
+                                                    );
+                                                })}
+                                            </>
+                                        );
+                                    })()}
+                                </svg>
+                                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-muted-foreground px-6">
+                                    {chartData.proformaData.map((data, index) => (
+                                        <span key={index} className="px-2 truncate max-w-[60px] text-center">
+                                            {data.month}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="mt-4 text-center text-sm text-muted-foreground">
+                                <span className="font-medium">Total Cumulative Revenue: </span>
+                                ₹{chartData.proformaData.reduce((sum, data) => sum + data.value, 0).toLocaleString()}
                             </div>
                         </CardContent>
                     </Card>
