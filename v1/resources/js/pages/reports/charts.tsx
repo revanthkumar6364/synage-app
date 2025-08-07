@@ -58,8 +58,6 @@ export default function VisualCharts({ chartData, filters }: Props) {
                 session: sessionFilter,
             };
 
-            console.log('Sending filters:', filterParams);
-
             router.get('/reports/charts', filterParams, {
                 preserveState: true,
                 preserveScroll: true,
@@ -71,11 +69,6 @@ export default function VisualCharts({ chartData, filters }: Props) {
 
     const maxValue = Math.max(1, ...chartData.estimatesData.map(d => Math.max(d.series1, d.series2, d.series3)));
     const maxProformaValue = Math.max(1, ...chartData.proformaData.map(d => d.value));
-
-    // Debug logging
-    console.log('Chart Data:', chartData);
-    console.log('Max Value:', maxValue);
-    console.log('Max Proforma Value:', maxProformaValue);
 
     const resetFilters = () => {
         setStatusFilter('All');
@@ -309,18 +302,11 @@ export default function VisualCharts({ chartData, filters }: Props) {
                         </CardHeader>
                         <CardContent>
                             <div className="h-80 space-y-2">
-                                {/* Debug Info */}
-                                <div className="text-xs text-gray-500 mb-2">
-                                    Debug: Max Value = {maxValue}, Data Points = {chartData.estimatesData.length}
-                                </div>
                                 <div className="space-y-2">
                                     {chartData.estimatesData.map((data, index) => {
                                         const totalHeight = (data.series1 / maxValue) * 100;
                                         const approvedHeight = (data.series2 / maxValue) * 100;
                                         const pendingHeight = (data.series3 / maxValue) * 100;
-
-                                        // Debug logging for each bar
-                                        console.log(`${data.month}: Total=${data.series1} (${totalHeight.toFixed(1)}%), Approved=${data.series2} (${approvedHeight.toFixed(1)}%), Pending=${data.series3} (${pendingHeight.toFixed(1)}%)`);
 
                                         return (
                                             <div key={index} className="flex items-end gap-2 h-12 border-b border-gray-200">

@@ -239,7 +239,6 @@ class QuotationMediaController extends Controller
 
             return back()->with('success', 'File detached successfully');
         } catch (\Exception $e) {
-            \Log::error('Failed to detach media: ' . $e->getMessage());
             return back()->with('error', 'Failed to detach file');
         }
     }

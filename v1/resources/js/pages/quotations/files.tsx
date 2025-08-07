@@ -85,13 +85,10 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
     };
 
     const handleAttach = (mediaId: number) => {
-        console.log('Attempting to attach media:', mediaId);
-
         router.patch(route('quotation-media.attach', { id: mediaId }), {
             quotation_id: quotation.id,
         }, {
             onSuccess: () => {
-                console.log('Attach successful');
                 toast.success('File attached successfully');
             },
             onError: (errors) => {
@@ -102,11 +99,8 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
     };
 
     const handleDetach = (mediaId: number) => {
-        console.log('Attempting to detach media:', mediaId);
-
         router.patch(route('quotation-media.detach', { id: mediaId }), {}, {
             onSuccess: () => {
-                console.log('Detach successful');
                 toast.success('File detached successfully');
             },
             onError: (errors) => {
