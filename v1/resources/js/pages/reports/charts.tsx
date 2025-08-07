@@ -38,6 +38,7 @@ interface Props {
     filters: {
         status?: string;
         category?: string;
+        session?: string;
     };
 }
 
@@ -45,39 +46,16 @@ export default function VisualCharts({ chartData, filters }: Props) {
     const { auth } = usePage<{ auth: any }>().props;
     const [statusFilter, setStatusFilter] = useState(filters.status || 'All');
     const [categoryFilter, setCategoryFilter] = useState(filters.category || 'All');
+    const [sessionFilter, setSessionFilter] = useState(filters.session || 'monthly');
     const chartsContainerRef = useRef<HTMLDivElement>(null);
-    const [librariesAvailable, setLibrariesAvailable] = useState({
-        html2canvas: false,
-        jsPDF: false
-    });
 
-    // Check library availability on component mount
-    useEffect(() => {
-        const checkLibraries = () => {
-            const html2canvasAvailable = typeof html2canvas !== 'undefined';
-            const jsPDFAvailable = typeof jsPDF !== 'undefined';
-
-            console.log('Library check - html2canvas:', html2canvasAvailable, 'jsPDF:', jsPDFAvailable);
-
-            setLibrariesAvailable({
-                html2canvas: html2canvasAvailable,
-                jsPDF: jsPDFAvailable
-            });
-        };
-
-        // Check immediately
-        checkLibraries();
-
-        // Also check after a short delay in case libraries load asynchronously
-        setTimeout(checkLibraries, 1000);
-    }, []);
-
-    // Debounced filter updates
+    // Debounced search
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             router.get('/reports/charts', {
                 status: statusFilter === 'All' ? undefined : statusFilter,
                 category: categoryFilter === 'All' ? undefined : categoryFilter,
+                session: sessionFilter,
             }, {
                 preserveState: true,
                 preserveScroll: true,
@@ -85,176 +63,20 @@ export default function VisualCharts({ chartData, filters }: Props) {
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [statusFilter, categoryFilter]);
+    }, [statusFilter, categoryFilter, sessionFilter]);
 
-    const maxValue = Math.max(...chartData.estimatesData.map(d => Math.max(d.series1, d.series2, d.series3)));
-    const maxProformaValue = Math.max(...chartData.proformaData.map(d => d.value));
+    const maxValue = Math.max(1, ...chartData.estimatesData.map(d => Math.max(d.series1, d.series2, d.series3)));
+    const maxProformaValue = Math.max(1, ...chartData.proformaData.map(d => d.value));
+
+    // Debug logging
+    console.log('Chart Data:', chartData);
+    console.log('Max Value:', maxValue);
+    console.log('Max Proforma Value:', maxProformaValue);
 
     const resetFilters = () => {
         setStatusFilter('All');
         setCategoryFilter('All');
-    };
-
-    const exportCharts = () => {
-        // TODO: Implement chart export functionality
-        console.log('Export charts');
-    };
-
-    const exportAsPNG = async () => {
-        if (!chartsContainerRef.current) {
-            alert('No content to export. Please try again.');
-            return;
-        }
-
-        try {
-            // Create a data summary instead of trying to capture the visual charts
-            const dataSummary = `
-Charts Data Summary - ${new Date().toISOString().split('T')[0]}
-
-ESTIMATES DATA:
-${chartData.estimatesData.map(d => `${d.month}: Total=${d.series1}, Approved=${d.series2}, Pending=${d.series3}`).join('\n')}
-
-PROFORMA DATA:
-${chartData.proformaData.map(d => `${d.month}: ₹${d.value}`).join('\n')}
-
-CONVERSION DATA:
-${chartData.conversionData.map(d => `${d.category}: ${d.value} (${d.percentage}%)`).join('\n')}
-            `;
-
-            // Create and download as text file (since PNG is problematic)
-            const blob = new Blob([dataSummary], { type: 'text/plain;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `charts-data-${new Date().toISOString().split('T')[0]}.txt`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (error) {
-            console.error('Error exporting as PNG:', error);
-            alert('Failed to export. Please use CSV export for data or Print for visual charts.');
-        }
-    };
-
-    const exportAsPDF = async () => {
-        if (!chartsContainerRef.current) {
-            alert('No content to export. Please try again.');
-            return;
-        }
-
-        try {
-            // Create a print-friendly version of the charts
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.write(`
-                    <html>
-                        <head>
-                            <title>Charts Report</title>
-                            <style>
-                                body {
-                                    margin: 0;
-                                    padding: 20px;
-                                    font-family: Arial, sans-serif;
-                                    background: white;
-                                }
-                                .chart-container {
-                                    display: grid;
-                                    grid-template-columns: 1fr 1fr;
-                                    gap: 20px;
-                                    margin-bottom: 20px;
-                                }
-                                .chart-card {
-                                    border: 1px solid #e5e7eb;
-                                    border-radius: 8px;
-                                    padding: 16px;
-                                    background: white;
-                                }
-                                .chart-title {
-                                    font-size: 18px;
-                                    font-weight: bold;
-                                    margin-bottom: 16px;
-                                    color: #374151;
-                                }
-                                .chart-content {
-                                    min-height: 200px;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    background: #f9fafb;
-                                    border-radius: 4px;
-                                }
-                                .full-width {
-                                    grid-column: 1 / -1;
-                                }
-                                h1 {
-                                    text-align: center;
-                                    margin-bottom: 30px;
-                                    color: #111827;
-                                    font-size: 24px;
-                                }
-                                @media print {
-                                    body { margin: 0; }
-                                    .chart-container { page-break-inside: avoid; }
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <h1>Visual Charts Report</h1>
-                            <div class="chart-container">
-                                <div class="chart-card">
-                                    <div class="chart-title">Estimates Trend (Bar Chart)</div>
-                                    <div class="chart-content">
-                                        <p>Chart data: ${chartData.estimatesData.map(d => `${d.month}: Total=${d.series1}, Approved=${d.series2}, Pending=${d.series3}`).join(' | ')}</p>
-                                    </div>
-                                </div>
-                                <div class="chart-card">
-                                    <div class="chart-title">Proforma Invoice Value (Line Chart)</div>
-                                    <div class="chart-content">
-                                        <p>Chart data: ${chartData.proformaData.map(d => `${d.month}: ₹${d.value}`).join(' | ')}</p>
-                                    </div>
-                                </div>
-                                <div class="chart-card">
-                                    <div class="chart-title">Monthly Trends (Area Chart)</div>
-                                    <div class="chart-content">
-                                        <p>Chart data: ${chartData.estimatesData.map(d => `${d.month}: Approved=${d.series2}`).join(' | ')}</p>
-                                    </div>
-                                </div>
-                                <div class="chart-card">
-                                    <div class="chart-title">Status Distribution (Pie Chart)</div>
-                                    <div class="chart-content">
-                                        <p>Chart data: ${chartData.conversionData.map(d => `${d.category}: ${d.value} (${d.percentage}%)`).join(' | ')}</p>
-                                    </div>
-                                </div>
-                                <div class="chart-card full-width">
-                                    <div class="chart-title">Monthly Comparison (Stacked Bar Chart)</div>
-                                    <div class="chart-content">
-                                        <p>Chart data: ${chartData.estimatesData.map(d => `${d.month}: Total=${d.series1}, Approved=${d.series2}, Pending=${d.series3}`).join(' | ')}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </body>
-                    </html>
-                `);
-                printWindow.document.close();
-
-                // Wait a moment for content to load, then print
-                setTimeout(() => {
-                    printWindow.print();
-                    // Close the window after printing
-                    setTimeout(() => {
-                        printWindow.close();
-                    }, 1000);
-                }, 500);
-            } else {
-                // Fallback to regular print if popup is blocked
-                alert('Please allow popups and try again, or use Ctrl+P to print.');
-                window.print();
-            }
-        } catch (error) {
-            console.error('Error exporting as PDF:', error);
-            alert('Failed to export as PDF. Please use browser print function (Ctrl+P) to save as PDF.');
-        }
+        setSessionFilter('monthly'); // Reset session filter
     };
 
     const printCharts = async () => {
@@ -318,19 +140,19 @@ ${chartData.conversionData.map(d => `${d.category}: ${d.value} (${d.percentage}%
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Visual Charts - Estimate and Proforma Invoice Reports" />
+            <Head title="Visual Charts" />
 
-            <div className="container mx-auto py-6 space-y-6">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Visual Charts - Estimate and Proforma Invoice Reports</h1>
+                        <h1 className="text-3xl font-bold tracking-tight">Visual Charts</h1>
                         <p className="text-muted-foreground">
                             Interactive charts for estimates, proforma invoices, and conversion ratios
                         </p>
                     </div>
-                    <Button variant="outline" onClick={exportCharts} className="flex items-center gap-2">
-                        <Download className="h-4 w-4" />
-                        Export Charts
+                    <Button variant="outline" onClick={printCharts} className="flex items-center gap-2">
+                        <Printer className="h-4 w-4" />
+                        Print Charts
                     </Button>
                 </div>
 
@@ -361,6 +183,16 @@ ${chartData.conversionData.map(d => `${d.category}: ${d.value} (${d.percentage}%
                                         <SelectItem value="absen">Absen</SelectItem>
                                         <SelectItem value="radiant_synage">Radiant Synage</SelectItem>
                                         <SelectItem value="custom">Custom</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Select value={sessionFilter} onValueChange={setSessionFilter}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Select session" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="weekly">Weekly</SelectItem>
+                                        <SelectItem value="monthly">Monthly</SelectItem>
+                                        <SelectItem value="yearly">Yearly</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <Button
@@ -403,37 +235,61 @@ ${chartData.conversionData.map(d => `${d.category}: ${d.value} (${d.percentage}%
                                 </div>
 
                                 {/* Bar Chart */}
-                                <div className="h-64 space-y-2">
-                                    {chartData.estimatesData.map((data, index) => (
-                                        <div key={index} className="flex items-end gap-1 h-8">
-                                            <div className="flex-1 flex items-end gap-1">
-                                                <div
-                                                    className="bg-blue-500 rounded-t"
-                                                    style={{
-                                                        height: `${(data.series1 / maxValue) * 100}%`,
-                                                        minHeight: '4px'
-                                                    }}
-                                                ></div>
-                                                <div
-                                                    className="bg-green-500 rounded-t"
-                                                    style={{
-                                                        height: `${(data.series2 / maxValue) * 100}%`,
-                                                        minHeight: '4px'
-                                                    }}
-                                                ></div>
-                                                <div
-                                                    className="bg-yellow-500 rounded-t"
-                                                    style={{
-                                                        height: `${(data.series3 / maxValue) * 100}%`,
-                                                        minHeight: '4px'
-                                                    }}
-                                                ></div>
+                                <div className="h-80 space-y-2">
+                                    {/* Debug Info */}
+                                    <div className="text-xs text-gray-500 mb-2">
+                                        Debug: Max Value = {maxValue}, Data Points = {chartData.estimatesData.length}
+                                    </div>
+                                    {chartData.estimatesData.map((data, index) => {
+                                        const totalHeight = (data.series1 / maxValue) * 100;
+                                        const approvedHeight = (data.series2 / maxValue) * 100;
+                                        const pendingHeight = (data.series3 / maxValue) * 100;
+
+                                        // Debug logging for each bar
+                                        console.log(`${data.month}: Total=${data.series1} (${totalHeight.toFixed(1)}%), Approved=${data.series2} (${approvedHeight.toFixed(1)}%), Pending=${data.series3} (${pendingHeight.toFixed(1)}%)`);
+
+                                        return (
+                                            <div key={index} className="flex items-end gap-2 h-12 border-b border-gray-200">
+                                                <div className="flex items-end gap-1 flex-1">
+                                                    <div
+                                                        className="bg-blue-500 rounded-t border border-blue-600"
+                                                        style={{
+                                                            height: `${Math.max(totalHeight, 8)}%`,
+                                                            minHeight: '8px',
+                                                            width: '30px'
+                                                        }}
+                                                        title={`Total: ${data.series1} (${totalHeight.toFixed(1)}%)`}
+                                                    ></div>
+                                                    <div
+                                                        className="bg-green-500 rounded-t border border-green-600"
+                                                        style={{
+                                                            height: `${Math.max(approvedHeight, 8)}%`,
+                                                            minHeight: '8px',
+                                                            width: '30px'
+                                                        }}
+                                                        title={`Approved: ${data.series2} (${approvedHeight.toFixed(1)}%)`}
+                                                    ></div>
+                                                    <div
+                                                        className="bg-yellow-500 rounded-t border border-yellow-600"
+                                                        style={{
+                                                            height: `${Math.max(pendingHeight, 8)}%`,
+                                                            minHeight: '8px',
+                                                            width: '30px'
+                                                        }}
+                                                        title={`Pending: ${data.series3} (${pendingHeight.toFixed(1)}%)`}
+                                                    ></div>
+                                                </div>
+                                                <div className="flex flex-col items-center min-w-[80px]">
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {data.month}
+                                                    </span>
+                                                    <span className="text-xs text-gray-500">
+                                                        T:{data.series1} A:{data.series2} P:{data.series3}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <span className="text-xs text-muted-foreground w-8 text-center">
-                                                {data.month}
-                                            </span>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </CardContent>
@@ -571,7 +427,7 @@ ${chartData.conversionData.map(d => `${d.category}: ${d.value} (${d.percentage}%
                                                 .reduce((sum, d) => sum + d.percentage, 0) * 3.6;
                                             const endAngle = startAngle + (item.percentage * 3.6);
 
-                                            const colors = ['#22c55e', '#f59e0b', '#ef4444'];
+                                            const colors = ['#22c55e', '#f59e0b', '#ef4444', '#6b7280'];
 
                                             return (
                                                 <circle
@@ -598,7 +454,7 @@ ${chartData.conversionData.map(d => `${d.category}: ${d.value} (${d.percentage}%
                                 {/* Legend */}
                                 <div className="space-y-4">
                                     {chartData.conversionData.map((item, index) => {
-                                        const colors = ['#22c55e', '#f59e0b', '#ef4444'];
+                                        const colors = ['#22c55e', '#f59e0b', '#ef4444', '#6b7280'];
                                         return (
                                             <div key={index} className="flex items-center gap-3">
                                                 <div
@@ -617,109 +473,23 @@ ${chartData.conversionData.map(d => `${d.category}: ${d.value} (${d.percentage}%
                         </CardContent>
                     </Card>
 
-                    {/* Stacked Bar Chart - Comparison */}
-                    <Card className="md:col-span-2">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <BarChart3 className="h-5 w-5" />
-                                Monthly Comparison (Stacked Bar Chart)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-80 space-y-2">
-                                {chartData.estimatesData.map((data, index) => (
-                                    <div key={index} className="flex items-end gap-1 h-12">
-                                        <div className="flex-1 flex items-end gap-1">
-                                            <div
-                                                className="bg-blue-500 rounded-t"
-                                                style={{
-                                                    height: `${(data.series1 / maxValue) * 100}%`,
-                                                    minHeight: '4px'
-                                                }}
-                                                title={`Total: ${data.series1}`}
-                                            ></div>
-                                            <div
-                                                className="bg-green-500 rounded-t"
-                                                style={{
-                                                    height: `${(data.series2 / maxValue) * 100}%`,
-                                                    minHeight: '4px'
-                                                }}
-                                                title={`Approved: ${data.series2}`}
-                                            ></div>
-                                            <div
-                                                className="bg-yellow-500 rounded-t"
-                                                style={{
-                                                    height: `${(data.series3 / maxValue) * 100}%`,
-                                                    minHeight: '4px'
-                                                }}
-                                                title={`Pending: ${data.series3}`}
-                                            ></div>
-                                        </div>
-                                        <span className="text-xs text-muted-foreground w-12 text-center">
-                                            {data.month}
-                                        </span>
-                                    </div>
-                                ))}
-
-                                {/* Legend */}
-                                <div className="flex items-center gap-4 text-sm mt-4">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                        <span>Total</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                        <span>Approved</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                        <span>Pending</span>
-                                    </div>
-                                </div>
+                    {/* Export Options */}
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                {/* Only show print and CSV buttons */}
+                                <Button variant="outline" onClick={printCharts} className="flex items-center gap-2">
+                                    <Printer className="h-4 w-4" />
+                                    Print Charts
+                                </Button>
+                                <Button variant="outline" onClick={exportAsCSV} className="flex items-center gap-2">
+                                    <FileDown className="h-4 w-4" />
+                                    Export as CSV
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
-
-                {/* Export Options */}
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            {/* Only show PDF button if jsPDF is available */}
-                            {librariesAvailable.jsPDF && (
-                                <Button variant="outline" onClick={exportAsPDF} className="flex items-center gap-2">
-                                    <Download className="h-4 w-4" />
-                                    Export as PDF
-                                </Button>
-                            )}
-
-                            {/* Only show PNG button if html2canvas is available */}
-                            {librariesAvailable.html2canvas && (
-                                <Button variant="outline" onClick={exportAsPNG} className="flex items-center gap-2">
-                                    <FileDown className="h-4 w-4" />
-                                    Export Data
-                                </Button>
-                            )}
-
-                            {/* Always show print and CSV buttons */}
-                            <Button variant="outline" onClick={printCharts} className="flex items-center gap-2">
-                                <Printer className="h-4 w-4" />
-                                Print Charts
-                            </Button>
-                            <Button variant="outline" onClick={exportAsCSV} className="flex items-center gap-2">
-                                <FileDown className="h-4 w-4" />
-                                Export as CSV
-                            </Button>
-                        </div>
-
-                        {/* Show message if libraries are not available */}
-                        {(!librariesAvailable.html2canvas || !librariesAvailable.jsPDF) && (
-                            <div className="mt-4 text-center text-sm text-muted-foreground">
-                                <p>Some export options are not available. Use Print function to save as PDF or image.</p>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
             </div>
         </AppLayout>
     );

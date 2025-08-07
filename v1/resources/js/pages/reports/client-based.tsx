@@ -20,14 +20,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface ReportData {
     id: number;
-    quotationNumber: string;
+    reference: string;
     accountName: string;
     contactPerson: string;
     salesPerson: string;
     amount: number;
     status: string;
     createdAt: string;
-    validUntil: string;
 }
 
 interface Pagination {
@@ -64,35 +63,6 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
     const [salesPersonFilter, setSalesPersonFilter] = useState(filters.salesPerson || 'All');
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const reportsContainerRef = useRef<HTMLDivElement>(null);
-    const [librariesAvailable, setLibrariesAvailable] = useState({
-        html2canvas: false,
-        jsPDF: false
-    });
-
-    // Check library availability on component mount
-    useEffect(() => {
-        const checkLibraries = () => {
-            const html2canvasAvailable = typeof html2canvas !== 'undefined';
-            const jsPDFAvailable = typeof jsPDF !== 'undefined';
-
-            console.log('Library check - html2canvas:', html2canvasAvailable, 'jsPDF:', jsPDFAvailable);
-
-            setLibrariesAvailable({
-                html2canvas: html2canvasAvailable,
-                jsPDF: jsPDFAvailable
-            });
-        };
-
-        // Check immediately
-        checkLibraries();
-
-        // Also check after a short delay in case libraries load asynchronously
-        setTimeout(checkLibraries, 1000);
-    }, []);
-
-    // Get unique accounts and sales persons for filters
-    const uniqueAccounts = [...new Set(reportData.map(item => item.accountName))];
-    const uniqueSalesPersons = [...new Set(reportData.map(item => item.salesPerson))];
 
     // Debounced search
     useEffect(() => {
@@ -124,88 +94,17 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
         setAmountTo('');
         setAccountFilter('All');
         setSalesPersonFilter('All');
+
+        // Trigger reset request
+        router.get('/reports/client-based', {}, {
+            preserveState: false,
+            replace: true
+        });
     };
 
-    const exportReport = async () => {
-        if (!reportsContainerRef.current) {
-            alert('No content to export. Please try again.');
-            return;
-        }
-
-        try {
-            // Try to use html2canvas if available, otherwise fallback to print
-            if (typeof html2canvas !== 'undefined') {
-                const canvas = await html2canvas(reportsContainerRef.current, {
-                    backgroundColor: '#ffffff',
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false,
-                });
-
-                const link = document.createElement('a');
-                link.download = `client-reports-${new Date().toISOString().split('T')[0]}.png`;
-                link.href = canvas.toDataURL('image/png', 1.0);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                // Fallback to print dialog
-                alert('PNG export not available. Please use browser print function (Ctrl+P) to save as image.');
-                window.print();
-            }
-        } catch (error) {
-            console.error('Error exporting report:', error);
-            alert('Failed to export. Please use browser print function (Ctrl+P) to save as image.');
-        }
-    };
-
-    const exportAsPDF = async () => {
-        if (!reportsContainerRef.current) {
-            alert('No content to export. Please try again.');
-            return;
-        }
-
-        try {
-            // Try to use jsPDF if available, otherwise fallback to print
-            if (typeof jsPDF !== 'undefined' && typeof html2canvas !== 'undefined') {
-                const canvas = await html2canvas(reportsContainerRef.current, {
-                    backgroundColor: '#ffffff',
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false,
-                });
-
-                const imgData = canvas.toDataURL('image/png', 1.0);
-                const pdf = new jsPDF('landscape', 'mm', 'a4');
-                const imgWidth = 297; // A4 width in mm
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                let heightLeft = imgHeight;
-
-                let position = 0;
-
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= imgHeight;
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= imgHeight;
-                }
-
-                pdf.save(`client-reports-${new Date().toISOString().split('T')[0]}.pdf`);
-            } else {
-                // Fallback to print dialog
-                alert('PDF export not available. Please use browser print function (Ctrl+P) to save as PDF.');
-                window.print();
-            }
-        } catch (error) {
-            console.error('Error exporting as PDF:', error);
-            alert('Failed to export as PDF. Please use browser print function (Ctrl+P) to save as PDF.');
-        }
-    };
+    // Get unique accounts and sales persons for filters
+    const uniqueAccounts = [...new Set(reportData.map(item => item.accountName))];
+    const uniqueSalesPersons = [...new Set(reportData.map(item => item.salesPerson))];
 
     const printReport = async () => {
         if (!reportsContainerRef.current) {
@@ -228,20 +127,19 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
             const csvData = [];
 
             // Add header
-            csvData.push(['SL No.', 'Quotation No.', 'Account Name', 'Contact Person', 'Sales Person', 'Amount', 'Status', 'Created Date', 'Valid Until']);
+            csvData.push(['SL No.', 'Reference', 'Account Name', 'Contact Person', 'Sales Person', 'Amount', 'Status', 'Created Date']);
 
             // Add data rows
             reportData.forEach((item, index) => {
                 csvData.push([
                     (index + 1).toString().padStart(2, '0'),
-                    item.quotationNumber || 'N/A',
+                    item.reference || 'N/A',
                     item.accountName,
                     item.contactPerson,
                     item.salesPerson,
                     item.amount,
                     item.status,
-                    item.createdAt,
-                    item.validUntil
+                    item.createdAt
                 ]);
             });
 
@@ -280,31 +178,15 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Client-Based Reports" />
 
-            <div className="container mx-auto py-6 space-y-6">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Client-Based Reports</h1>
                         <p className="text-muted-foreground">
-                            Detailed reports by client, contact person, and sales performance
+                            View detailed reports by client, estimate status, and conversion rates
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        {/* Only show PDF button if jsPDF is available */}
-                        {librariesAvailable.jsPDF && (
-                            <Button variant="outline" onClick={exportAsPDF} className="flex items-center gap-2">
-                                <Download className="h-4 w-4" />
-                                Export PDF
-                            </Button>
-                        )}
-
-                        {/* Only show PNG button if html2canvas is available */}
-                        {librariesAvailable.html2canvas && (
-                            <Button variant="outline" onClick={exportReport} className="flex items-center gap-2">
-                                <FileDown className="h-4 w-4" />
-                                Export PNG
-                            </Button>
-                        )}
-
                         {/* Always show print and CSV buttons */}
                         <Button variant="outline" onClick={printReport} className="flex items-center gap-2">
                             <Printer className="h-4 w-4" />
@@ -317,7 +199,7 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
                     </div>
                 </div>
 
-                {/* Filters and Table */}
+                {/* Search and Filters */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Client Performance Details</CardTitle>
@@ -445,48 +327,49 @@ export default function ClientBasedReports({ reportData, pagination, filters }: 
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead className="w-[80px]">SL No.</TableHead>
-                                        <TableHead>Quotation No.</TableHead>
+                                        <TableHead>Reference</TableHead>
                                         <TableHead>Account Name</TableHead>
                                         <TableHead>Contact Person</TableHead>
                                         <TableHead>Sales Person</TableHead>
                                         <TableHead>Amount (₹)</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead>Created Date</TableHead>
-                                        <TableHead>Valid Until</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {reportData.map((item, index) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell className="font-medium">
-                                                {(index + 1).toString().padStart(2, '0')}
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                {item.quotationNumber || 'N/A'}
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                {item.accountName}
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                {item.contactPerson}
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                {item.salesPerson}
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                ₹{(item.amount || 0).toLocaleString()}
-                                            </TableCell>
-                                            <TableCell>
-                                                {getStatusBadge(item.status)}
-                                            </TableCell>
-                                            <TableCell>
-                                                {item.createdAt}
-                                            </TableCell>
-                                            <TableCell>
-                                                {item.validUntil}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+                                    {reportData.map((item, index) => {
+                                        // Calculate serial number based on current page and items per page
+                                        const serialNumber = ((pagination.current_page - 1) * pagination.per_page) + index + 1;
+
+                                        return (
+                                            <TableRow key={item.id}>
+                                                <TableCell className="font-medium">
+                                                    {serialNumber.toString().padStart(2, '0')}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    {item.reference || 'N/A'}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    {item.accountName}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    {item.contactPerson}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    {item.salesPerson}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    ₹{(item.amount || 0).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {getStatusBadge(item.status)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {item.createdAt}
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
                                 </TableBody>
                             </Table>
 

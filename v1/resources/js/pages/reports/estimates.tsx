@@ -20,13 +20,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface EstimateData {
     id: number;
-    estimateNumber: string;
+    reference: string;
     clientName: string;
     salesPerson: string;
     amount: number;
     status: string;
     createdAt: string;
-    validUntil: string;
 }
 
 interface Analytics {
@@ -71,31 +70,6 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
     const [amountTo, setAmountTo] = useState(filters.amountTo || '');
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const estimatesContainerRef = useRef<HTMLDivElement>(null);
-    const [librariesAvailable, setLibrariesAvailable] = useState({
-        html2canvas: false,
-        jsPDF: false
-    });
-
-    // Check library availability on component mount
-    useEffect(() => {
-        const checkLibraries = () => {
-            const html2canvasAvailable = typeof html2canvas !== 'undefined';
-            const jsPDFAvailable = typeof jsPDF !== 'undefined';
-
-            console.log('Library check - html2canvas:', html2canvasAvailable, 'jsPDF:', jsPDFAvailable);
-
-            setLibrariesAvailable({
-                html2canvas: html2canvasAvailable,
-                jsPDF: jsPDFAvailable
-            });
-        };
-
-        // Check immediately
-        checkLibraries();
-
-        // Also check after a short delay in case libraries load asynchronously
-        setTimeout(checkLibraries, 1000);
-    }, []);
 
     // Debounced search
     useEffect(() => {
@@ -123,87 +97,12 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
         setDateTo('');
         setAmountFrom('');
         setAmountTo('');
-    };
 
-    const exportReport = async () => {
-        if (!estimatesContainerRef.current) {
-            alert('No content to export. Please try again.');
-            return;
-        }
-
-        try {
-            // Try to use html2canvas if available, otherwise fallback to print
-            if (typeof html2canvas !== 'undefined') {
-                const canvas = await html2canvas(estimatesContainerRef.current, {
-                    backgroundColor: '#ffffff',
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false,
-                });
-
-                const link = document.createElement('a');
-                link.download = `estimates-report-${new Date().toISOString().split('T')[0]}.png`;
-                link.href = canvas.toDataURL('image/png', 1.0);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                // Fallback to print dialog
-                alert('PNG export not available. Please use browser print function (Ctrl+P) to save as image.');
-                window.print();
-            }
-        } catch (error) {
-            console.error('Error exporting report:', error);
-            alert('Failed to export. Please use browser print function (Ctrl+P) to save as image.');
-        }
-    };
-
-    const exportAsPDF = async () => {
-        if (!estimatesContainerRef.current) {
-            alert('No content to export. Please try again.');
-            return;
-        }
-
-        try {
-            // Try to use jsPDF if available, otherwise fallback to print
-            if (typeof jsPDF !== 'undefined' && typeof html2canvas !== 'undefined') {
-                const canvas = await html2canvas(estimatesContainerRef.current, {
-                    backgroundColor: '#ffffff',
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false,
-                });
-
-                const imgData = canvas.toDataURL('image/png', 1.0);
-                const pdf = new jsPDF('landscape', 'mm', 'a4');
-                const imgWidth = 297; // A4 width in mm
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                let heightLeft = imgHeight;
-
-                let position = 0;
-
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= imgHeight;
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= imgHeight;
-                }
-
-                pdf.save(`estimates-report-${new Date().toISOString().split('T')[0]}.pdf`);
-            } else {
-                // Fallback to print dialog
-                alert('PDF export not available. Please use browser print function (Ctrl+P) to save as PDF.');
-                window.print();
-            }
-        } catch (error) {
-            console.error('Error exporting as PDF:', error);
-            alert('Failed to export as PDF. Please use browser print function (Ctrl+P) to save as PDF.');
-        }
+        // Trigger reset request
+        router.get('/reports/estimates', {}, {
+            preserveState: false,
+            replace: true
+        });
     };
 
     const printReport = async () => {
@@ -241,17 +140,16 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
             // Add estimates data
             csvData.push([]);
             csvData.push(['Estimate Details']);
-            csvData.push(['SL No.', 'Estimate No.', 'Client Name', 'Sales Person', 'Amount', 'Status', 'Created Date', 'Valid Until']);
+            csvData.push(['SL No.', 'Reference', 'Client Name', 'Sales Person', 'Amount', 'Status', 'Created Date']);
             estimateData.forEach((item, index) => {
                 csvData.push([
                     (index + 1).toString().padStart(2, '0'),
-                    item.estimateNumber || 'N/A',
+                    item.reference || 'N/A',
                     item.clientName,
                     item.salesPerson,
                     item.amount,
                     item.status,
-                    item.createdAt,
-                    item.validUntil
+                    item.createdAt
                 ]);
             });
 
@@ -293,31 +191,15 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Estimate Analytics" />
 
-            <div className="container mx-auto py-6 space-y-6">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Estimate Analytics</h1>
                         <p className="text-muted-foreground">
-                            Detailed analysis of estimates, conversion rates, and performance metrics
+                            Detailed analytics on estimate performance and trends
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        {/* Only show PDF button if jsPDF is available */}
-                        {librariesAvailable.jsPDF && (
-                            <Button variant="outline" onClick={exportAsPDF} className="flex items-center gap-2">
-                                <Download className="h-4 w-4" />
-                                Export PDF
-                            </Button>
-                        )}
-
-                        {/* Only show PNG button if html2canvas is available */}
-                        {librariesAvailable.html2canvas && (
-                            <Button variant="outline" onClick={exportReport} className="flex items-center gap-2">
-                                <FileDown className="h-4 w-4" />
-                                Export PNG
-                            </Button>
-                        )}
-
                         {/* Always show print and CSV buttons */}
                         <Button variant="outline" onClick={printReport} className="flex items-center gap-2">
                             <Printer className="h-4 w-4" />
@@ -515,44 +397,45 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead className="w-[80px]">SL No.</TableHead>
-                                        <TableHead>Estimate No.</TableHead>
+                                        <TableHead>Reference</TableHead>
                                         <TableHead>Client Name</TableHead>
                                         <TableHead>Sales Person</TableHead>
                                         <TableHead>Amount (₹)</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead>Created Date</TableHead>
-                                        <TableHead>Valid Until</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {estimateData.map((item, index) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell className="font-medium">
-                                                {(index + 1).toString().padStart(2, '0')}
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                {item.estimateNumber || 'N/A'}
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                {item.clientName}
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                {item.salesPerson}
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                ₹{(item.amount || 0).toLocaleString()}
-                                            </TableCell>
-                                            <TableCell>
-                                                {getStatusBadge(item.status)}
-                                            </TableCell>
-                                            <TableCell>
-                                                {item.createdAt}
-                                            </TableCell>
-                                            <TableCell>
-                                                {item.validUntil}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+                                    {estimateData.map((item, index) => {
+                                        // Calculate serial number based on current page and items per page
+                                        const serialNumber = ((pagination.current_page - 1) * pagination.per_page) + index + 1;
+
+                                        return (
+                                            <TableRow key={item.id}>
+                                                <TableCell className="font-medium">
+                                                    {serialNumber.toString().padStart(2, '0')}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    {item.reference || 'N/A'}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    {item.clientName}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    {item.salesPerson}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    ₹{(item.amount || 0).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {getStatusBadge(item.status)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {item.createdAt}
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
                                 </TableBody>
                             </Table>
 

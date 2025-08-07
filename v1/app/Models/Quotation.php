@@ -399,6 +399,13 @@ class Quotation extends Model
                 throw new \InvalidArgumentException('Invalid quotation status');
             }
         });
+
+        static::creating(function ($quotation) {
+            // Auto-generate quotation number if not provided
+            if (empty($quotation->quotation_number)) {
+                $quotation->quotation_number = $quotation->generateQuotationNumber();
+            }
+        });
     }
 
 

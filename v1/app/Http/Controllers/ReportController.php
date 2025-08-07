@@ -38,10 +38,10 @@ class ReportController extends Controller
 
         // Date range filters
         if ($request->filled('dateFrom')) {
-            $query->where('quotations.created_at', '>=', $request->dateFrom . ' 00:00:00');
+            $query->where('quotations.estimate_date', '>=', $request->dateFrom);
         }
         if ($request->filled('dateTo')) {
-            $query->where('quotations.created_at', '<=', $request->dateTo . ' 23:59:59');
+            $query->where('quotations.estimate_date', '<=', $request->dateTo);
         }
 
         // Account filter
@@ -64,11 +64,11 @@ class ReportController extends Controller
             $query->where('sales_user_id', $authUser->id);
         }
 
-        // Get paginated data
-        $quotations = $query->orderBy('created_at', 'desc')->paginate(10);
+        // Get all filtered data first
+        $filteredQuotations = $query->orderBy('created_at', 'desc')->get();
 
         // Transform data for frontend
-        $reportData = $quotations->getCollection()->map(function ($quotation) {
+        $reportData = $filteredQuotations->map(function ($quotation) {
             $amount = $quotation->grand_total;
             if ($amount === null || $amount == 0) {
                 $amount = $quotation->items->sum(function ($item) {
@@ -83,18 +83,17 @@ class ReportController extends Controller
 
             return [
                 'id' => $quotation->id,
-                'quotationNumber' => $quotation->quotation_number,
+                'reference' => $quotation->reference,
                 'accountName' => $quotation->account->business_name ?? 'Unknown Account',
                 'contactPerson' => $quotation->account_contact->name ?? 'N/A',
                 'salesPerson' => $quotation->salesUser->name ?? 'Unknown',
                 'amount' => $amount ?? 0,
                 'status' => $quotation->status,
                 'createdAt' => $quotation->created_at->format('M d, Y'),
-                'validUntil' => $quotation->valid_until ? $quotation->valid_until->format('M d, Y') : 'N/A',
             ];
         });
 
-        // Apply amount range filter after data transformation
+        // Apply amount range filter
         if ($request->filled('amountFrom') || $request->filled('amountTo')) {
             $reportData = $reportData->filter(function ($item) use ($request) {
                 $amount = $item['amount'];
@@ -108,13 +107,21 @@ class ReportController extends Controller
             });
         }
 
+        // Manual pagination for filtered data
+        $perPage = 10;
+        $currentPage = $request->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        $paginatedData = $reportData->slice($offset, $perPage);
+        $total = $reportData->count();
+        $lastPage = ceil($total / $perPage);
+
         return Inertia::render('reports/client-based', [
-            'reportData' => $reportData,
+            'reportData' => $paginatedData->values(),
             'pagination' => [
-                'current_page' => $quotations->currentPage(),
-                'last_page' => $quotations->lastPage(),
-                'per_page' => $quotations->perPage(),
-                'total' => $quotations->total(),
+                'current_page' => (int)$currentPage,
+                'last_page' => $lastPage,
+                'per_page' => $perPage,
+                'total' => $total,
             ],
             'filters' => $request->only(['search', 'status', 'dateFrom', 'dateTo', 'amountFrom', 'amountTo', 'account', 'salesPerson']),
         ]);
@@ -149,7 +156,7 @@ class ReportController extends Controller
         }
 
         // Get summary statistics
-        $summaryStats = $this->getSalesSummaryStats($salesData);
+        $summaryStats = $this->getSalesSummaryStats($salesData, $query);
 
         return Inertia::render('reports/sales', [
             'salesData' => $salesData,
@@ -177,12 +184,15 @@ class ReportController extends Controller
             $query->where('sales_user_id', $authUser->id);
         }
 
+        // Get session filter (weekly, monthly, yearly)
+        $sessionFilter = $request->get('session', 'monthly');
+
         // Get chart data
-        $chartData = $this->getChartData($query);
+        $chartData = $this->getChartData($query, $sessionFilter);
 
         return Inertia::render('reports/charts', [
             'chartData' => $chartData,
-            'filters' => $request->only(['status', 'category']),
+            'filters' => $request->only(['status', 'category', 'session']),
         ]);
     }
 
@@ -201,10 +211,10 @@ class ReportController extends Controller
 
         // Date range filters
         if ($request->filled('dateFrom')) {
-            $query->where('quotations.created_at', '>=', $request->dateFrom . ' 00:00:00');
+            $query->where('quotations.estimate_date', '>=', $request->dateFrom);
         }
         if ($request->filled('dateTo')) {
-            $query->where('quotations.created_at', '<=', $request->dateTo . ' 23:59:59');
+            $query->where('quotations.estimate_date', '<=', $request->dateTo);
         }
 
         // Apply role-based filtering
@@ -213,22 +223,14 @@ class ReportController extends Controller
             $query->where('sales_user_id', $authUser->id);
         }
 
-        // Get paginated data
-        $quotations = $query->orderBy('created_at', 'desc')->paginate(10);
+        // Get all filtered data first for analytics
+        $filteredQuotations = $query->orderBy('created_at', 'desc')->get();
 
-        // Get analytics from ALL data (not filtered)
-        $allQuotationsQuery = Quotation::with(['account', 'account_contact', 'creator', 'salesUser']);
-
-        // Apply role-based filtering for analytics
-        if ($authUser->role === 'sales') {
-            $allQuotationsQuery->where('sales_user_id', $authUser->id);
-        }
-
-        $allQuotations = $allQuotationsQuery->get();
-        $analytics = $this->getEstimateAnalytics($allQuotations);
+        // Calculate analytics from filtered data
+        $analytics = $this->getEstimateAnalytics($filteredQuotations);
 
         // Transform data for frontend
-        $estimateData = $quotations->getCollection()->map(function ($quotation) {
+        $estimateData = $filteredQuotations->map(function ($quotation) {
             $amount = $quotation->grand_total;
             if ($amount === null || $amount == 0) {
                 $amount = $quotation->items->sum(function ($item) {
@@ -243,17 +245,16 @@ class ReportController extends Controller
 
             return [
                 'id' => $quotation->id,
-                'estimateNumber' => $quotation->quotation_number,
+                'reference' => $quotation->reference,
                 'clientName' => $quotation->account->business_name ?? 'Unknown Client',
                 'salesPerson' => $quotation->salesUser->name ?? 'Unknown',
                 'amount' => $amount ?? 0,
                 'status' => $quotation->status,
                 'createdAt' => $quotation->created_at->format('M d, Y'),
-                'validUntil' => $quotation->valid_until ? $quotation->valid_until->format('M d, Y') : 'N/A',
             ];
         });
 
-        // Apply amount range filter after data transformation
+        // Apply amount range filter
         if ($request->filled('amountFrom') || $request->filled('amountTo')) {
             $estimateData = $estimateData->filter(function ($item) use ($request) {
                 $amount = $item['amount'];
@@ -267,13 +268,21 @@ class ReportController extends Controller
             });
         }
 
+        // Manual pagination for filtered data
+        $perPage = 10;
+        $currentPage = $request->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        $paginatedData = $estimateData->slice($offset, $perPage);
+        $total = $estimateData->count();
+        $lastPage = ceil($total / $perPage);
+
         return Inertia::render('reports/estimates', [
-            'estimateData' => $estimateData,
+            'estimateData' => $paginatedData->values(),
             'pagination' => [
-                'current_page' => $quotations->currentPage(),
-                'last_page' => $quotations->lastPage(),
-                'per_page' => $quotations->perPage(),
-                'total' => $quotations->total(),
+                'current_page' => (int)$currentPage,
+                'last_page' => $lastPage,
+                'per_page' => $perPage,
+                'total' => $total,
             ],
             'analytics' => $analytics,
             'filters' => $request->only(['search', 'status', 'dateFrom', 'dateTo', 'amountFrom', 'amountTo']),
@@ -642,11 +651,25 @@ class ReportController extends Controller
         return $salesData;
     }
 
-    private function getSalesSummaryStats($salesData)
+    private function getSalesSummaryStats($salesData, $baseQuery)
     {
-        $totalEstimates = collect($salesData)->sum('estimates');
-        $totalConverted = collect($salesData)->sum('converted');
-        $totalSales = collect($salesData)->sum('totalSales');
+        // Calculate actual totals from the base query instead of summing category totals
+        $totalEstimates = $baseQuery->count();
+        $totalConverted = $baseQuery->where('quotations.status', 'approved')->count();
+        $totalSales = $baseQuery->where('quotations.status', 'approved')->with('items')->get()->sum(function ($quotation) {
+            $amount = $quotation->grand_total ?? 0;
+            if ($amount == 0) {
+                $amount = $quotation->items->sum(function ($item) {
+                    $quantity = floatval($item->quantity ?? 0);
+                    $unitPrice = floatval($item->proposed_unit_price ?? 0);
+                    $taxPercentage = floatval($item->tax_percentage ?? 0);
+                    $subtotal = $quantity * $unitPrice;
+                    $taxAmount = $subtotal * ($taxPercentage / 100);
+                    return $subtotal + $taxAmount;
+                });
+            }
+            return $amount ?? 0;
+        });
         $overallConversionRate = $totalEstimates > 0 ? ($totalConverted / $totalEstimates) * 100 : 0;
 
         return [
@@ -657,30 +680,58 @@ class ReportController extends Controller
         ];
     }
 
-    private function getChartData($baseQuery)
+    private function getChartData($baseQuery, $sessionFilter = 'monthly')
     {
-        // Get monthly data for the last 6 months
-        $months = collect();
-        for ($i = 5; $i >= 0; $i--) {
-            $months->push(Carbon::now()->subMonths($i)->format('M'));
+        // Get data based on session filter
+        $periods = collect();
+
+        switch ($sessionFilter) {
+            case 'weekly':
+                // Get last 12 weeks
+                for ($i = 11; $i >= 0; $i--) {
+                    $date = Carbon::now()->subWeeks($i);
+                    $periods->push([
+                        'label' => $date->format('M d'),
+                        'start' => Carbon::create($date->year, $date->month, $date->day, 0, 0, 0, config('app.timezone'))->startOfWeek(),
+                        'end' => Carbon::create($date->year, $date->month, $date->day, 23, 59, 59, config('app.timezone'))->endOfWeek(),
+                    ]);
+                }
+                break;
+
+            case 'yearly':
+                // Get last 5 years
+                for ($i = 4; $i >= 0; $i--) {
+                    $date = Carbon::now()->subYears($i);
+                    $periods->push([
+                        'label' => $date->format('Y'),
+                        'start' => Carbon::create($date->year, 1, 1, 0, 0, 0, config('app.timezone')),
+                        'end' => Carbon::create($date->year, 12, 31, 23, 59, 59, config('app.timezone')),
+                    ]);
+                }
+                break;
+
+            default: // monthly
+                // Get last 6 months
+                for ($i = 5; $i >= 0; $i--) {
+                    $date = Carbon::now()->subMonths($i);
+                    $periods->push([
+                        'label' => $date->format('M Y'),
+                        'start' => Carbon::create($date->year, $date->month, 1, 0, 0, 0, config('app.timezone')),
+                        'end' => Carbon::create($date->year, $date->month, $date->daysInMonth, 23, 59, 59, config('app.timezone')),
+                    ]);
+                }
+                break;
         }
 
         // Estimates chart data with proper amount calculations
-        $estimatesData = $months->map(function ($month) use ($baseQuery) {
-            $startDate = Carbon::parse($month)->startOfMonth();
-            $endDate = Carbon::parse($month)->endOfMonth();
-
-            $query = clone $baseQuery;
-            $total = $query->whereBetween('created_at', [$startDate, $endDate])->count();
-
-            $query = clone $baseQuery;
-            $approved = $query->where('quotations.status', 'approved')->whereBetween('created_at', [$startDate, $endDate])->count();
-
-            $query = clone $baseQuery;
-            $pending = $query->where('quotations.status', 'pending')->whereBetween('created_at', [$startDate, $endDate])->count();
+        $estimatesData = $periods->map(function ($periodData) use ($baseQuery) {
+            // Create fresh queries for each calculation
+            $total = Quotation::whereBetween('estimate_date', [$periodData['start']->format('Y-m-d'), $periodData['end']->format('Y-m-d')])->count();
+            $approved = Quotation::where('status', 'approved')->whereBetween('estimate_date', [$periodData['start']->format('Y-m-d'), $periodData['end']->format('Y-m-d')])->count();
+            $pending = Quotation::where('status', 'pending')->whereBetween('estimate_date', [$periodData['start']->format('Y-m-d'), $periodData['end']->format('Y-m-d')])->count();
 
             return [
-                'month' => $month,
+                'month' => $periodData['label'],
                 'series1' => $total,
                 'series2' => $approved,
                 'series3' => $pending,
@@ -688,13 +739,9 @@ class ReportController extends Controller
         });
 
         // Proforma invoice data with proper amount calculations
-        $proformaData = $months->map(function ($month) use ($baseQuery) {
-            $startDate = Carbon::parse($month)->startOfMonth();
-            $endDate = Carbon::parse($month)->endOfMonth();
-
-            $query = clone $baseQuery;
-            $quotations = $query->where('quotations.status', 'approved')
-                ->whereBetween('approved_at', [$startDate, $endDate])
+        $proformaData = $periods->map(function ($periodData) use ($baseQuery) {
+            $quotations = Quotation::where('status', 'approved')
+                ->whereBetween('approved_at', [$periodData['start'], $periodData['end']])
                 ->with('items')
                 ->get();
 
@@ -714,17 +761,17 @@ class ReportController extends Controller
             });
 
             return [
-                'month' => $month,
+                'month' => $periodData['label'],
                 'value' => $value,
             ];
         });
 
         // Conversion ratios with all statuses
-        $totalEstimates = $baseQuery->count();
-        $approvedEstimates = $baseQuery->where('quotations.status', 'approved')->count();
-        $pendingEstimates = $baseQuery->where('quotations.status', 'pending')->count();
-        $rejectedEstimates = $baseQuery->where('quotations.status', 'rejected')->count();
-        $draftEstimates = $baseQuery->where('quotations.status', 'draft')->count();
+        $totalEstimates = Quotation::count();
+        $approvedEstimates = Quotation::where('status', 'approved')->count();
+        $pendingEstimates = Quotation::where('status', 'pending')->count();
+        $rejectedEstimates = Quotation::where('status', 'rejected')->count();
+        $draftEstimates = Quotation::where('status', 'draft')->count();
 
         $conversionData = [
             [
@@ -741,6 +788,11 @@ class ReportController extends Controller
                 'category' => 'Rejected',
                 'value' => $rejectedEstimates,
                 'percentage' => $totalEstimates > 0 ? round(($rejectedEstimates / $totalEstimates) * 100, 1) : 0,
+            ],
+            [
+                'category' => 'Draft',
+                'value' => $draftEstimates,
+                'percentage' => $totalEstimates > 0 ? round(($draftEstimates / $totalEstimates) * 100, 1) : 0,
             ],
         ];
 

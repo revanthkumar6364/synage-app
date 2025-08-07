@@ -172,6 +172,11 @@ class QuotationController extends Controller
                 $validated['reference'] = $tempQuotation->generateReferenceNumber();
             }
 
+            // Auto-generate quotation number if not provided
+            if (empty($validated['quotation_number'])) {
+                $validated['quotation_number'] = (new Quotation())->generateQuotationNumber();
+            }
+
             $quotation = Quotation::create($validated);
 
             // Handle file uploads if any
