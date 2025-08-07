@@ -47,11 +47,11 @@ export function AppSidebar() {
             href: '/quotations',
             icon: FileText,
         },
-        {
+        ...(['admin', 'manager'].includes(auth.user.role) ? [{
             title: 'Reports and Analytics',
             href: '/reports',
             icon: BarChart3,
-        }
+        }] : []),
     ];
     const footerNavItems: NavItem[] = [
         {

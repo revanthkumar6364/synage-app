@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\QuotationMediaController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ReportController;
@@ -15,9 +16,7 @@ use App\Http\Controllers\ReportController;
 Route::redirect('/', '/dashboard', 301)->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('users', UserController::class)->except(['show']);
     Route::get('users/{id}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
@@ -52,7 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('quotation-media', QuotationMediaController::class);
 
     // Reports and Analytics Routes
-    Route::prefix('reports')->group(function () {
+    Route::prefix('reports')->middleware(['admin.manager'])->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/client-based', [ReportController::class, 'clientBased'])->name('reports.client-based');
         Route::get('/sales', [ReportController::class, 'sales'])->name('reports.sales');
