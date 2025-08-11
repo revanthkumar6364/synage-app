@@ -68,13 +68,18 @@ class QuotationMediaController extends Controller
             $filePath = 'quotation-images/' . $validated['category'];
             $fullPath = "{$filePath}/{$fileName}";
 
+            // Ensure the directory exists
+            if (!Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->makeDirectory($filePath);
+            }
+
             // Store the main file
             if (!Storage::disk('public')->put($fullPath, file_get_contents($file->getRealPath()))) {
                 throw new \Exception('Failed to store the file');
             }
 
             // Create media record
-            QuotationMedia::create([
+            $media = QuotationMedia::create([
                 'category' => $validated['category'],
                 'name' => $validated['name'],
                 'file_name' => $fileName,
@@ -86,13 +91,34 @@ class QuotationMediaController extends Controller
                 'updated_by' => $request->user()->id,
             ]);
 
+            // Log successful creation for debugging
+            \Log::info('Media created successfully', [
+                'media_id' => $media->id,
+                'category' => $validated['category'],
+                'file_path' => $filePath,
+                'file_name' => $fileName
+            ]);
+
             DB::commit();
             return redirect()->route('quotation-media.index')
                 ->with('success', 'Media uploaded successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Storage::disk('public')->delete($fullPath);
+
+            // Log the error for debugging
+            \Log::error('Media creation failed', [
+                'category' => $validated['category'] ?? 'unknown',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => $request->user()->id
+            ]);
+
+            // Clean up any partially created file
+            if (isset($fullPath) && Storage::disk('public')->exists($fullPath)) {
+                Storage::disk('public')->delete($fullPath);
+            }
+
             return back()->with('error', 'Failed to upload media: ' . $e->getMessage());
         }
     }
@@ -147,43 +173,13 @@ class QuotationMediaController extends Controller
 
             DB::commit();
 
-            // For AJAX requests or Inertia requests, return JSON response
-            if ($request->expectsJson() || $request->header('X-Inertia')) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Media updated successfully.',
-                    'redirect' => route('quotation-media.index')
-                ]);
-            }
-
-            // For regular requests, redirect
-            // Force explicit status code to avoid server-specific redirect issues
-            // Try multiple approaches for different server environments
-            try {
-                return response()->redirectTo(route('quotation-media.index'))
-                    ->with('success', 'Media updated successfully.')
-                    ->setStatusCode(302);
-            } catch (\Exception $e) {
-                // Fallback for problematic server environments
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Media updated successfully.',
-                    'redirect' => route('quotation-media.index')
-                ])->setStatusCode(200);
-            }
+            // Always redirect for Inertia requests (this is what Inertia expects)
+            return redirect()->route('quotation-media.index')->with('success', 'Media updated successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // For AJAX requests, return JSON response
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to update media: ' . $e->getMessage()
-                ], 422);
-            }
-
-            // For regular requests, return back with error
+            // Always return back with error for Inertia requests
             return back()->with('error', 'Failed to update media: ' . $e->getMessage());
         }
     }
