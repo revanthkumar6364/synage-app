@@ -208,9 +208,6 @@ class QuotationMediaController extends Controller
 
     public function detach(Request $request, $id)
     {
-        // Debug: Check if method is being called
-        \Log::info('DETACH METHOD CALLED', ['id' => $id, 'request' => $request->all()]);
-
         $quotation_medium = QuotationMedia::findOrFail($id);
 
         if ($request->user()->cannot('update', $quotation_medium)) {
@@ -220,47 +217,15 @@ class QuotationMediaController extends Controller
         // Store the quotation ID before detaching
         $quotationId = $quotation_medium->quotation_id;
 
-        // Debug logging
-        \Log::info('Detach attempt', [
-            'media_id' => $id,
-            'quotation_id_before' => $quotationId,
-            'user_id' => $request->user()->id
-        ]);
+        $quotation_medium->quotation_id = null;
+        $quotation_medium->save();
 
-        DB::beginTransaction();
-
-        try {
-            $quotation_medium->quotation_id = null;
-            $quotation_medium->updated_by = $request->user()->id;
-            $quotation_medium->save();
-
-            // Verify the update
-            $quotation_medium->refresh();
-
-            \Log::info('Detach result', [
-                'media_id' => $id,
-                'quotation_id_after' => $quotation_medium->quotation_id,
-                'updated' => $quotation_medium->wasChanged('quotation_id')
-            ]);
-
-            DB::commit();
-
-            // For Inertia requests, redirect to refresh the quotation files page
-            if ($request->header('X-Inertia') && $quotationId) {
-                return redirect()->route('quotations.files', $quotationId)
-                    ->with('success', 'File detached successfully');
-            }
-
-            return back()->with('success', 'File detached successfully');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Detach failed', [
-                'media_id' => $id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return back()->with('error', 'Failed to detach file: ' . $e->getMessage());
+        // For Inertia requests, redirect to refresh the quotation files page
+        if ($request->header('X-Inertia') && $quotationId) {
+            return redirect()->route('quotations.files', $quotationId)
+                ->with('success', 'File detached successfully');
         }
+
+        return back()->with('success', 'File detached successfully');
     }
 }
