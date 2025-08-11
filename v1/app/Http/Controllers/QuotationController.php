@@ -752,33 +752,47 @@ class QuotationController extends Controller
 
     public function downloadPdf(Quotation $quotation)
     {
-        $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
-        $quotationFiles = QuotationMedia::where('quotation_id', $quotation->id)->get();
+        try {
+            // Check if user can view the quotation
+            if (auth()->user()->cannot('view', $quotation)) {
+                abort(403, 'You are not authorized to view this quotation.');
+            }
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.quotation', [
-            'quotation' => $quotation->load(['items.product', 'account', 'account_contact']),
-            'commonFiles' => $commonFiles,
-            'quotationFiles' => $quotationFiles
-        ]);
+            $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
+            $quotationFiles = QuotationMedia::where('quotation_id', $quotation->id)->get();
 
-        // Set paper size to A4 and portrait orientation
-        $pdf->setPaper('a4', 'portrait');
+            // Load quotation with all necessary relationships
+            $quotation->load(['items.product', 'account', 'account_contact']);
 
-        // Set better rendering options
-        $pdf->setOption('isHtml5ParserEnabled', true);
-        $pdf->setOption('isPhpEnabled', true);
-        $pdf->setOption('isRemoteEnabled', true);
-        $pdf->setOption('dpi', 150);
-        $pdf->setOption('defaultFont', 'DejaVu Sans');
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.quotation', [
+                'quotation' => $quotation,
+                'commonFiles' => $commonFiles,
+                'quotationFiles' => $quotationFiles,
+                'user' => auth()->user()
+            ]);
 
-        // Increase memory limit for large PDFs with images
-        ini_set('memory_limit', '256M');
+            // Set paper size to A4 and portrait orientation
+            $pdf->setPaper('a4', 'portrait');
 
-        // Sanitize filename
-        $filename = str_replace(['/', '\\'], '_', $quotation->reference);
-        $filename = preg_replace('/[^a-zA-Z0-9_-]/', '', $filename);
+            // Set better rendering options
+            $pdf->setOption('isHtml5ParserEnabled', true);
+            $pdf->setOption('isPhpEnabled', true);
+            $pdf->setOption('isRemoteEnabled', true);
+            $pdf->setOption('dpi', 150);
+            $pdf->setOption('defaultFont', 'DejaVu Sans');
 
-        return $pdf->download("quotation_{$filename}.pdf");
+            // Increase memory limit for large PDFs with images
+            ini_set('memory_limit', '256M');
+
+            // Sanitize filename
+            $filename = str_replace(['/', '\\'], '_', $quotation->reference);
+            $filename = preg_replace('/[^a-zA-Z0-9_-]/', '', $filename);
+
+            return $pdf->download("quotation_{$filename}.pdf");
+
+        } catch (\Exception $e) {
+            abort(500, 'Failed to generate PDF. Please try again later.');
+        }
     }
 
 

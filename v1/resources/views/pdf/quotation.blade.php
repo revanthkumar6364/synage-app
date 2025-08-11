@@ -408,7 +408,7 @@
         <table style="width: 100%; margin-bottom: 16px;">
             <tr>
                 <td style="text-align: right;">
-                    <span style="font-size: 20px; color: #666;">Date: {{ \Carbon\Carbon::parse($quotation->estimate_date)->format('d/m/Y') }}</span>
+                    <span style="font-size: 20px; color: #666;">Date: {{ $quotation->estimate_date ? \Carbon\Carbon::parse($quotation->estimate_date)->format('d/m/Y') : '' }}</span>
                 </td>
             </tr>
         </table>
@@ -665,10 +665,10 @@
         <div class="signature-section">
             <div class="signature-block">
                 For Radiant Synage Pvt Ltd.,<br>
-                <div class="signature-name">{{ auth()->user()->name ?? '' }}</div>
+                <div class="signature-name">{{ $user->name ?? '' }}</div>
                 <div class="signature-name">
-                    EMAIL: {{ auth()->user()->email ?? '' }}<br>
-                    MOBILE: {{ auth()->user()->mobile ?? '' }}
+                    EMAIL: {{ $user->email ?? '' }}<br>
+                    MOBILE: {{ $user->mobile ?? '' }}
                 </div>
                 <div style="margin-top: 8px; font-size: 11px;">
                     <a href="https://wa.me/918884491377"

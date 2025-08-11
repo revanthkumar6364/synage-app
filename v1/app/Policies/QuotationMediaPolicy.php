@@ -38,7 +38,7 @@ class QuotationMediaPolicy
     public function update(User $user, QuotationMedia $quotationMedia): bool
     {
         // Allow admin and manager to update any media
-        if (in_array($user->role, ['admin', 'manager'])) {
+        if (in_array($user->role, ['admin', 'manager']) && in_array($quotationMedia->category, array_keys(config('all.quotation_images_categories')))) {
             return true;
         }
 

@@ -21,20 +21,8 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { formatBytes } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
-import { TrashIcon } from 'lucide-react';
 import { type FC } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -60,17 +48,7 @@ const Edit: FC<Props> = ({ media, categories }) => {
         put(route('quotation-media.update', media.id));
     };
 
-    const handleDelete = () => {
-        router.delete(route('quotation-media.destroy', media.id), {
-            onSuccess: () => {
-                // Redirect to index page after successful deletion
-                router.visit(route('quotation-media.index'));
-            },
-            onError: () => {
-                // Handle error if needed
-            }
-        });
-    };
+
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -80,28 +58,6 @@ const Edit: FC<Props> = ({ media, categories }) => {
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-2xl font-bold tracking-tight">Edit Media</CardTitle>
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="destructive">
-                                        <TrashIcon className="mr-2 h-4 w-4" />
-                                        Delete
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Delete Media</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            Are you sure you want to delete this media? This action cannot be undone.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={handleDelete}>
-                                            Delete
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
                         </div>
                     </CardHeader>
                 </Card>

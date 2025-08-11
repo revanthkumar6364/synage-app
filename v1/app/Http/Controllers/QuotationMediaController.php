@@ -97,22 +97,21 @@ class QuotationMediaController extends Controller
         }
     }
 
-    public function edit(Request $request, $quotationMediaId)
+    public function edit(Request $request, QuotationMedia $quotation_medium)
     {
-        $quotationMedia = QuotationMedia::find($quotationMediaId);
-        if ($request->user()->cannot('update', $quotationMedia)) {
+        if ($request->user()->cannot('update', $quotation_medium)) {
             abort(403);
         }
 
         return Inertia::render('quotation-media/edit', [
-            'media' => $quotationMedia,
+            'media' => $quotation_medium,
             'categories' => config('all.quotation_images_categories'),
         ]);
     }
 
-    public function update(Request $request, QuotationMedia $quotationMedia)
+    public function update(Request $request, QuotationMedia $quotation_medium)
     {
-        if ($request->user()->cannot('update', $quotationMedia)) {
+        if ($request->user()->cannot('update', $quotation_medium)) {
             abort(403);
         }
         $validated = $request->validate([
@@ -125,13 +124,13 @@ class QuotationMediaController extends Controller
             DB::beginTransaction();
 
             // If category changed, move the file
-            if ($validated['category'] !== $quotationMedia->category) {
+            if ($validated['category'] !== $quotation_medium->category) {
                 $newPath = 'quotation-images/' . $validated['category'];
-                $oldPath = $quotationMedia->file_path;
+                $oldPath = $quotation_medium->file_path;
 
                 // Move main file
-                $oldFullPath = "{$oldPath}/{$quotationMedia->file_name}";
-                $newFullPath = "{$newPath}/{$quotationMedia->file_name}";
+                $oldFullPath = "{$oldPath}/{$quotation_medium->file_name}";
+                $newFullPath = "{$newPath}/{$quotation_medium->file_name}";
 
                 if (Storage::disk('public')->exists($oldFullPath)) {
                     $fileContents = Storage::disk('public')->get($oldFullPath);
@@ -144,10 +143,10 @@ class QuotationMediaController extends Controller
                 $validated['file_path'] = $newPath;
             }
 
-            $quotationMedia->update($validated + ['updated_by' => $request->user()->id]);
+            $quotation_medium->update($validated + ['updated_by' => $request->user()->id]);
 
             DB::commit();
-            return back()->with('success', 'Media updated successfully.');
+            return redirect()->route('quotation-media.index')->with('success', 'Media updated successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -155,23 +154,22 @@ class QuotationMediaController extends Controller
         }
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, QuotationMedia $quotation_medium)
     {
-        $quotationMedia = QuotationMedia::findOrFail($id);
-        if ($request->user()->cannot('delete', $quotationMedia)) {
+        if ($request->user()->cannot('delete', $quotation_medium)) {
             abort(403);
         }
         try {
             DB::beginTransaction();
 
             // Delete the file
-            $filePath = "{$quotationMedia->file_path}/{$quotationMedia->file_name}";
+            $filePath = "{$quotation_medium->file_path}/{$quotation_medium->file_name}";
             if (Storage::disk('public')->exists($filePath)) {
                 Storage::disk('public')->delete($filePath);
             }
 
             // Delete the record
-            $quotationMedia->delete();
+            $quotation_medium->delete();
 
             DB::commit();
             return back()->with('success', 'Media deleted successfully.');
@@ -205,9 +203,8 @@ class QuotationMediaController extends Controller
         }
     }
 
-    public function attach(Request $request, $id)
+    public function attach(Request $request, QuotationMedia $quotation_medium)
     {
-        $media = QuotationMedia::findOrFail($id);
         $quotationId = $request->input('quotation_id');
 
         if (!$quotationId) {
@@ -215,27 +212,25 @@ class QuotationMediaController extends Controller
         }
 
         // Check if user can update this media
-        if ($request->user()->cannot('update', $media)) {
+        if ($request->user()->cannot('update', $quotation_medium)) {
             return back()->with('error', 'Unauthorized');
         }
 
-        $media->quotation_id = $quotationId;
-        $media->save();
+        $quotation_medium->quotation_id = $quotationId;
+        $quotation_medium->save();
 
         return back()->with('success', 'File attached successfully');
     }
 
-    public function detach(Request $request, $id)
+    public function detach(Request $request, QuotationMedia $quotation_medium)
     {
         try {
-            $media = QuotationMedia::findOrFail($id);
-
-            if ($request->user()->cannot('update', $media)) {
+            if ($request->user()->cannot('update', $quotation_medium)) {
                 return back()->with('error', 'Unauthorized');
             }
 
-            $media->quotation_id = null;
-            $media->save();
+            $quotation_medium->quotation_id = null;
+            $quotation_medium->save();
 
             return back()->with('success', 'File detached successfully');
         } catch (\Exception $e) {

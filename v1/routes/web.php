@@ -43,11 +43,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('quotations.create-version');
     Route::get('quotations/{quotation}/files', [QuotationController::class, 'files'])->name('quotations.files');
     Route::post('quotations/{quotation}/files', [QuotationController::class, 'filesStore'])->name('quotations.files.store');
-    Route::get('quotations/{quotation}/pdf', [QuotationController::class, 'generatePdf'])->name('quotations.pdf');
+    Route::get('quotations/{quotation}/pdf', [QuotationController::class, 'downloadPdf'])->name('quotations.pdf');
 
     // Quotation Media Management
-    Route::patch('quotation-media/{id}/attach', [QuotationMediaController::class, 'attach'])->name('quotation-media.attach');
-    Route::patch('quotation-media/{id}/detach', [QuotationMediaController::class, 'detach'])->name('quotation-media.detach');
+    Route::patch('quotation-media/{quotation_medium}/attach', [QuotationMediaController::class, 'attach'])->name('quotation-media.attach');
+    Route::patch('quotation-media/{quotation_medium}/detach', [QuotationMediaController::class, 'detach'])->name('quotation-media.detach');
     Route::resource('quotation-media', QuotationMediaController::class);
 
     // Reports and Analytics Routes
