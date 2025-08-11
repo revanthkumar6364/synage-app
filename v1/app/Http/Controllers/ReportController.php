@@ -29,7 +29,19 @@ class ReportController extends Controller
 
         // Apply filters
         if ($request->filled('search')) {
-            $query->search($request->search);
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('quotations.reference', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('account', function ($accountQuery) use ($searchTerm) {
+                      $accountQuery->where('business_name', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('account_contact', function ($contactQuery) use ($searchTerm) {
+                      $contactQuery->where('name', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('salesUser', function ($salesQuery) use ($searchTerm) {
+                      $salesQuery->where('name', 'like', "%{$searchTerm}%");
+                  });
+            });
         }
 
         if ($request->filled('status') && $request->status !== 'All') {
@@ -64,11 +76,24 @@ class ReportController extends Controller
             $query->where('sales_user_id', $authUser->id);
         }
 
-        // Get all filtered data first
-        $filteredQuotations = $query->orderBy('created_at', 'desc')->get();
+        // Apply amount range filter before pagination
+        if ($request->filled('amountFrom') || $request->filled('amountTo')) {
+            $query->whereHas('items', function ($itemQuery) use ($request) {
+                if ($request->filled('amountFrom')) {
+                    $itemQuery->whereRaw('(quantity * proposed_unit_price * (1 + tax_percentage / 100)) >= ?', [floatval($request->amountFrom)]);
+                }
+                if ($request->filled('amountTo')) {
+                    $itemQuery->whereRaw('(quantity * proposed_unit_price * (1 + tax_percentage / 100)) <= ?', [floatval($request->amountTo)]);
+                }
+            });
+        }
+
+        // Get paginated data
+        $perPage = 10;
+        $paginatedQuotations = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         // Transform data for frontend
-        $reportData = $filteredQuotations->map(function ($quotation) {
+        $reportData = $paginatedQuotations->getCollection()->map(function ($quotation) {
             $amount = $quotation->grand_total;
             if ($amount === null || $amount == 0) {
                 $amount = $quotation->items->sum(function ($item) {
@@ -93,35 +118,16 @@ class ReportController extends Controller
             ];
         });
 
-        // Apply amount range filter
-        if ($request->filled('amountFrom') || $request->filled('amountTo')) {
-            $reportData = $reportData->filter(function ($item) use ($request) {
-                $amount = $item['amount'];
-                if ($request->filled('amountFrom') && $amount < floatval($request->amountFrom)) {
-                    return false;
-                }
-                if ($request->filled('amountTo') && $amount > floatval($request->amountTo)) {
-                    return false;
-                }
-                return true;
-            });
-        }
-
-        // Manual pagination for filtered data
-        $perPage = 10;
-        $currentPage = $request->get('page', 1);
-        $offset = ($currentPage - 1) * $perPage;
-        $paginatedData = $reportData->slice($offset, $perPage);
-        $total = $reportData->count();
-        $lastPage = ceil($total / $perPage);
-
         return Inertia::render('reports/client-based', [
-            'reportData' => $paginatedData->values(),
+            'reportData' => $reportData->values(),
             'pagination' => [
-                'current_page' => (int)$currentPage,
-                'last_page' => $lastPage,
-                'per_page' => $perPage,
-                'total' => $total,
+                'current_page' => $paginatedQuotations->currentPage(),
+                'last_page' => $paginatedQuotations->lastPage(),
+                'per_page' => $paginatedQuotations->perPage(),
+                'total' => $paginatedQuotations->total(),
+                'from' => $paginatedQuotations->firstItem(),
+                'to' => $paginatedQuotations->lastItem(),
+                'links' => $paginatedQuotations->linkCollection()->toArray(),
             ],
             'filters' => $request->only(['search', 'status', 'dateFrom', 'dateTo', 'amountFrom', 'amountTo', 'account', 'salesPerson']),
         ]);
@@ -283,6 +289,8 @@ class ReportController extends Controller
                 'last_page' => $lastPage,
                 'per_page' => $perPage,
                 'total' => $total,
+                'from' => $offset + 1,
+                'to' => min($offset + $perPage, $total),
             ],
             'analytics' => $analytics,
             'filters' => $request->only(['search', 'status', 'dateFrom', 'dateTo', 'amountFrom', 'amountTo']),

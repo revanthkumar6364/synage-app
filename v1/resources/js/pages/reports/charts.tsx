@@ -3,28 +3,19 @@ import { Head } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import {
     BarChart3,
     TrendingUp,
     PieChart,
     AreaChart,
-    Download,
     Printer,
-    Filter,
-    RotateCcw,
-    TrendingDown,
-    Clock,
     DollarSign,
     Users,
     FileText
 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { usePage } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -60,7 +51,7 @@ interface Props {
 }
 
 export default function VisualCharts({ chartData, filters }: Props) {
-    const { auth } = usePage<{ auth: any }>().props;
+
     const [statusFilter, setStatusFilter] = useState(filters.status || 'All');
     const [categoryFilter, setCategoryFilter] = useState(filters.category || 'All');
     const [sessionFilter, setSessionFilter] = useState(filters.session || 'monthly');
@@ -125,12 +116,24 @@ export default function VisualCharts({ chartData, filters }: Props) {
     };
 
     const printCharts = async () => {
-        if (!chartsContainerRef.current) {
-            alert('No content to print. Please try again.');
-            return;
-        }
-
         try {
+            // Check if we have content to print
+            if (!chartsContainerRef.current) {
+                alert('No content to print. Please try again.');
+                return;
+            }
+
+            // Check if charts container has any visible content
+            const container = chartsContainerRef.current;
+            const hasContent = container.children.length > 0 &&
+                             (container.querySelectorAll('svg, .text-2xl, .text-sm, .text-3xl, .text-lg').length > 0 ||
+                              (container.textContent && container.textContent.trim().length > 0));
+
+            if (!hasContent) {
+                alert('No content to print. Please try again.');
+                return;
+            }
+
             // Use browser's built-in print
             window.print();
         } catch (error) {
@@ -183,10 +186,12 @@ export default function VisualCharts({ chartData, filters }: Props) {
         }
     };
 
+
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Visual Charts" />
-            <div className="flex h-full flex-1 flex-col gap-8 rounded-xl p-6">
+            <div ref={chartsContainerRef} className="flex h-full flex-1 flex-col gap-8 rounded-xl p-6">
                 {/* Header Section */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -479,7 +484,6 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                     <svg className="w-full h-full" viewBox="0 0 100 100">
                                         {chartData.conversionData.map((data, index) => {
                                             const total = chartData.conversionData.reduce((sum, item) => sum + item.value, 0);
-                                            const percentage = total > 0 ? (data.value / total) * 100 : 0;
                                             const startAngle = chartData.conversionData
                                                 .slice(0, index)
                                                 .reduce((sum, item) => sum + (item.value / total) * 360, 0);

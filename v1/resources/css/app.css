@@ -179,6 +179,45 @@
   min-width: 0 !important;
 }
 
+/* Ensure date input calendar icon is visible */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="date"] {
+    position: relative;
+}
+
+/* Custom calendar icon for date inputs */
+.date-input-wrapper {
+    position: relative;
+}
+
+.date-input-wrapper::after {
+    content: "📅";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 16px;
+}
+
 /* Rich Text Editor Styles */
 .rich-text-editor {
     line-height: 1.6;

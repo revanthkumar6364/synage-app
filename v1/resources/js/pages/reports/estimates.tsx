@@ -4,13 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Pagination } from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { Head, usePage, router } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
-import { Search, Filter, Calendar, DollarSign, Download, FileDown, Printer } from 'lucide-react';
+import { Search, Filter, Calendar, DollarSign, FileDown, Printer } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -44,6 +43,8 @@ interface Pagination {
     last_page: number;
     per_page: number;
     total: number;
+    from?: number;
+    to?: number;
 }
 
 interface Props {
@@ -61,7 +62,7 @@ interface Props {
 }
 
 export default function EstimateAnalytics({ estimateData, pagination, analytics, filters }: Props) {
-    const { auth } = usePage<{ auth: any }>().props;
+
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [statusFilter, setStatusFilter] = useState(filters.status || 'All');
     const [dateFrom, setDateFrom] = useState(filters.dateFrom || '');
@@ -172,6 +173,8 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
         }
     };
 
+
+
     const getStatusBadge = (status: string) => {
         const statusConfig = {
             draft: { variant: 'secondary' as const, text: 'Draft' },
@@ -185,7 +188,7 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
     };
 
     const conversionRate = analytics.totalEstimates > 0 ? ((analytics.approvedEstimates / analytics.totalEstimates) * 100).toFixed(1) : '0.0';
-    const averageEstimateValue = analytics.totalEstimates > 0 ? (analytics.totalAmount / analytics.totalEstimates).toFixed(2) : '0.00';
+
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -200,7 +203,7 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        {/* Always show print and CSV buttons */}
+                        {/* Export buttons */}
                         <Button variant="outline" onClick={printReport} className="flex items-center gap-2">
                             <Printer className="h-4 w-4" />
                             Print
@@ -371,8 +374,12 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
                                             Date Range
                                         </label>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <Input type="date" placeholder="From" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
-                                            <Input type="date" placeholder="To" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+                                            <div className="date-input-wrapper">
+                                                <Input type="date" placeholder="From" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+                                            </div>
+                                            <div className="date-input-wrapper">
+                                                <Input type="date" placeholder="To" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -440,34 +447,62 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
                             </Table>
 
                             {/* Pagination */}
-                            {pagination.last_page > 1 && (
-                                <div className="flex items-center justify-between space-x-2 py-4">
-                                    <div className="text-sm text-muted-foreground">
-                                        Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} results
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => router.get('/reports/estimates', { ...filters, page: pagination.current_page - 1 })}
-                                            disabled={pagination.current_page === 1}
-                                        >
-                                            Previous
-                                        </Button>
-                                        <div className="text-sm">
-                                            Page {pagination.current_page} of {pagination.last_page}
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => router.get('/reports/estimates', { ...filters, page: pagination.current_page + 1 })}
-                                            disabled={pagination.current_page === pagination.last_page}
-                                        >
-                                            Next
-                                        </Button>
-                                    </div>
+                            <div className="mt-4 flex items-center justify-between">
+                                <div className="text-sm text-muted-foreground">
+                                    Showing {pagination.from || ((pagination.current_page - 1) * pagination.per_page) + 1} to {pagination.to || Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} records
                                 </div>
-                            )}
+                                <div className="flex items-center space-x-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            if (pagination.current_page > 1) {
+                                                router.get('/reports/estimates', {
+                                                    search: searchTerm || undefined,
+                                                    status: statusFilter === 'All' ? undefined : statusFilter,
+                                                    dateFrom: dateFrom || undefined,
+                                                    dateTo: dateTo || undefined,
+                                                    amountFrom: amountFrom || undefined,
+                                                    amountTo: amountTo || undefined,
+                                                    page: pagination.current_page - 1
+                                                }, {
+                                                    preserveState: true,
+                                                    preserveScroll: true,
+                                                });
+                                            }
+                                        }}
+                                        disabled={pagination.current_page <= 1}
+                                    >
+                                        Previous
+                                    </Button>
+                                    <span className="text-sm">
+                                        Page {pagination.current_page} of {pagination.last_page}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            if (pagination.current_page < pagination.last_page) {
+                                                router.get('/reports/estimates', {
+                                                    search: searchTerm || undefined,
+                                                    status: statusFilter === 'All' ? undefined : statusFilter,
+                                                    dateFrom: dateFrom || undefined,
+                                                    dateTo: dateTo || undefined,
+                                                    amountFrom: amountFrom || undefined,
+                                                    amountTo: amountTo || undefined,
+                                                    page: pagination.current_page + 1
+                                                }, {
+                                                    preserveState: true,
+                                                    preserveScroll: true,
+                                                });
+                                            }
+                                        }}
+                                        disabled={pagination.current_page >= pagination.last_page}
+                                    >
+                                        Next
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
