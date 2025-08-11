@@ -67,8 +67,8 @@ class QuotationMediaController extends Controller
         $filePath = 'quotation-images/' . $validated['category'];
         $fullPath = "{$filePath}/{$fileName}";
 
-        // Store the main file - Storage::putFileAs() will automatically create directories
-        if (!Storage::disk('public')->putFileAs($filePath, $file, $fileName)) {
+        // Store the main file - use put() which reliably creates directories
+        if (!Storage::disk('public')->put($fullPath, file_get_contents($file->getRealPath()))) {
             abort(500, 'Failed to store the file');
         }
 
