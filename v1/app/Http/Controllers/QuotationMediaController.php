@@ -214,8 +214,17 @@ class QuotationMediaController extends Controller
             return back()->with('error', 'Unauthorized');
         }
 
+        // Store the quotation ID before detaching
+        $quotationId = $quotation_medium->quotation_id;
+
         $quotation_medium->quotation_id = null;
         $quotation_medium->save();
+
+        // For Inertia requests, redirect to refresh the quotation files page
+        if ($request->header('X-Inertia') && $quotationId) {
+            return redirect()->route('quotations.files', $quotationId)
+                ->with('success', 'File detached successfully');
+        }
 
         return back()->with('success', 'File detached successfully');
     }

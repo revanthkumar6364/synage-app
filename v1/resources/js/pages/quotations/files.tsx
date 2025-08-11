@@ -90,6 +90,8 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
         }, {
             onSuccess: () => {
                 toast.success('File attached successfully');
+                // Refresh the page to show updated state
+                router.reload();
             },
             onError: (errors) => {
                 console.error('Attach failed:', errors);
@@ -102,6 +104,8 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
         router.patch(route('quotation-media.detach', { id: mediaId }), {}, {
             onSuccess: () => {
                 toast.success('File detached successfully');
+                // Refresh the page to show updated state
+                router.reload();
             },
             onError: (errors) => {
                 console.error('Detach failed:', errors);
