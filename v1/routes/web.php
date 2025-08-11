@@ -46,8 +46,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('quotations/{quotation}/pdf', [QuotationController::class, 'downloadPdf'])->name('quotations.pdf');
 
     // Quotation Media Management
-    Route::patch('quotation-media/{quotation_medium}/attach', [QuotationMediaController::class, 'attach'])->name('quotation-media.attach');
-    Route::patch('quotation-media/{quotation_medium}/detach', [QuotationMediaController::class, 'detach'])->name('quotation-media.detach');
+    Route::patch('quotation-media/{id}/attach', [QuotationMediaController::class, 'attach'])->name('quotation-media.attach');
+    Route::patch('quotation-media/{id}/detach', [QuotationMediaController::class, 'detach'])->name('quotation-media.detach');
     Route::resource('quotation-media', QuotationMediaController::class);
 
     // Reports and Analytics Routes
