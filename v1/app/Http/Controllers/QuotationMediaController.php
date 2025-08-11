@@ -147,8 +147,8 @@ class QuotationMediaController extends Controller
 
             DB::commit();
 
-            // For AJAX requests, return JSON response
-            if ($request->expectsJson()) {
+            // For AJAX requests or Inertia requests, return JSON response
+            if ($request->expectsJson() || $request->header('X-Inertia')) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Media updated successfully.',
@@ -157,7 +157,20 @@ class QuotationMediaController extends Controller
             }
 
             // For regular requests, redirect
-            return redirect()->route('quotation-media.index')->with('success', 'Media updated successfully.');
+            // Force explicit status code to avoid server-specific redirect issues
+            // Try multiple approaches for different server environments
+            try {
+                return response()->redirectTo(route('quotation-media.index'))
+                    ->with('success', 'Media updated successfully.')
+                    ->setStatusCode(302);
+            } catch (\Exception $e) {
+                // Fallback for problematic server environments
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Media updated successfully.',
+                    'redirect' => route('quotation-media.index')
+                ])->setStatusCode(200);
+            }
 
         } catch (\Exception $e) {
             DB::rollBack();
