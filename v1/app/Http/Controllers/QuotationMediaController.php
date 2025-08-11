@@ -146,10 +146,31 @@ class QuotationMediaController extends Controller
             $quotation_medium->update($validated + ['updated_by' => $request->user()->id]);
 
             DB::commit();
+
+            // For AJAX requests, return JSON response
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Media updated successfully.',
+                    'redirect' => route('quotation-media.index')
+                ]);
+            }
+
+            // For regular requests, redirect
             return redirect()->route('quotation-media.index')->with('success', 'Media updated successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // For AJAX requests, return JSON response
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update media: ' . $e->getMessage()
+                ], 422);
+            }
+
+            // For regular requests, return back with error
             return back()->with('error', 'Failed to update media: ' . $e->getMessage());
         }
     }
