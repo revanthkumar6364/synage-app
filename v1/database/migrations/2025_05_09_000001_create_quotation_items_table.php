@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('quotation_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained();
-            $table->integer('quantity');
+            $table->decimal('quantity', 10, 2);
             $table->decimal('unit_price', 10, 2);
             $table->decimal('proposed_unit_price', 10, 2)->default(0);
             $table->decimal('discount_percentage', 5, 2)->default(0);

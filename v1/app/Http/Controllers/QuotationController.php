@@ -416,7 +416,7 @@ class QuotationController extends Controller
         $validated = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
             'items.*.proposed_unit_price' => 'required|numeric|min:0',
             'items.*.discount_percentage' => 'required|numeric|min:0|max:100',

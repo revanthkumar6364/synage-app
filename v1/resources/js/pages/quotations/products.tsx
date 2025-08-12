@@ -23,7 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface QuotationItem {
     id: number;
     product_id: number;
-    quantity: number;
+    quantity: number | string;
     unit_price: number;
     proposed_unit_price: number;
     discount_percentage: number;
@@ -35,7 +35,7 @@ interface QuotationItem {
 
 interface SelectedProduct {
     id: number;
-    quantity: number;
+    quantity: number | string;
     unit_price: number;
     proposed_unit_price: number;
     discount_percentage: number;
@@ -157,7 +157,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                 finalValue = numericValue;
             }
         } else if (field === 'quantity') {
-            finalValue = typeof value === 'string' ? parseInt(value) : value;
+            finalValue = typeof value === 'string' ? parseFloat(value) : value;
         } else if (field === 'available_size_width_mm' || field === 'available_size_height_mm') {
             finalValue = value === '' ? '' : parseFloat(value as string);
         }
@@ -481,7 +481,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                                     type="number"
                                                                     min="0"
                                                                     step="0.01"
-                                                                    className="w-20"
+                                                                    className="w-24"
                                                                     placeholder="Width (mm)"
                                                                     value={product.available_size_width_mm ?? ''}
                                                                     onChange={e => handleProductChange(index, 'available_size_width_mm', e.target.value)}
@@ -492,7 +492,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                                     type="number"
                                                                     min="0"
                                                                     step="0.01"
-                                                                    className="w-20"
+                                                                    className="w-24"
                                                                     placeholder="Height (mm)"
                                                                     value={product.available_size_height_mm ?? ''}
                                                                     onChange={e => handleProductChange(index, 'available_size_height_mm', e.target.value)}
@@ -528,8 +528,9 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     <TableCell>
                                                         <Input
                                                             type="number"
-                                                            min="1"
-                                                            className="w-16"
+                                                            min="0.01"
+                                                            step="0.01"
+                                                            className="w-20"
                                                             value={product.quantity}
                                                             onChange={(e) => handleProductChange(index, 'quantity', e.target.value)}
                                                             placeholder="Qty"
