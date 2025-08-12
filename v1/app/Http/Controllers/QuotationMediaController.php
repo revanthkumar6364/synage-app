@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\QuotationMedia;
+use App\Models\Quotation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -195,9 +196,10 @@ class QuotationMediaController extends Controller
             return back()->with('error', 'Quotation ID required');
         }
 
-        // Check if user can update this media
-        if ($request->user()->cannot('update', $quotation_medium->quotation)) {
-            return back()->with('error', 'Unauthorized');
+        // Check if user can update the quotation that this media will be attached to
+        $targetQuotation = Quotation::findOrFail($quotationId);
+        if ($request->user()->cannot('update', $targetQuotation)) {
+            return back()->with('error', 'Unauthorized to update this quotation');
         }
 
         $quotation_medium->quotation_id = $quotationId;
@@ -210,8 +212,9 @@ class QuotationMediaController extends Controller
     {
         $quotation_medium = QuotationMedia::findOrFail($id);
 
-        if ($request->user()->cannot('update', $quotation_medium->quotation)) {
-            return back()->with('error', 'Unauthorized');
+        // Check if user can update the quotation that this media belongs to
+        if ($quotation_medium->quotation && $request->user()->cannot('update', $quotation_medium->quotation)) {
+            return back()->with('error', 'Unauthorized to update this quotation');
         }
 
         // Store the quotation ID before detaching
