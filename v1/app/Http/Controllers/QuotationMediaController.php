@@ -196,7 +196,7 @@ class QuotationMediaController extends Controller
         }
 
         // Check if user can update this media
-        if ($request->user()->cannot('update', $quotation_medium)) {
+        if ($request->user()->cannot('update', $quotation_medium->quotation)) {
             return back()->with('error', 'Unauthorized');
         }
 
@@ -210,7 +210,7 @@ class QuotationMediaController extends Controller
     {
         $quotation_medium = QuotationMedia::findOrFail($id);
 
-        if ($request->user()->cannot('update', $quotation_medium)) {
+        if ($request->user()->cannot('update', $quotation_medium->quotation)) {
             return back()->with('error', 'Unauthorized');
         }
 
