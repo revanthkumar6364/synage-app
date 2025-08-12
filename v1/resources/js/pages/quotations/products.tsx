@@ -360,7 +360,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                 >
                                                     <div>
                                                         <div className="font-medium">{product.name}</div>
-                                                        <div className="text-sm text-gray-500">
+                                                        <div className="text-sm text-muted-foreground">
                                                             {(() => {
                                                                 switch (product.product_type) {
                                                                     case 'indoor_led':
@@ -385,7 +385,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     </div>
                                                     <div className="text-right">
                                                         <div>₹{product.price}</div>
-                                                        <div className="text-sm text-gray-500">GST: {product.gst_percentage}%</div>
+                                                        <div className="text-sm text-muted-foreground">GST: {product.gst_percentage}%</div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -398,18 +398,18 @@ export default function QuotationProducts({ quotation, products }: Props) {
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {auth.user.role === 'admin' && (
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
                                     <div className="flex items-center">
-                                        <div className="text-blue-800 text-sm">
+                                        <div className="text-blue-800 dark:text-blue-200 text-sm">
                                             <strong>Admin Note:</strong> You can set any price for products. The system will show suggested price ranges (₹min - ₹max) when you enter prices outside the normal range, but you are not restricted by these limits.
                                         </div>
                                     </div>
                                 </div>
                             )}
                             {quotation.items.length === 1 && (
-                                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                                <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
                                     <div className="flex items-center">
-                                        <div className="text-green-800 text-sm">
+                                        <div className="text-green-800 dark:text-green-200 text-sm">
                                             <strong>✓ Synchronized Product:</strong> The product matches your selection from Step 1. You can modify the details or add more products as needed.
                                         </div>
                                     </div>
@@ -520,7 +520,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                             placeholder="Proposed"
                                                         />
                                                         {product.priceError && (
-                                                            <div className="mt-1 w-48 text-xs text-red-500">
+                                                            <div className="mt-1 w-48 text-xs text-red-500 dark:text-red-400">
                                                                 {product.priceError}
                                                             </div>
                                                         )}
@@ -561,8 +561,8 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                 {/* Show calculated proposed size and quantity below the row for indoor/outdoor */}
                                                 {isIndoorOutdoor && calc && (
                                                     <tr>
-                                                        <td colSpan={10} style={{ background: '#f9f9f9', padding: '8px 16px' }}>
-                                                            <div style={{ fontSize: 13, color: '#333' }}>
+                                                        <td colSpan={10} className="bg-gray-50 dark:bg-gray-800 p-2">
+                                                            <div className="text-xs text-muted-foreground">
                                                                 <strong>Item Box Size:</strong> {productDetails.unit_size?.width_mm || productDetails.w_mm || 320} mm W × {productDetails.unit_size?.height_mm || productDetails.h_mm || 160} mm H
                                                                 &nbsp;|&nbsp;
                                                                 <strong>Proposed Size:</strong> {calc.proposedWidthMm} mm W × {calc.proposedHeightMm} mm H
@@ -579,11 +579,11 @@ export default function QuotationProducts({ quotation, products }: Props) {
                             </Table>
 
                             {/* Summary Section */}
-                            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                 <h3 className="text-lg font-semibold mb-4">Summary</h3>
                                 <div className="grid grid-cols-3 gap-4">
                                     <div>
-                                        <div className="text-sm text-gray-600">Subtotal</div>
+                                        <div className="text-sm text-muted-foreground">Subtotal</div>
                                         <div className="text-lg font-medium">
                                             {formatCurrency(selectedProducts.reduce((sum, product) => {
                                                 return sum + calculateSubtotal(product);
@@ -591,7 +591,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-sm text-gray-600">GST</div>
+                                        <div className="text-sm text-muted-foreground">GST</div>
                                         <div className="text-lg font-medium">
                                             {formatCurrency(selectedProducts.reduce((sum, product) => {
                                                 return sum + calculateTaxAmount(product);
@@ -599,7 +599,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-sm text-gray-600">Total</div>
+                                        <div className="text-sm text-muted-foreground">Total</div>
                                         <div className="text-lg font-semibold text-primary">
                                             {formatCurrency(selectedProducts.reduce((sum, product) => {
                                                 return sum + calculateTotal(product);
