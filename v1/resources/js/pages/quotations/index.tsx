@@ -122,30 +122,33 @@ export default function Index({ quotations, filters, statuses }: Props) {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSearch} className="mb-4 space-y-4">
-                            <div className="flex flex-col gap-4 md:flex-row">
-                                <div className="relative w-full md:w-auto flex-1 max-w-sm">
+                            <div className="flex flex-col gap-4 lg:flex-row">
+                                <div className="relative w-full lg:w-auto flex-1 max-w-sm">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 pointer-events-none" />
                                     <Input
                                         placeholder="Search quotations..."
                                         value={data.search}
                                         onChange={(e) => setData('search', e.target.value)}
-                                        className="pl-9 md:max-w-sm"
+                                        className="pl-9"
                                     />
                                 </div>
-                                <Button type="submit">
-                                    <Search className="mr-2 h-4 w-4" />Search
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => {
-                                        setData({ search: '', status: 'all' });
-                                        router.get(route('quotations.index'));
-                                    }}
-                                >
-                                    <RefreshCcw className="mr-2 h-4 w-4" />
-                                    Reset
-                                </Button>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button type="submit" className="flex-1 sm:flex-none">
+                                        <Search className="mr-2 h-4 w-4" />Search
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            setData({ search: '', status: 'all' });
+                                            router.get(route('quotations.index'));
+                                        }}
+                                        className="flex-1 sm:flex-none"
+                                    >
+                                        <RefreshCcw className="mr-2 h-4 w-4" />
+                                        Reset
+                                    </Button>
+                                </div>
                             </div>
                         </form>
 
@@ -165,75 +168,100 @@ export default function Index({ quotations, filters, statuses }: Props) {
                             </Tabs>
                         </div>
 
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Reference</TableHead>
-                                    <TableHead>Title</TableHead>
-                                    <TableHead>Customer</TableHead>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Total</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Created By</TableHead>
-                                    <TableHead>Sales Person</TableHead>
-                                    <TableHead>Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {quotations.data.map((quotation: Quotation) => (
-                                    <TableRow key={quotation.id}>
-                                        <TableCell>
-                                            {quotation.reference}
-                                            {quotation.parent_id && (
-                                                <span className="ml-2 text-xs text-muted-foreground">
-                                                    (Version {quotation.reference.split('-V')[1]})
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>{quotation.title}</TableCell>
-                                        <TableCell>{quotation.account?.business_name}</TableCell>
-                                        <TableCell>{new Date(quotation.estimate_date).toLocaleDateString()}</TableCell>
-                                        <TableCell>{formatAmount(quotation.total_amount)}</TableCell>
-                                        <TableCell>
-                                            <Badge className={getStatusColor(quotation.status)}>
-                                                {quotation.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>{quotation.creator?.name}</TableCell>
-                                        <TableCell>{quotation.sales_user?.name}</TableCell>
-                                        <TableCell>
-                                            <div className="inline-flex gap-2">
-                                                {quotation.status === 'approved' || quotation.status === 'rejected' ? (
-                                                    <Link href={route('quotations.show', quotation.id)}>
-                                                        <Button variant="outline" size="icon">
-                                                            <EyeIcon className="h-4 w-4" />
-                                                        </Button>
-                                                    </Link>
-                                                ) : (
-                                                    quotation.can?.approve && (
-                                                        <Link href={route('quotations.show', quotation.id)}>
-                                                            <Button variant="outline" size="icon">
-                                                                <CheckIcon className="h-4 w-4" />
-                                                            </Button>
-                                                        </Link>
-                                                    )
-                                                )}
-                                                {quotation.can?.update && (
-                                                    <Link href={route('quotations.edit', quotation.id)}>
-                                                        <Button variant="outline" size="icon">
-                                                            <PencilIcon className="h-4 w-4" />
-                                                        </Button>
-                                                    </Link>
-                                                )}
-                                            </div>
-                                        </TableCell>
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="min-w-[120px]">Reference</TableHead>
+                                        <TableHead className="min-w-[200px]">Title</TableHead>
+                                        <TableHead className="min-w-[150px]">Customer</TableHead>
+                                        <TableHead className="min-w-[100px]">Date</TableHead>
+                                        <TableHead className="min-w-[120px]">Total</TableHead>
+                                        <TableHead className="min-w-[100px]">Status</TableHead>
+                                        <TableHead className="min-w-[150px]">Team</TableHead>
+                                        <TableHead className="min-w-[120px]">Actions</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                                                    <TableBody>
+                                        {quotations.data.map((quotation: Quotation) => (
+                                            <TableRow key={quotation.id}>
+                                                                                            <TableCell className="font-medium">
+                                                <div className="flex flex-col">
+                                                    <span className="break-all">{quotation.reference}</span>
+                                                    {quotation.parent_id && (
+                                                        <span className="text-xs text-muted-foreground">
+                                                            (Version {quotation.reference.split('-V')[1]})
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="min-w-[200px] max-w-[300px]">
+                                                    <span className="break-words whitespace-pre-wrap">{quotation.title}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="min-w-[150px] max-w-[250px]">
+                                                    <span className="break-words whitespace-pre-wrap">{quotation.account?.business_name || '-'}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="whitespace-nowrap">
+                                                {new Date(quotation.estimate_date).toLocaleDateString()}
+                                            </TableCell>
+                                            <TableCell className="whitespace-nowrap font-medium">
+                                                {formatAmount(quotation.total_amount)}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge className={getStatusColor(quotation.status)}>
+                                                    {quotation.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col space-y-1">
+                                                    <div>
+                                                        <span className="text-xs text-gray-500">Created:</span>
+                                                        <span className="ml-1 break-words text-sm">{quotation.creator?.name || '-'}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-xs text-gray-500">Sales:</span>
+                                                        <span className="ml-1 break-words text-sm">{quotation.sales_user?.name || '-'}</span>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-wrap gap-1">
+                                                        {quotation.status === 'approved' || quotation.status === 'rejected' ? (
+                                                            <Link href={route('quotations.show', quotation.id)}>
+                                                                <Button variant="outline" size="icon" className="h-8 w-8">
+                                                                    <EyeIcon className="h-3 w-3" />
+                                                                </Button>
+                                                            </Link>
+                                                        ) : (
+                                                            quotation.can?.approve && (
+                                                                <Link href={route('quotations.show', quotation.id)}>
+                                                                    <Button variant="outline" size="icon" className="h-8 w-8">
+                                                                        <CheckIcon className="h-3 w-3" />
+                                                                    </Button>
+                                                                </Link>
+                                                            )
+                                                        )}
+                                                        {quotation.can?.update && (
+                                                            <Link href={route('quotations.edit', quotation.id)}>
+                                                                <Button variant="outline" size="icon" className="h-8 w-8">
+                                                                    <PencilIcon className="h-3 w-3" />
+                                                                </Button>
+                                                            </Link>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                            </Table>
+                        </div>
 
-                        <div className="mt-6 flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">
+                        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <p className="text-sm text-muted-foreground text-center sm:text-left">
                                 Showing page {quotations.current_page} of {quotations.last_page}
                             </p>
                             <Pagination>
