@@ -185,7 +185,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="shipping_location">Shipping Location <span className="text-red-500">*</span></Label>
+                                            <Label htmlFor="shipping_location">Shipping state <span className="text-red-500">*</span></Label>
                                             <Input
                                                 id="shipping_location"
                                                 value={data.shipping_location}
