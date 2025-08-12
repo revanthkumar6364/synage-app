@@ -9,6 +9,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Search, RefreshCcw, Plus, EyeIcon, PencilIcon, CheckIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { formatCurrency } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -98,8 +99,7 @@ export default function Index({ quotations, filters, statuses }: Props) {
     };
 
     const formatAmount = (amount: number | null): string => {
-        if (amount === null || isNaN(amount)) return '₹0.00';
-        return `₹${Number(amount).toFixed(2)}`;
+        return formatCurrency(amount);
     };
 
     return (

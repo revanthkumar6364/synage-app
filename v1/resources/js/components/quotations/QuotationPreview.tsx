@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from '@/lib/utils';
 
 interface Props {
     data: any;
@@ -120,10 +121,10 @@ export default function QuotationPreview({ data, onSubmit, processing }: Props) 
                                             {item.product_id}
                                         </td>
                                         <td className="text-right p-2">{item.quantity}</td>
-                                        <td className="text-right p-2">${item.unit_price.toFixed(2)}</td>
+                                        <td className="text-right p-2">{formatCurrency(item.unit_price)}</td>
                                         <td className="text-right p-2">{item.discount}%</td>
                                         <td className="text-right p-2">{item.tax}%</td>
-                                        <td className="text-right p-2">${item.total.toFixed(2)}</td>
+                                        <td className="text-right p-2">{formatCurrency(item.total)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -131,7 +132,7 @@ export default function QuotationPreview({ data, onSubmit, processing }: Props) 
                                 <tr>
                                     <td colSpan={5} className="text-right p-2 font-medium">Subtotal:</td>
                                     <td className="text-right p-2 font-medium">
-                                        ${calculateSubtotal().toFixed(2)}
+                                        {formatCurrency(calculateSubtotal())}
                                     </td>
                                 </tr>
                             </tfoot>

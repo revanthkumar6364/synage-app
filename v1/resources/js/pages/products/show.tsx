@@ -5,6 +5,7 @@ import { type BreadcrumbItem, type Product } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeftIcon } from 'lucide-react';
 import { type FC } from 'react';
+import { formatCurrency } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,8 +29,7 @@ interface ShowProps {
 const Show: FC<ShowProps> = ({ product }) => {
     const formatPrice = (price: number | null | undefined): string => {
         if (!price) return 'N/A';
-        const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-        return `₹${numPrice.toFixed(2)}`;
+        return formatCurrency(price);
     };
 
     const formatProductType = (type: string | undefined): string => {

@@ -9,6 +9,7 @@ import { type BreadcrumbItem, type Product, type Category } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PlusIcon, SearchIcon, XIcon } from 'lucide-react';
 import { type FC, useState, useEffect } from 'react';
+import { formatCurrency } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -63,8 +64,7 @@ const Index: FC<IndexProps> = ({ products, categories, filters }) => {
 
     const formatPrice = (price: number | string | null | undefined): string => {
         if (!price) return 'N/A';
-        const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
-        return `₹${numericPrice.toFixed(2)}`;
+        return formatCurrency(price);
     };
 
     const formatProductType = (type: string | undefined): string => {

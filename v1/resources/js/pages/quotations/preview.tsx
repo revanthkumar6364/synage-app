@@ -13,6 +13,7 @@ import { Table, TableHeader, TableBody, TableCell, TableRow, TableHead } from '@
 import { FileTextIcon, FileIcon, MessageCircle } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Bold, Italic, Underline, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Facebook, Instagram, Youtube, Linkedin, Globe } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 // Rich Text Editor Component
 interface RichTextEditorProps {
@@ -550,9 +551,9 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="text-right">{item.quantity}</TableCell>
-                                                        <TableCell className="text-right">₹{Number(item.proposed_unit_price || 0).toFixed(2)}</TableCell>
+                                                        <TableCell className="text-right">{formatCurrency(item.proposed_unit_price || 0)}</TableCell>
                                                         <TableCell className="text-right">{item.tax_percentage}%</TableCell>
-                                                        <TableCell className="text-right font-medium">₹{calculateTotal(item).toFixed(2)}</TableCell>
+                                                        <TableCell className="text-right font-medium">{formatCurrency(calculateTotal(item))}</TableCell>
                                                     </TableRow>
                                                 ))}
                                             </TableBody>
@@ -566,16 +567,16 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                         <div className="w-72 space-y-2">
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-muted-foreground">Subtotal:</span>
-                                                <span className="font-medium">₹{totalSubtotal.toFixed(2)}</span>
+                                                <span className="font-medium">{formatCurrency(totalSubtotal)}</span>
                                             </div>
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-muted-foreground">Tax Total:</span>
-                                                <span className="font-medium">₹{totalTax.toFixed(2)}</span>
+                                                <span className="font-medium">{formatCurrency(totalTax)}</span>
                                             </div>
                                             <Separator />
                                             <div className="flex justify-between text-base font-medium">
                                                 <span>Total Amount:</span>
-                                                <span className="text-primary">₹{grandTotal.toFixed(2)}</span>
+                                                <span className="text-primary">{formatCurrency(grandTotal)}</span>
                                             </div>
                                         </div>
                                     </div>

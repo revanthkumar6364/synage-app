@@ -408,7 +408,8 @@
         <table style="width: 100%; margin-bottom: 16px;">
             <tr>
                 <td style="text-align: right;">
-                    <span style="font-size: 20px; color: #666;">Date: {{ $quotation->estimate_date ? \Carbon\Carbon::parse($quotation->estimate_date)->format('d/m/Y') : '' }}</span>
+                    <span style="font-size: 20px; color: #666;">Date:
+                        {{ $quotation->estimate_date ? \Carbon\Carbon::parse($quotation->estimate_date)->format('d/m/Y') : '' }}</span>
                 </td>
             </tr>
         </table>
@@ -424,34 +425,34 @@
         <table class="info-grid">
             <tr>
                 @if ($quotation->show_billing_in_print)
-                <td>
-                    <div class="info-box">
-                        <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Bill To</h3>
-                        <p class="business-name">{{ optional($quotation->account)->business_name }}</p>
-                        <p style="font-size: 16px; color: #333;">{{ $quotation->billing_address }}</p>
-                        <p style="font-size: 16px; color: #333;">{{ $quotation->billing_city }},
-                            {{ $quotation->billing_location }}
-                            {{ $quotation->billing_zip_code }}</p>
-                        <p style="margin-top: 8px; font-size: 16px; color: #333;"><span style="font-weight: 500">GST
-                                NO:</span>
-                            {{ optional($quotation->account)->gst_number }}</p>
-                    </div>
-                </td>
+                    <td>
+                        <div class="info-box">
+                            <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Bill To</h3>
+                            <p class="business-name">{{ optional($quotation->account)->business_name }}</p>
+                            <p style="font-size: 16px; color: #333;">{{ $quotation->billing_address }}</p>
+                            <p style="font-size: 16px; color: #333;">{{ $quotation->billing_city }},
+                                {{ $quotation->billing_location }}
+                                {{ $quotation->billing_zip_code }}</p>
+                            <p style="margin-top: 8px; font-size: 16px; color: #333;"><span style="font-weight: 500">GST
+                                    NO:</span>
+                                {{ optional($quotation->account)->gst_number }}</p>
+                        </div>
+                    </td>
                 @endif
                 @if ($quotation->show_shipping_in_print)
-                <td>
-                    <div class="info-box">
-                        <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Ship To</h3>
-                        <p class="business-name">{{ optional($quotation->account_contact)->name }}</p>
-                        <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_address }}</p>
-                        <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_city }},
-                            {{ $quotation->shipping_location }}
-                            {{ $quotation->shipping_zip_code }}</p>
-                        <p style="margin-top: 8px; font-size: 16px; color: #333;"><span style="font-weight: 500">GST
-                                NO:</span>
-                            {{ optional($quotation->account)->gst_number }}</p>
-                    </div>
-                </td>
+                    <td>
+                        <div class="info-box">
+                            <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Ship To</h3>
+                            <p class="business-name">{{ optional($quotation->account_contact)->name }}</p>
+                            <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_address }}</p>
+                            <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_city }},
+                                {{ $quotation->shipping_location }}
+                                {{ $quotation->shipping_zip_code }}</p>
+                            <p style="margin-top: 8px; font-size: 16px; color: #333;"><span style="font-weight: 500">GST
+                                    NO:</span>
+                                {{ optional($quotation->account)->gst_number }}</p>
+                        </div>
+                    </td>
                 @endif
             </tr>
         </table>
@@ -590,9 +591,10 @@
                         <td>{{ $item->product->hsn_code }}</td>
                     @endif
                     <td style="font-size: 16px; color: #666;">{{ $item->quantity }}</td>
-                    <td class="text-right">₹{{ number_format($item->proposed_unit_price, 2) }}</td>
+                    <td class="text-right">₹{{ number_format($item->proposed_unit_price, 2, '.', ',') }}</td>
                     <td class="text-right">{{ $item->tax_percentage }}%</td>
-                    <td class="text-right" style="font-weight: 500">₹{{ number_format($item->total, 2) }}</td>
+                    <td class="text-right" style="font-weight: 500">₹{{ number_format($item->total, 2, '.', ',') }}
+                    </td>
                 </tr>
             @endforeach
         </tbody>
@@ -601,15 +603,16 @@
     <div class="totals-section">
         <div class="totals-row">
             <span style="font-size: 16px; color: #333;">Subtotal:</span>
-            <span style="float: right; font-weight: 500">₹{{ number_format($quotation->subtotal, 2) }}</span>
+            <span style="float: right; font-weight: 500">₹{{ number_format($quotation->subtotal, 2, '.', ',') }}</span>
         </div>
         <div class="totals-row">
             <span style="font-size: 16px; color: #333;">Tax Total:</span>
-            <span style="float: right; font-weight: 500">₹{{ number_format($quotation->tax_amount, 2) }}</span>
+            <span
+                style="float: right; font-weight: 500">₹{{ number_format($quotation->tax_amount, 2, '.', ',') }}</span>
         </div>
         <div class="totals-row final">
             <span style="font-size: 16px; color: #333;">Total Amount:</span>
-            <span style="float: right">₹{{ number_format($quotation->total_amount, 2) }}</span>
+            <span style="float: right">₹{{ number_format($quotation->total_amount, 2, '.', ',') }}</span>
         </div>
     </div>
 

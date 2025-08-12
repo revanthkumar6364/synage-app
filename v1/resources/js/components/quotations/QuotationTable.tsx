@@ -3,6 +3,7 @@ import { Quotation } from "@/types";
 import { format } from "date-fns";
 import { Link } from "@inertiajs/react";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from '@/lib/utils';
 
 interface Props {
     quotations: Quotation[];
@@ -41,7 +42,7 @@ export default function QuotationTable({ quotations, status }: Props) {
                         <TableCell>{quotation.title}</TableCell>
                         <TableCell>{format(new Date(quotation.date), 'dd/MM/yyyy')}</TableCell>
                         <TableCell>{quotation.customer_account?.business_name}</TableCell>
-                        <TableCell>${quotation.total.toFixed(2)}</TableCell>
+                        <TableCell>{formatCurrency(quotation.total)}</TableCell>
                         <TableCell>
                             <Badge className={getStatusColor(quotation.status)}>
                                 {quotation.status}

@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
 import { toast, Toaster } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input as SearchInput } from "@/components/ui/input";
+import { formatCurrency } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -506,7 +507,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     )}
                                                     <TableCell>
                                                         <div style={{ minWidth: 80 }}>
-                                                            ₹{Number(product.unit_price).toFixed(2)}
+                                                            {formatCurrency(product.unit_price)}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -536,7 +537,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     </TableCell>
                                                     <TableCell>
                                                         <div style={{ minWidth: 100 }}>
-                                                            ₹{subtotal.toFixed(2)}
+                                                            {formatCurrency(subtotal)}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -544,7 +545,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     </TableCell>
                                                     <TableCell>
                                                         <div style={{ minWidth: 100 }}>
-                                                            ₹{calculateTotal(product).toFixed(2)}
+                                                            {formatCurrency(calculateTotal(product))}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -583,25 +584,25 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                     <div>
                                         <div className="text-sm text-gray-600">Subtotal</div>
                                         <div className="text-lg font-medium">
-                                            ₹{selectedProducts.reduce((sum, product) => {
+                                            {formatCurrency(selectedProducts.reduce((sum, product) => {
                                                 return sum + calculateSubtotal(product);
-                                            }, 0).toFixed(2)}
+                                            }, 0))}
                                         </div>
                                     </div>
                                     <div>
                                         <div className="text-sm text-gray-600">GST</div>
                                         <div className="text-lg font-medium">
-                                            ₹{selectedProducts.reduce((sum, product) => {
+                                            {formatCurrency(selectedProducts.reduce((sum, product) => {
                                                 return sum + calculateTaxAmount(product);
-                                            }, 0).toFixed(2)}
+                                            }, 0))}
                                         </div>
                                     </div>
                                     <div>
                                         <div className="text-sm text-gray-600">Total</div>
                                         <div className="text-lg font-semibold text-primary">
-                                            ₹{selectedProducts.reduce((sum, product) => {
+                                            {formatCurrency(selectedProducts.reduce((sum, product) => {
                                                 return sum + calculateTotal(product);
-                                            }, 0).toFixed(2)}
+                                            }, 0))}
                                         </div>
                                     </div>
                                 </div>

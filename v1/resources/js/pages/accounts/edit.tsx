@@ -87,7 +87,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="gst_number">GST Number <span className="text-red-500">*</span></Label>
+                                    <Label htmlFor="gst_number">GST Number</Label>
                                     <Input
                                         id="gst_number"
                                         value={data.gst_number}
@@ -98,7 +98,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="industry_type">Industry Type <span className="text-red-500">*</span></Label>
+                                    <Label htmlFor="industry_type">Industry Type</Label>
                                     <Select value={data.industry_type} onValueChange={(value) => setData('industry_type', value)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select industry type" />
@@ -116,7 +116,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="billing_address">Billing Address <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="billing_address">Billing Address</Label>
                                 <Textarea
                                     id="billing_address"
                                     value={data.billing_address}
@@ -128,7 +128,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="billing_location">Billing Location <span className="text-red-500">*</span></Label>
+                                    <Label htmlFor="billing_location">Billing Location</Label>
                                     <Input
                                         id="billing_location"
                                         value={data.billing_location}
@@ -139,7 +139,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="billing_city">Billing City <span className="text-red-500">*</span></Label>
+                                    <Label htmlFor="billing_city">Billing City</Label>
                                     <Input
                                         id="billing_city"
                                         value={data.billing_city}
@@ -150,7 +150,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="billing_zip_code">Billing ZIP Code <span className="text-red-500">*</span></Label>
+                                    <Label htmlFor="billing_zip_code">Billing ZIP Code</Label>
                                     <Input
                                         id="billing_zip_code"
                                         value={data.billing_zip_code}
@@ -173,7 +173,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
                             {!data.same_as_billing && (
                                 <>
                                     <div className="space-y-2">
-                                        <Label htmlFor="shipping_address">Shipping Address <span className="text-red-500">*</span></Label>
+                                        <Label htmlFor="shipping_address">Shipping Address</Label>
                                         <Textarea
                                             id="shipping_address"
                                             value={data.shipping_address}
@@ -185,7 +185,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="shipping_location">Shipping state <span className="text-red-500">*</span></Label>
+                                            <Label htmlFor="shipping_location">Shipping state</Label>
                                             <Input
                                                 id="shipping_location"
                                                 value={data.shipping_location}
@@ -196,7 +196,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label htmlFor="shipping_city">Shipping City <span className="text-red-500">*</span></Label>
+                                            <Label htmlFor="shipping_city">Shipping City</Label>
                                             <Input
                                                 id="shipping_city"
                                                 value={data.shipping_city}
@@ -207,7 +207,7 @@ const EditAccount: FC<EditAccountProps> = ({ account, industry_types, statuses }
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label htmlFor="shipping_zip_code">Shipping ZIP Code <span className="text-red-500">*</span></Label>
+                                            <Label htmlFor="shipping_zip_code">Shipping ZIP Code</Label>
                                             <Input
                                                 id="shipping_zip_code"
                                                 value={data.shipping_zip_code}
