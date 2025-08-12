@@ -178,14 +178,16 @@ export default function Index({ quotations, filters, statuses }: Props) {
                                         <TableHead className="min-w-[100px]">Date</TableHead>
                                         <TableHead className="min-w-[120px]">Total</TableHead>
                                         <TableHead className="min-w-[100px]">Status</TableHead>
-                                        <TableHead className="min-w-[150px]">Team</TableHead>
                                         <TableHead className="min-w-[120px]">Actions</TableHead>
+                                        <TableHead className="min-w-[150px]">Team</TableHead>
+
+
                                     </TableRow>
                                 </TableHeader>
-                                                                    <TableBody>
-                                        {quotations.data.map((quotation: Quotation) => (
-                                            <TableRow key={quotation.id}>
-                                                                                            <TableCell className="font-medium">
+                                <TableBody>
+                                    {quotations.data.map((quotation: Quotation) => (
+                                        <TableRow key={quotation.id}>
+                                            <TableCell className="font-medium">
                                                 <div className="flex flex-col">
                                                     <span className="break-all">{quotation.reference}</span>
                                                     {quotation.parent_id && (
@@ -217,6 +219,32 @@ export default function Index({ quotations, filters, statuses }: Props) {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {quotation.status === 'approved' || quotation.status === 'rejected' ? (
+                                                        <Link href={route('quotations.show', quotation.id)}>
+                                                            <Button variant="outline" size="icon" className="h-8 w-8">
+                                                                <EyeIcon className="h-3 w-3" />
+                                                            </Button>
+                                                        </Link>
+                                                    ) : (
+                                                        quotation.can?.approve && (
+                                                            <Link href={route('quotations.show', quotation.id)}>
+                                                                <Button variant="outline" size="icon" className="h-8 w-8">
+                                                                    <CheckIcon className="h-3 w-3" />
+                                                                </Button>
+                                                            </Link>
+                                                        )
+                                                    )}
+                                                    {quotation.can?.update && (
+                                                        <Link href={route('quotations.edit', quotation.id)}>
+                                                            <Button variant="outline" size="icon" className="h-8 w-8">
+                                                                <PencilIcon className="h-3 w-3" />
+                                                            </Button>
+                                                        </Link>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
                                                 <div className="flex flex-col space-y-1">
                                                     <div>
                                                         <span className="text-xs text-gray-500">Created:</span>
@@ -228,35 +256,10 @@ export default function Index({ quotations, filters, statuses }: Props) {
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
-                                                <div className="flex flex-wrap gap-1">
-                                                        {quotation.status === 'approved' || quotation.status === 'rejected' ? (
-                                                            <Link href={route('quotations.show', quotation.id)}>
-                                                                <Button variant="outline" size="icon" className="h-8 w-8">
-                                                                    <EyeIcon className="h-3 w-3" />
-                                                                </Button>
-                                                            </Link>
-                                                        ) : (
-                                                            quotation.can?.approve && (
-                                                                <Link href={route('quotations.show', quotation.id)}>
-                                                                    <Button variant="outline" size="icon" className="h-8 w-8">
-                                                                        <CheckIcon className="h-3 w-3" />
-                                                                    </Button>
-                                                                </Link>
-                                                            )
-                                                        )}
-                                                        {quotation.can?.update && (
-                                                            <Link href={route('quotations.edit', quotation.id)}>
-                                                                <Button variant="outline" size="icon" className="h-8 w-8">
-                                                                    <PencilIcon className="h-3 w-3" />
-                                                                </Button>
-                                                            </Link>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
+
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
                             </Table>
                         </div>
 

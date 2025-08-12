@@ -488,7 +488,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                     <TableHead className="w-[40px] text-center">#</TableHead>
                                                     <TableHead>Product Description</TableHead>
                                                     <TableHead>HSN</TableHead>
-                                                    <TableHead className="text-right">Qty</TableHead>
+                                                    <TableHead className="text-right">Unit</TableHead>
                                                     <TableHead className="text-right">Unit Price</TableHead>
                                                     <TableHead className="text-right">Tax %</TableHead>
                                                     <TableHead className="text-right">Total</TableHead>
@@ -507,7 +507,12 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>{item.product.hsn_code}</TableCell>
-                                                        <TableCell className="text-right">{item.quantity}</TableCell>
+                                                        <TableCell className="text-right">
+                                                            {item.available_size_width_mm && item.available_size_height_mm
+                                                                ? `${item.quantity} sqft`
+                                                                : `${item.quantity} qty`
+                                                            }
+                                                        </TableCell>
                                                         <TableCell className="text-right">{formatCurrency(item.proposed_unit_price || 0)}</TableCell>
                                                         <TableCell className="text-right">{item.tax_percentage}%</TableCell>
                                                         <TableCell className="text-right font-medium">{formatCurrency(calculateTotal(item))}</TableCell>

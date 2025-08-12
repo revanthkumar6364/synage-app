@@ -571,7 +571,7 @@
                 @if ($quotation->show_hsn_code)
                     <th>HSN</th>
                 @endif
-                <th class="text-right">Qty</th>
+                <th class="text-right">Unit</th>
                 <th class="text-right">Unit Price</th>
                 <th class="text-right">Tax %</th>
                 <th class="text-right">Total</th>
@@ -590,7 +590,12 @@
                     @if ($quotation->show_hsn_code)
                         <td>{{ $item->product->hsn_code }}</td>
                     @endif
-                    <td style="font-size: 16px; color: #666;">{{ $item->quantity }}</td>
+                    <td style="font-size: 16px; color: #666;">
+                        {{ $item->available_size_width_mm && $item->available_size_height_mm
+                            ? $item->quantity . ' sqft'
+                            : $item->quantity . ' qty'
+                        }}
+                    </td>
                     <td class="text-right">₹{{ number_format($item->proposed_unit_price, 2, '.', ',') }}</td>
                     <td class="text-right">{{ $item->tax_percentage }}%</td>
                     <td class="text-right" style="font-weight: 500">₹{{ number_format($item->total, 2, '.', ',') }}

@@ -423,7 +423,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                         <TableHead colSpan={2} className="text-center">Available size at location</TableHead>
                                         <TableHead rowSpan={2}>Unit Price</TableHead>
                                         <TableHead rowSpan={2}>Proposed Price</TableHead>
-                                        <TableHead rowSpan={2}>Qty</TableHead>
+                                        <TableHead rowSpan={2}>Qty/Sq.ft</TableHead>
                                         <TableHead rowSpan={2}>Total W/O GST (₹)</TableHead>
                                         <TableHead rowSpan={2}>GST %</TableHead>
                                         <TableHead rowSpan={2}>Total (₹)</TableHead>
