@@ -67,10 +67,10 @@ class QuotationItem extends Model
         // Calculate taxable amount (after discount)
         $this->taxable_amount = $this->subtotal - $this->discount_amount;
 
-        // Calculate tax amount
+        // Calculate tax amount (on taxable amount, not subtotal)
         $this->tax_amount = ($this->taxable_amount * $this->tax_percentage) / 100;
 
-        // Calculate total
+        // Calculate total (taxable amount + tax amount)
         $this->total = $this->taxable_amount + $this->tax_amount;
 
         return $this;

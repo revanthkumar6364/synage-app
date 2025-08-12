@@ -268,16 +268,28 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
         return proposedPrice * quantity;
     };
 
-    const calculateTax = (item: any) => {
+    const calculateDiscountAmount = (item: any) => {
         const subtotal = calculateSubtotal(item);
+        const discountPercentage = parseFloat(item.discount_percentage) || 0;
+        return subtotal * (discountPercentage / 100);
+    };
+
+    const calculateTaxableAmount = (item: any) => {
+        const subtotal = calculateSubtotal(item);
+        const discountAmount = calculateDiscountAmount(item);
+        return subtotal - discountAmount;
+    };
+
+    const calculateTax = (item: any) => {
+        const taxableAmount = calculateTaxableAmount(item);
         const taxPercentage = parseFloat(item.tax_percentage) || 0;
-        return subtotal * (taxPercentage / 100);
+        return taxableAmount * (taxPercentage / 100);
     };
 
     const calculateTotal = (item: any) => {
-        const subtotal = calculateSubtotal(item);
+        const taxableAmount = calculateTaxableAmount(item);
         const tax = calculateTax(item);
-        return subtotal + tax;
+        return taxableAmount + tax;
     };
 
     const totalSubtotal = quotation.items.reduce((sum, item) => sum + calculateSubtotal(item), 0);

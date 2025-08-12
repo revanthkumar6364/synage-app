@@ -82,7 +82,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                 quantity: item.quantity,
                 unit_price: item.unit_price,
                 proposed_unit_price: item.proposed_unit_price || item.unit_price,
-                discount_percentage: item.discount_percentage,
+                discount_percentage: item.discount_percentage || 0,
                 tax_percentage: item.tax_percentage,
                 notes: item.notes || '',
                 available_size_width_mm: item.available_size_width_mm ?? '',
@@ -98,7 +98,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
             quantity: product.quantity,
             unit_price: product.unit_price,
             proposed_unit_price: product.proposed_unit_price,
-            discount_percentage: product.discount_percentage,
+            discount_percentage: product.discount_percentage || 0,
             tax_percentage: product.tax_percentage,
             notes: product.notes,
             available_size_width_mm: product.available_size_width_mm,
@@ -169,10 +169,54 @@ export default function QuotationProducts({ quotation, products }: Props) {
     };
 
     const calculateSubtotal = (product: any) => {
-        const subtotal = product.quantity * product.proposed_unit_price;
-        const discountAmount = (subtotal * product.discount_percentage) / 100;
-        const taxAmount = ((subtotal - discountAmount) * product.tax_percentage) / 100;
-        return (subtotal - discountAmount + taxAmount).toFixed(2);
+        const quantity = parseFloat(product.quantity) || 0;
+        const proposedPrice = parseFloat(product.proposed_unit_price) || 0;
+        const result = quantity * proposedPrice;
+        return isNaN(result) ? 0 : result;
+    };
+
+    const calculateDiscountAmount = (product: any) => {
+        const quantity = parseFloat(product.quantity) || 0;
+        const proposedPrice = parseFloat(product.proposed_unit_price) || 0;
+        const discountPercentage = parseFloat(product.discount_percentage) || 0;
+        const subtotal = quantity * proposedPrice;
+        const result = (subtotal * discountPercentage) / 100;
+        return isNaN(result) ? 0 : result;
+    };
+
+    const calculateTaxableAmount = (product: any) => {
+        const quantity = parseFloat(product.quantity) || 0;
+        const proposedPrice = parseFloat(product.proposed_unit_price) || 0;
+        const discountPercentage = parseFloat(product.discount_percentage) || 0;
+        const subtotal = quantity * proposedPrice;
+        const discountAmount = (subtotal * discountPercentage) / 100;
+        const result = subtotal - discountAmount;
+        return isNaN(result) ? 0 : result;
+    };
+
+    const calculateTaxAmount = (product: any) => {
+        const quantity = parseFloat(product.quantity) || 0;
+        const proposedPrice = parseFloat(product.proposed_unit_price) || 0;
+        const discountPercentage = parseFloat(product.discount_percentage) || 0;
+        const taxPercentage = parseFloat(product.tax_percentage) || 0;
+        const subtotal = quantity * proposedPrice;
+        const discountAmount = (subtotal * discountPercentage) / 100;
+        const taxableAmount = subtotal - discountAmount;
+        const result = (taxableAmount * taxPercentage) / 100;
+        return isNaN(result) ? 0 : result;
+    };
+
+    const calculateTotal = (product: any) => {
+        const quantity = parseFloat(product.quantity) || 0;
+        const proposedPrice = parseFloat(product.proposed_unit_price) || 0;
+        const discountPercentage = parseFloat(product.discount_percentage) || 0;
+        const taxPercentage = parseFloat(product.tax_percentage) || 0;
+        const subtotal = quantity * proposedPrice;
+        const discountAmount = (subtotal * discountPercentage) / 100;
+        const taxableAmount = subtotal - discountAmount;
+        const taxAmount = (taxableAmount * taxPercentage) / 100;
+        const result = taxableAmount + taxAmount;
+        return isNaN(result) ? 0 : result;
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -419,7 +463,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                             };
                                         }
                                         // Calculate subtotal (W/O GST)
-                                        const subtotal = product.quantity * product.proposed_unit_price;
+                                        const subtotal = Number(product.quantity) * Number(product.proposed_unit_price);
                                         return (
                                             <React.Fragment key={index}>
                                                 <TableRow>
@@ -462,7 +506,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     )}
                                                     <TableCell>
                                                         <div style={{ minWidth: 80 }}>
-                                                            ₹{Number(product.unit_price).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                            ₹{Number(product.unit_price).toFixed(2)}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -492,7 +536,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     </TableCell>
                                                     <TableCell>
                                                         <div style={{ minWidth: 100 }}>
-                                                            ₹{subtotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                            ₹{subtotal.toFixed(2)}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -500,7 +544,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     </TableCell>
                                                     <TableCell>
                                                         <div style={{ minWidth: 100 }}>
-                                                            ₹{(product.quantity * product.proposed_unit_price).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                            ₹{calculateTotal(product).toFixed(2)}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -531,6 +575,38 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                     })}
                                 </TableBody>
                             </Table>
+
+                            {/* Summary Section */}
+                            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                                <h3 className="text-lg font-semibold mb-4">Summary</h3>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <div className="text-sm text-gray-600">Subtotal</div>
+                                        <div className="text-lg font-medium">
+                                            ₹{selectedProducts.reduce((sum, product) => {
+                                                return sum + calculateSubtotal(product);
+                                            }, 0).toFixed(2)}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-sm text-gray-600">GST</div>
+                                        <div className="text-lg font-medium">
+                                            ₹{selectedProducts.reduce((sum, product) => {
+                                                return sum + calculateTaxAmount(product);
+                                            }, 0).toFixed(2)}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-sm text-gray-600">Total</div>
+                                        <div className="text-lg font-semibold text-primary">
+                                            ₹{selectedProducts.reduce((sum, product) => {
+                                                return sum + calculateTotal(product);
+                                            }, 0).toFixed(2)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4 my-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="notes">Notes</Label>
