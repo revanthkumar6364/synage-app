@@ -179,28 +179,28 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
         const unitSize = selectedProduct?.unit_size || { width_mm: 320, height_mm: 160 };
         const boxWidth = unitSize.width_mm;
         const boxHeight = unitSize.height_mm;
-        const boxesInWidth = Math.floor(width_mm / boxWidth);
-        const boxesInHeight = Math.floor(height_mm / boxHeight);
+        const boxesInWidth = Math.floor(width_mm / boxWidth) || 0;
+        const boxesInHeight = Math.floor(height_mm / boxHeight) || 0;
         const maxPossibleBoxes = boxesInWidth * boxesInHeight;
         const proposedWidth = boxWidth * boxesInWidth;
-        const proposedHeight = boxHeight * Math.ceil(maxPossibleBoxes / boxesInWidth);
+        const proposedHeight = boxesInWidth > 0 ? boxHeight * Math.ceil(maxPossibleBoxes / boxesInWidth) : 0;
         setData((prev: any) => ({
             ...prev,
-            available_size_width_mm: width_mm.toFixed(2),
-            available_size_height_mm: height_mm.toFixed(2),
-            available_size_width_ft: width_ft.toFixed(2),
-            available_size_height_ft: height_ft.toFixed(2),
-            available_size_sqft: sqft.toFixed(2),
-            max_quantity: maxPossibleBoxes.toString(),
-            quantity: maxPossibleBoxes.toString(),
-            proposed_size_width: proposedWidth.toString(),
-            proposed_size_height: proposedHeight.toString(),
+            available_size_width_mm: (isNaN(width_mm) ? 0 : width_mm).toFixed(2),
+            available_size_height_mm: (isNaN(height_mm) ? 0 : height_mm).toFixed(2),
+            available_size_width_ft: (isNaN(width_ft) ? 0 : width_ft).toFixed(2),
+            available_size_height_ft: (isNaN(height_ft) ? 0 : height_ft).toFixed(2),
+            available_size_sqft: (isNaN(sqft) ? 0 : sqft).toFixed(2),
+            max_quantity: (isNaN(maxPossibleBoxes) ? 0 : maxPossibleBoxes).toString(),
+            quantity: (isNaN(maxPossibleBoxes) ? 0 : maxPossibleBoxes).toString(),
+            proposed_size_width: (isNaN(proposedWidth) ? 0 : proposedWidth).toString(),
+            proposed_size_height: (isNaN(proposedHeight) ? 0 : proposedHeight).toString(),
             proposed_size_unit: "mm",
-            proposed_size_width_mm: proposedWidth.toFixed(2),
-            proposed_size_height_mm: proposedHeight.toFixed(2),
-            proposed_size_width_ft: (proposedWidth / 304.8).toFixed(2),
-            proposed_size_height_ft: (proposedHeight / 304.8).toFixed(2),
-            proposed_size_sqft: ((proposedWidth / 304.8) * (proposedHeight / 304.8)).toFixed(2)
+            proposed_size_width_mm: (isNaN(proposedWidth) ? 0 : proposedWidth).toFixed(2),
+            proposed_size_height_mm: (isNaN(proposedHeight) ? 0 : proposedHeight).toFixed(2),
+            proposed_size_width_ft: (isNaN(proposedWidth) ? 0 : (proposedWidth / 304.8)).toFixed(2),
+            proposed_size_height_ft: (isNaN(proposedHeight) ? 0 : (proposedHeight / 304.8)).toFixed(2),
+            proposed_size_sqft: (isNaN(proposedWidth) || isNaN(proposedHeight) ? 0 : ((proposedWidth / 304.8) * (proposedHeight / 304.8))).toFixed(2)
         }));
     }, [data.available_size_width, data.available_size_height, data.available_size_unit, data.selected_product_id, data.product_type]);
 
