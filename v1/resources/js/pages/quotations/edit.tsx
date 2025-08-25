@@ -441,7 +441,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-6">
-                                    <h3 className="text-lg font-medium">Billing Details</h3>
+                                    <h3 className="text-lg font-medium">Billing Details (Optional)</h3>
                                     <div>
                                         <Label>Address</Label>
                                         <Textarea
@@ -487,7 +487,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
 
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between">
-                                        <h3 className="text-lg font-medium">Shipping Details</h3>
+                                        <h3 className="text-lg font-medium">Shipping Details (Optional)</h3>
                                         <div className="flex items-center space-x-2">
                                             <Checkbox
                                                 id="same_as_billing"

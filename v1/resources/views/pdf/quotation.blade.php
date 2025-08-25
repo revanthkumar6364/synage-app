@@ -421,10 +421,10 @@
 
     <div class="separator"></div>
 
-    @if ($quotation->show_billing_in_print || $quotation->show_shipping_in_print)
+    @if (($quotation->show_billing_in_print && $quotation->billing_address) || ($quotation->show_shipping_in_print && $quotation->shipping_address))
         <table class="info-grid">
             <tr>
-                @if ($quotation->show_billing_in_print)
+                @if ($quotation->show_billing_in_print && $quotation->billing_address)
                     <td>
                         <div class="info-box">
                             <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Bill To</h3>
@@ -439,7 +439,7 @@
                         </div>
                     </td>
                 @endif
-                @if ($quotation->show_shipping_in_print)
+                @if ($quotation->show_shipping_in_print && $quotation->shipping_address)
                     <td>
                         <div class="info-box">
                             <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Ship To</h3>

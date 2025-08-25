@@ -331,30 +331,36 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                 <Separator className="my-8" />
 
                                 {/* Billing and Shipping */}
-                                <div className="grid grid-cols-2 gap-8">
-                                    <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
-                                        <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Bill To</h3>
-                                        <div className="text-sm space-y-2">
-                                            <p className="font-medium text-foreground">{quotation.account?.business_name}</p>
-                                            <div className="text-muted-foreground space-y-1">
-                                                <p>{quotation.billing_address}</p>
-                                                <p>{quotation.billing_city}, {quotation.billing_location} {quotation.billing_zip_code}</p>
-                                                <p className="font-medium mt-2">GST NO: {quotation.account?.gst_number}</p>
+                                {(quotation.billing_address || quotation.shipping_address) && (
+                                    <div className="grid grid-cols-2 gap-8">
+                                        {quotation.billing_address && (
+                                            <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
+                                                <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Bill To</h3>
+                                                <div className="text-sm space-y-2">
+                                                    <p className="font-medium text-foreground">{quotation.account?.business_name}</p>
+                                                    <div className="text-muted-foreground space-y-1">
+                                                        <p>{quotation.billing_address}</p>
+                                                        <p>{quotation.billing_city}, {quotation.billing_location} {quotation.billing_zip_code}</p>
+                                                        <p className="font-medium mt-2">GST NO: {quotation.account?.gst_number}</p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
-                                        <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Ship To</h3>
-                                        <div className="text-sm space-y-2">
-                                            <p className="font-medium text-foreground">{quotation.account_contact?.name}</p>
-                                            <div className="text-muted-foreground space-y-1">
-                                                <p>{quotation.shipping_address}</p>
-                                                <p>{quotation.shipping_city}, {quotation.shipping_location} {quotation.shipping_zip_code}</p>
-                                                <p className="font-medium mt-2">GST NO: {quotation.account?.gst_number}</p>
+                                        )}
+                                        {quotation.shipping_address && (
+                                            <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
+                                                <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Ship To</h3>
+                                                <div className="text-sm space-y-2">
+                                                    <p className="font-medium text-foreground">{quotation.account_contact?.name}</p>
+                                                    <div className="text-muted-foreground space-y-1">
+                                                        <p>{quotation.shipping_address}</p>
+                                                        <p>{quotation.shipping_city}, {quotation.shipping_location} {quotation.shipping_zip_code}</p>
+                                                        <p className="font-medium mt-2">GST NO: {quotation.account?.gst_number}</p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
-                                </div>
+                                )}
 
                                 <Separator className="my-8" />
 

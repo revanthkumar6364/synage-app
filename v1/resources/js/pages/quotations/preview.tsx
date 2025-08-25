@@ -397,12 +397,12 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                         <p className="text-sm text-muted-foreground">{quotation.description}</p>
                                     </div>
                                 </div>
-                                {(quotation.show_billing_in_print || quotation.show_shipping_in_print) && (
+                                {(quotation.show_billing_in_print && quotation.billing_address) || (quotation.show_shipping_in_print && quotation.shipping_address) ? (
                                     <>
                                         <Separator className="my-8" />
 
                                         <div className="grid grid-cols-2 gap-8">
-                                            {quotation.show_billing_in_print && (
+                                            {quotation.show_billing_in_print && quotation.billing_address && (
                                                 <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
                                                     <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Bill To</h3>
                                                     <div className="text-sm space-y-2">
@@ -415,7 +415,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                                     </div>
                                                 </div>
                                             )}
-                                            {quotation.show_shipping_in_print && (
+                                            {quotation.show_shipping_in_print && quotation.shipping_address && (
                                                 <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
                                                     <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Ship To</h3>
                                                     <div className="text-sm space-y-2">
@@ -430,7 +430,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                             )}
                                         </div>
                                     </>
-                                )}
+                                ) : null}
 
                                 {/* Product Specifications */}
                                 <Separator className="my-8" />

@@ -656,31 +656,27 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                             </div>
 
                             <div className="space-y-4">
-                                <h3 className="font-medium">Billing Address</h3>
+                                <h3 className="font-medium">Billing Address (Optional)</h3>
                                 <Textarea
                                     placeholder="Address"
                                     value={data.billing_address}
                                     onChange={(e) => setData('billing_address', e.target.value)}
-                                    required
                                 />
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <Input
                                         placeholder="Location"
                                         value={data.billing_location}
                                         onChange={(e) => setData('billing_location', e.target.value)}
-                                        required
                                     />
                                     <Input
                                         placeholder="City"
                                         value={data.billing_city}
                                         onChange={(e) => setData('billing_city', e.target.value)}
-                                        required
                                     />
                                     <Input
                                         placeholder="ZIP Code"
                                         value={data.billing_zip_code}
                                         onChange={(e) => setData('billing_zip_code', e.target.value)}
-                                        required
                                     />
                                 </div>
                             </div>
@@ -730,31 +726,27 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                             </div>
 
                             <div className="space-y-4">
-                                <h3 className="font-medium">Shipping Address</h3>
+                                <h3 className="font-medium">Shipping Address (Optional)</h3>
                                 <Textarea
                                     placeholder="Address"
                                     value={data.same_as_billing ? data.billing_address : data.shipping_address}
                                     onChange={(e) => setData('shipping_address', e.target.value)}
-                                    required
                                 />
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <Input
                                         placeholder="Location"
                                         value={data.same_as_billing ? data.billing_location : data.shipping_location}
                                         onChange={(e) => setData('shipping_location', e.target.value)}
-                                        required
                                     />
                                     <Input
                                         placeholder="City"
                                         value={data.same_as_billing ? data.billing_city : data.shipping_city}
                                         onChange={(e) => setData('shipping_city', e.target.value)}
-                                        required
                                     />
                                     <Input
                                         placeholder="ZIP Code"
                                         value={data.same_as_billing ? data.billing_zip_code : data.shipping_zip_code}
                                         onChange={(e) => setData('shipping_zip_code', e.target.value)}
-                                        required
                                     />
                                 </div>
                             </div>
