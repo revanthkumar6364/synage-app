@@ -164,7 +164,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="price">Price <span className="text-red-500">*</span></Label>
+                                    <Label htmlFor="price">Base Price (sq. ft/unit)<span className="text-red-500">*</span></Label>
                                     <Input
                                         id="price"
                                         type="number"
@@ -188,7 +188,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="min_price">Min Price</Label>
+                                    <Label htmlFor="min_price">Min Price (sq. ft/unit)</Label>
                                     <Input
                                         id="min_price"
                                         type="number"
@@ -201,7 +201,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="max_price">Max Price</Label>
+                                    <Label htmlFor="max_price">Max Price (sq. ft/unit)</Label>
                                     <Input
                                         id="max_price"
                                         type="number"
@@ -214,7 +214,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="price_per_sqft">Price per Square Foot</Label>
+                                    <Label htmlFor="price_per_sqft">Price (sq. ft/unit)</Label>
                                     <Input
                                         id="price_per_sqft"
                                         type="number"

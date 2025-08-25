@@ -99,18 +99,18 @@ const Show: FC<ShowProps> = ({ product }) => {
                                 <h3 className="font-semibold text-lg mb-3">Pricing</h3>
                                 <div className="space-y-3">
                                     <div>
-                                        <span className="text-sm text-gray-500">Base Price:</span>
+                                        <span className="text-sm text-gray-500">Base Price (sq. ft/unit):</span>
                                         <p className="font-medium">{formatPrice(product.price)}</p>
                                     </div>
                                     {(product.min_price || product.max_price) && (
                                         <div>
-                                            <span className="text-sm text-gray-500">Price Range:</span>
+                                            <span className="text-sm text-gray-500">Price Range (sq. ft/unit):</span>
                                             <p>{formatPrice(product.min_price)} - {formatPrice(product.max_price)}</p>
                                         </div>
                                     )}
                                     {product.price_per_sqft && (
                                         <div>
-                                            <span className="text-sm text-gray-500">Price per Sq.Ft:</span>
+                                            <span className="text-sm text-gray-500">Price per Square Foot (sq. ft/unit):</span>
                                             <p>{formatPrice(product.price_per_sqft)}</p>
                                         </div>
                                     )}

@@ -423,7 +423,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                         <TableHead colSpan={2} className="text-center">Available size at location</TableHead>
                                         <TableHead rowSpan={2}>Unit Price</TableHead>
                                         <TableHead rowSpan={2}>Proposed Price</TableHead>
-                                        <TableHead rowSpan={2}>Qty/Sq.ft</TableHead>
+                                        <TableHead rowSpan={2}>Quantity</TableHead>
                                         <TableHead rowSpan={2}>Total W/O GST (₹)</TableHead>
                                         <TableHead rowSpan={2}>GST %</TableHead>
                                         <TableHead rowSpan={2}>Total (₹)</TableHead>
@@ -528,12 +528,12 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                                     <TableCell>
                                                         <Input
                                                             type="number"
-                                                            min="0.01"
-                                                            step="0.01"
+                                                            min={isIndoorOutdoor ? "0.01" : "1"}
+                                                            step={isIndoorOutdoor ? "0.01" : "1"}
                                                             className="w-20"
                                                             value={product.quantity}
                                                             onChange={(e) => handleProductChange(index, 'quantity', e.target.value)}
-                                                            placeholder="Qty"
+                                                            placeholder={isIndoorOutdoor ? "Sq.ft" : "Qty"}
                                                         />
                                                     </TableCell>
                                                     <TableCell>
