@@ -47,6 +47,7 @@ class QuotationController extends Controller
                 ['value' => 'draft', 'label' => 'Draft'],
                 ['value' => 'pending', 'label' => 'Pending'],
                 ['value' => 'approved', 'label' => 'Approved'],
+                ['value' => 'order_received', 'label' => 'Order Received'],
                 ['value' => 'rejected', 'label' => 'Rejected'],
             ],
         ]);
@@ -89,7 +90,7 @@ class QuotationController extends Controller
             'shipping_city' => 'nullable|string|max:100',
             'shipping_zip_code' => 'nullable|string|max:20',
             'same_as_billing' => 'boolean',
-            'status' => 'required|in:draft,pending,approved,rejected',
+            'status' => 'required|in:draft,pending,approved,rejected,order_received',
             'notes' => 'nullable|string',
             'client_scope' => 'nullable|string',
             'show_hsn_code' => 'boolean',
@@ -158,11 +159,44 @@ class QuotationController extends Controller
             if (auth()->user()->role === 'sales') {
                 $validated['sales_user_id'] = auth()->user()->id;
             }
-            $validated['taxes_terms'] = config('all.terms_and_conditions.taxes_terms');
-            $validated['warranty_terms'] = config('all.terms_and_conditions.warranty_terms');
-            $validated['delivery_terms'] = config('all.terms_and_conditions.delivery_terms');
-            $validated['payment_terms'] = config('all.terms_and_conditions.payment_terms');
-            $validated['electrical_terms'] = config('all.terms_and_conditions.electrical_terms');
+            // Set legacy terms for backward compatibility
+            $legacyTerms = config('all.terms_and_conditions.legacy');
+            $validated['taxes_terms'] = $legacyTerms['taxes_terms'];
+            $validated['warranty_terms'] = $legacyTerms['warranty_terms'];
+            $validated['delivery_terms'] = $legacyTerms['delivery_terms'];
+            $validated['payment_terms'] = $legacyTerms['payment_terms'];
+            $validated['electrical_terms'] = $legacyTerms['electrical_terms'];
+
+            // Set comprehensive terms based on product_type
+            $productType = $validated['product_type'] ?? 'standard_led';
+
+            // Set general terms from config
+            $generalTerms = config('all.terms_and_conditions.general');
+            $validated['general_pricing_terms'] = $generalTerms['pricing'];
+            $validated['general_warranty_terms'] = $generalTerms['warranty'];
+            $validated['general_delivery_terms'] = $generalTerms['delivery_timeline'];
+            $validated['general_payment_terms'] = $generalTerms['payment_terms'];
+            $validated['general_site_readiness_terms'] = $generalTerms['site_readiness_delays'];
+            $validated['general_installation_scope_terms'] = $generalTerms['installation_scope'];
+            $validated['general_ownership_risk_terms'] = $generalTerms['ownership_risk'];
+            $validated['general_force_majeure_terms'] = $generalTerms['force_majeure'];
+
+            // Set product type specific terms
+            if ($productType === 'indoor') {
+                $indoorTerms = config('all.terms_and_conditions.indoor');
+                $validated['indoor_data_connectivity_terms'] = $indoorTerms['data_connectivity'];
+                $validated['indoor_infrastructure_readiness_terms'] = $indoorTerms['infrastructure_readiness'];
+                $validated['indoor_logistics_support_terms'] = $indoorTerms['logistics_support'];
+                $validated['indoor_general_conditions_terms'] = $indoorTerms['general_conditions'];
+            } elseif ($productType === 'outdoor') {
+                $outdoorTerms = config('all.terms_and_conditions.outdoor');
+                $validated['outdoor_approvals_permissions_terms'] = $outdoorTerms['approvals_permissions'];
+                $validated['outdoor_data_connectivity_terms'] = $outdoorTerms['data_connectivity'];
+                $validated['outdoor_power_mounting_terms'] = $outdoorTerms['power_mounting_infrastructure'];
+                $validated['outdoor_logistics_site_access_terms'] = $outdoorTerms['logistics_site_access'];
+                $validated['outdoor_general_conditions_terms'] = $outdoorTerms['general_conditions'];
+            }
+            // For 'standard_led' and other types, only general terms apply
 
             // Auto-generate reference if not provided
             if (empty($validated['reference'])) {
@@ -178,6 +212,9 @@ class QuotationController extends Controller
             }
 
             $quotation = Quotation::create($validated);
+
+            // Automatically attach default files
+            $this->attachDefaultFiles($quotation);
 
             // Handle file uploads if any
             if ($request->hasFile('files')) {
@@ -225,7 +262,7 @@ class QuotationController extends Controller
 
     public function show(Request $request, $quotationId)
     {
-        $quotation = Quotation::with(['items', 'account'])->find($quotationId);
+        $quotation = Quotation::with(['items.product', 'account', 'account_contact'])->find($quotationId);
         $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
         $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->get();
         return Inertia::render('quotations/show', [
@@ -482,7 +519,7 @@ class QuotationController extends Controller
 
     public function preview(Request $request, $quotationId)
     {
-        $quotation = Quotation::with(['items', 'account'])->find($quotationId);
+        $quotation = Quotation::with(['items.product', 'account', 'account_contact'])->find($quotationId);
         $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
         $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->get();
         return Inertia::render('quotations/preview', [
@@ -499,7 +536,7 @@ class QuotationController extends Controller
         $validated = $request->validate([
             'notes' => 'nullable|string',
             'client_scope' => 'nullable|string',
-            'status' => 'required|in:draft,pending,approved,rejected',
+            'status' => 'required|in:draft,pending,approved,rejected,order_received',
             'taxes' => 'nullable|string',
             'warranty' => 'nullable|string',
             'delivery_terms' => 'nullable|string',
@@ -551,27 +588,104 @@ class QuotationController extends Controller
         return back()->with('error', 'Conversion to order not implemented yet.');
     }
 
+    public function updateProductType(Request $request, Quotation $quotation)
+    {
+        $validated = $request->validate([
+            'product_type' => 'required|string|in:indoor,outdoor,standard_led',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $quotation->product_type = $validated['product_type'];
+            $quotation->populateDefaultTerms($validated['product_type']);
+            $quotation->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Product type updated successfully.',
+                'terms' => $quotation->getApplicableTerms()
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update product type: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function saveTerms(Request $request, Quotation $quotation)
     {
         $validated = $request->validate([
+            // Legacy terms (for backward compatibility)
             'taxes' => 'nullable|string',
             'warranty' => 'nullable|string',
             'delivery_terms' => 'nullable|string',
             'payment_terms' => 'nullable|string',
             'electrical_terms' => 'nullable|string',
+
+            // New comprehensive terms
+
+            // General terms
+            'general_pricing_terms' => 'nullable|string',
+            'general_warranty_terms' => 'nullable|string',
+            'general_delivery_terms' => 'nullable|string',
+            'general_payment_terms' => 'nullable|string',
+            'general_site_readiness_terms' => 'nullable|string',
+            'general_installation_scope_terms' => 'nullable|string',
+            'general_ownership_risk_terms' => 'nullable|string',
+            'general_force_majeure_terms' => 'nullable|string',
+
+            // Indoor terms
+            'indoor_data_connectivity_terms' => 'nullable|string',
+            'indoor_infrastructure_readiness_terms' => 'nullable|string',
+            'indoor_logistics_support_terms' => 'nullable|string',
+            'indoor_general_conditions_terms' => 'nullable|string',
+
+            // Outdoor terms
+            'outdoor_approvals_permissions_terms' => 'nullable|string',
+            'outdoor_data_connectivity_terms' => 'nullable|string',
+            'outdoor_power_mounting_terms' => 'nullable|string',
+            'outdoor_logistics_site_access_terms' => 'nullable|string',
+            'outdoor_general_conditions_terms' => 'nullable|string',
         ]);
 
         try {
             DB::beginTransaction();
 
             // Update the quotation terms
-            $quotation->update([
+            $updateData = [
+                // Legacy terms
                 'taxes_terms' => $validated['taxes'],
                 'warranty_terms' => $validated['warranty'],
                 'delivery_terms' => $validated['delivery_terms'],
                 'payment_terms' => $validated['payment_terms'],
                 'electrical_terms' => $validated['electrical_terms'],
-            ]);
+
+                // New comprehensive terms
+                'general_pricing_terms' => $validated['general_pricing_terms'],
+                'general_warranty_terms' => $validated['general_warranty_terms'],
+                'general_delivery_terms' => $validated['general_delivery_terms'],
+                'general_payment_terms' => $validated['general_payment_terms'],
+                'general_site_readiness_terms' => $validated['general_site_readiness_terms'],
+                'general_installation_scope_terms' => $validated['general_installation_scope_terms'],
+                'general_ownership_risk_terms' => $validated['general_ownership_risk_terms'],
+                'general_force_majeure_terms' => $validated['general_force_majeure_terms'],
+                'indoor_data_connectivity_terms' => $validated['indoor_data_connectivity_terms'],
+                'indoor_infrastructure_readiness_terms' => $validated['indoor_infrastructure_readiness_terms'],
+                'indoor_logistics_support_terms' => $validated['indoor_logistics_support_terms'],
+                'indoor_general_conditions_terms' => $validated['indoor_general_conditions_terms'],
+                'outdoor_approvals_permissions_terms' => $validated['outdoor_approvals_permissions_terms'],
+                'outdoor_data_connectivity_terms' => $validated['outdoor_data_connectivity_terms'],
+                'outdoor_power_mounting_terms' => $validated['outdoor_power_mounting_terms'],
+                'outdoor_logistics_site_access_terms' => $validated['outdoor_logistics_site_access_terms'],
+                'outdoor_general_conditions_terms' => $validated['outdoor_general_conditions_terms'],
+            ];
+
+            $quotation->update($updateData);
 
             DB::commit();
 
@@ -712,6 +826,7 @@ class QuotationController extends Controller
         $validated = $request->validate([
             'file' => 'required|file|mimes:jpg,jpeg,png,gif,svg,pdf|max:5120',
             'category' => 'required|string|in:image,pdf,brochure,supplement',
+            'mime_type' => 'nullable|string',
         ]);
 
         try {
@@ -732,7 +847,7 @@ class QuotationController extends Controller
                 'name' => $file->getClientOriginalName(),
                 'file_name' => $fileName,
                 'file_path' => $filePath,
-                'mime_type' => $file->getMimeType(),
+                'mime_type' => $validated['mime_type'] ?? $file->getMimeType(),
                 'file_size' => $file->getSize(),
                 'is_active' => true,
                 'created_by' => $request->user()->id,
@@ -795,6 +910,56 @@ class QuotationController extends Controller
         }
     }
 
+    public function markAsOrderReceived(Request $request, Quotation $quotation)
+    {
+        try {
+            // Update the quotation status
+            $quotation->update([
+                'status' => 'order_received',
+                'updated_by' => $request->user()->id,
+                'last_action' => 'order_received',
+                'editable' => false,
+            ]);
 
+            return response()->json([
+                'success' => true,
+                'message' => 'Quotation marked as order received successfully.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark quotation as order received.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Automatically attach default files to a quotation
+     */
+    private function attachDefaultFiles(Quotation $quotation)
+    {
+        // Get default files (files with null quotation_id)
+        $defaultFiles = QuotationMedia::whereNull('quotation_id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        foreach ($defaultFiles as $defaultFile) {
+            // Create a copy of the default file for this quotation
+            QuotationMedia::create([
+                'quotation_id' => $quotation->id,
+                'category' => $defaultFile->category,
+                'name' => $defaultFile->name,
+                'file_name' => $defaultFile->file_name,
+                'file_path' => $defaultFile->file_path,
+                'mime_type' => $defaultFile->mime_type,
+                'file_size' => $defaultFile->file_size,
+                'is_active' => true,
+                'sort_order' => $defaultFile->sort_order,
+                'created_by' => $defaultFile->created_by,
+                'updated_by' => $defaultFile->updated_by,
+            ]);
+        }
+    }
 
 }

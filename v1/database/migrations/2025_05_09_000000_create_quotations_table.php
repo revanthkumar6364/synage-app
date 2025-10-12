@@ -76,7 +76,7 @@ return new class extends Migration
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('total_amount', 10, 2)->default(0);
             $table->decimal('grand_total', 10, 2)->default(0);
-            $table->enum('status', ['draft', 'pending', 'approved', 'rejected'])->default('draft'); // Changed to enum
+            $table->enum('status', ['draft', 'pending', 'approved', 'rejected', 'order_received'])->default('draft'); // Changed to enum
             $table->boolean('editable')->default(true);
             $table->text('last_action')->nullable();
             $table->foreignId('created_by')->constrained('users');

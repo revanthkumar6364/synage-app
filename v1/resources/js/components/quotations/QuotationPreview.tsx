@@ -28,7 +28,7 @@ interface QuotationPreviewData {
         tax: number;
         total: number;
     }>;
-    status: 'draft' | 'pending' | 'approved' | 'rejected';
+    status: 'draft' | 'pending' | 'approved' | 'order_received' | 'rejected';
     notes?: string;
     client_scope?: string;
 }

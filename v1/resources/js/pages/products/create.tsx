@@ -228,9 +228,14 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                     <Input
                                         id="hsn_code"
                                         value={data.hsn_code}
-                                        onChange={(e) => setData('hsn_code', e.target.value)}
-                                        placeholder="Enter HSN Code"
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '');
+                                            setData('hsn_code', value);
+                                        }}
+                                        placeholder="Enter HSN Code (min 5 digits)"
+                                        maxLength={10}
                                     />
+                                    <p className="text-xs text-muted-foreground">Minimum 5 digits required</p>
                                     {errors.hsn_code && <p className="text-sm text-red-500">{errors.hsn_code}</p>}
                                 </div>
 

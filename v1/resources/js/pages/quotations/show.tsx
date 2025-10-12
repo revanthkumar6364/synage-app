@@ -58,6 +58,8 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                 return `${baseStyle} bg-yellow-500 text-white`;
             case 'approved':
                 return `${baseStyle} bg-green-500 text-white`;
+            case 'order_received':
+                return `${baseStyle} bg-blue-500 text-white`;
             case 'rejected':
                 return `${baseStyle} bg-red-500 text-white`;
             default:
@@ -187,7 +189,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                             <div className="flex items-center gap-2 mt-1">
                                 <p className="text-sm text-muted-foreground">Reference: {quotation.reference}</p>
                                 <div className={getStatusBadgeStyle(quotation.status)}>
-                                    {quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)}
+                                    {quotation.status === 'order_received' ? 'Order Received' : quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)}
                                 </div>
                             </div>
                         </div>
@@ -198,6 +200,30 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     onClick={() => router.visit(route('quotations.edit', quotation.id))}
                                 >
                                     Edit
+                                </Button>
+                            )}
+                            {quotation.status === 'approved' && (
+                                <Button
+                                    variant="default"
+                                    onClick={() => {
+                                        setLoading(true);
+                                        router.post(route('quotations.mark-as-order-received', quotation.id), {}, {
+                                            onSuccess: () => {
+                                                toast.success('Quotation marked as order received');
+                                                router.reload();
+                                            },
+                                            onError: () => {
+                                                toast.error('Failed to mark quotation as order received');
+                                            },
+                                            onFinish: () => {
+                                                setLoading(false);
+                                            }
+                                        });
+                                    }}
+                                    disabled={loading}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                                >
+                                    {loading ? 'Processing...' : 'Mark as Order Received'}
                                 </Button>
                             )}
                             {(quotation.status === 'pending' || quotation.status === 'approved') && (
@@ -558,32 +584,166 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                 {/* Terms and Conditions */}
                                 <div className="space-y-6">
                                     <h3 className="text-lg font-semibold text-primary">Terms and Conditions</h3>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="space-y-4">
+
+                                    {/* Show comprehensive terms if available, otherwise show legacy terms */}
+                                    {quotation.general_pricing_terms ? (
+                                        <div className="space-y-6">
+                                            {/* General Terms */}
                                             <div>
-                                                <h4 className="font-medium mb-2">Taxes</h4>
-                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.taxes_terms}</p>
+                                                <h4 className="font-medium mb-3 text-primary">General Terms & Conditions</h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {quotation.general_pricing_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Pricing</h5>
+                                                            <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.general_pricing_terms}</p>
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_warranty_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Warranty</h5>
+                                                            <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.general_warranty_terms}</p>
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_delivery_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Delivery Timeline</h5>
+                                                            <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.general_delivery_terms}</p>
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_payment_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Payment Terms</h5>
+                                                            <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.general_payment_terms}</p>
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_site_readiness_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Site Readiness & Delays</h5>
+                                                            <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.general_site_readiness_terms}</p>
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_installation_scope_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Installation Scope</h5>
+                                                            <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.general_installation_scope_terms}</p>
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_ownership_risk_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Ownership & Risk</h5>
+                                                            <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.general_ownership_risk_terms}</p>
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_force_majeure_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Force Majeure</h5>
+                                                            <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.general_force_majeure_terms}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h4 className="font-medium mb-2">Warranty</h4>
-                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.warranty_terms}</p>
+
+                                            {/* Indoor Terms */}
+                                            {quotation.product_type === 'indoor' && (
+                                                <div>
+                                                    <h4 className="font-medium mb-3 text-primary">Indoor LED Installation</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {quotation.indoor_data_connectivity_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Data & Connectivity</h5>
+                                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.indoor_data_connectivity_terms}</p>
+                                                            </div>
+                                                        )}
+                                                        {quotation.indoor_infrastructure_readiness_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Infrastructure Readiness</h5>
+                                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.indoor_infrastructure_readiness_terms}</p>
+                                                            </div>
+                                                        )}
+                                                        {quotation.indoor_logistics_support_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Logistics & Support</h5>
+                                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.indoor_logistics_support_terms}</p>
+                                                            </div>
+                                                        )}
+                                                        {quotation.indoor_general_conditions_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">General Conditions</h5>
+                                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.indoor_general_conditions_terms}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Outdoor Terms */}
+                                            {quotation.product_type === 'outdoor' && (
+                                                <div>
+                                                    <h4 className="font-medium mb-3 text-primary">Outdoor LED Installation</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {quotation.outdoor_approvals_permissions_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Approvals & Permissions</h5>
+                                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.outdoor_approvals_permissions_terms}</p>
+                                                            </div>
+                                                        )}
+                                                        {quotation.outdoor_data_connectivity_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Data & Connectivity</h5>
+                                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.outdoor_data_connectivity_terms}</p>
+                                                            </div>
+                                                        )}
+                                                        {quotation.outdoor_power_mounting_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Power & Mounting Infrastructure</h5>
+                                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.outdoor_power_mounting_terms}</p>
+                                                            </div>
+                                                        )}
+                                                        {quotation.outdoor_logistics_site_access_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Logistics & Site Access</h5>
+                                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.outdoor_logistics_site_access_terms}</p>
+                                                            </div>
+                                                        )}
+                                                        {quotation.outdoor_general_conditions_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">General Conditions</h5>
+                                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.outdoor_general_conditions_terms}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        // Legacy terms display
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Taxes</h4>
+                                                    <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.taxes_terms}</p>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Warranty</h4>
+                                                    <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.warranty_terms}</p>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Electrical Points and Installation</h4>
+                                                    <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.electrical_terms}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h4 className="font-medium mb-2">Electrical Points and Installation</h4>
-                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.electrical_terms}</p>
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Delivery Terms</h4>
+                                                    <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.delivery_terms}</p>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Payment Terms</h4>
+                                                    <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.payment_terms}</p>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <h4 className="font-medium mb-2">Delivery Terms</h4>
-                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.delivery_terms}</p>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-medium mb-2">Payment Terms</h4>
-                                                <p className="text-sm text-muted-foreground whitespace-pre-line">{quotation.payment_terms}</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
 
                                 <Separator className="my-8" />
@@ -636,6 +796,25 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     <a href="https://radiantsynage.com" target="_blank" rel="noopener noreferrer" title="Website">
                                         <Globe className="h-6 w-6 text-gray-700 hover:text-black" />
                                     </a>
+                                </div>
+
+                                {/* Zapple QR Code for Customer Support */}
+                                <div className="space-y-6">
+                                    <Separator />
+                                    <div className="bg-muted/30 p-6 rounded-lg border border-border/50 text-center">
+                                        <h3 className="text-lg font-semibold text-primary mb-4">Customer Support</h3>
+                                        <div className="flex items-center justify-center gap-6">
+                                            <img
+                                                src="/images/zapple.png"
+                                                alt="Zapple QR Code"
+                                                className="w-24 h-24 object-contain"
+                                            />
+                                            <div className="text-left">
+                                                <p className="text-sm font-medium text-foreground mb-1">Scan QR Code for Support</p>
+                                                <p className="text-xs text-muted-foreground">Get instant help with your quotation</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Attachments */}

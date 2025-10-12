@@ -162,11 +162,37 @@ export interface Quotation {
     same_as_billing: boolean;
     notes?: string;
     client_scope?: string;
+    // Legacy terms (for backward compatibility)
     taxes_terms?: string;
     warranty_terms?: string;
     delivery_terms?: string;
     payment_terms?: string;
     electrical_terms?: string;
+
+    // New comprehensive terms
+
+    // General terms
+    general_pricing_terms?: string;
+    general_warranty_terms?: string;
+    general_delivery_terms?: string;
+    general_payment_terms?: string;
+    general_site_readiness_terms?: string;
+    general_installation_scope_terms?: string;
+    general_ownership_risk_terms?: string;
+    general_force_majeure_terms?: string;
+
+    // Indoor terms
+    indoor_data_connectivity_terms?: string;
+    indoor_infrastructure_readiness_terms?: string;
+    indoor_logistics_support_terms?: string;
+    indoor_general_conditions_terms?: string;
+
+    // Outdoor terms
+    outdoor_approvals_permissions_terms?: string;
+    outdoor_data_connectivity_terms?: string;
+    outdoor_power_mounting_terms?: string;
+    outdoor_logistics_site_access_terms?: string;
+    outdoor_general_conditions_terms?: string;
     show_hsn_code?: boolean;
     show_no_of_pixels?: boolean;
     subtotal: number;
@@ -175,7 +201,7 @@ export interface Quotation {
     discount_amount: number;
     total_amount: number;
     grand_total: number;
-    status: 'draft' | 'pending' | 'approved' | 'rejected';
+    status: 'draft' | 'pending' | 'approved' | 'order_received' | 'rejected';
     editable: boolean;
     last_action?: string;
     created_by: number;

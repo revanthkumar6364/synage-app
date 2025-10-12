@@ -18,6 +18,7 @@ class Quotation extends Model
     const STATUS_PENDING = 'pending';
     const STATUS_APPROVED = 'approved';
     const STATUS_REJECTED = 'rejected';
+    const STATUS_ORDER_RECEIVED = 'order_received';
 
     protected $fillable = [
         'parent_id',
@@ -61,11 +62,30 @@ class Quotation extends Model
         'same_as_billing',
         'notes',
         'client_scope',
+        // Legacy terms (for backward compatibility)
         'taxes_terms',
         'warranty_terms',
         'delivery_terms',
         'payment_terms',
         'electrical_terms',
+        // New comprehensive terms
+        'general_pricing_terms',
+        'general_warranty_terms',
+        'general_delivery_terms',
+        'general_payment_terms',
+        'general_site_readiness_terms',
+        'general_installation_scope_terms',
+        'general_ownership_risk_terms',
+        'general_force_majeure_terms',
+        'indoor_data_connectivity_terms',
+        'indoor_infrastructure_readiness_terms',
+        'indoor_logistics_support_terms',
+        'indoor_general_conditions_terms',
+        'outdoor_approvals_permissions_terms',
+        'outdoor_data_connectivity_terms',
+        'outdoor_power_mounting_terms',
+        'outdoor_logistics_site_access_terms',
+        'outdoor_general_conditions_terms',
         'show_hsn_code',
         'show_no_of_pixels',
         'show_billing_in_print',
@@ -229,7 +249,8 @@ class Quotation extends Model
         $validTransitions = [
             self::STATUS_DRAFT => [self::STATUS_PENDING, self::STATUS_REJECTED],
             self::STATUS_PENDING => [self::STATUS_APPROVED, self::STATUS_REJECTED],
-            self::STATUS_APPROVED => [self::STATUS_REJECTED],
+            self::STATUS_APPROVED => [self::STATUS_ORDER_RECEIVED, self::STATUS_REJECTED],
+            self::STATUS_ORDER_RECEIVED => [self::STATUS_REJECTED],
             self::STATUS_REJECTED => [self::STATUS_DRAFT],
         ];
 
@@ -367,6 +388,11 @@ class Quotation extends Model
         return $query->where('status', self::STATUS_REJECTED);
     }
 
+    public function scopeOrderReceived(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_ORDER_RECEIVED);
+    }
+
     public function scopeSearch(Builder $query, string $search): Builder
     {
         return $query->where(function ($q) use ($search) {
@@ -386,6 +412,7 @@ class Quotation extends Model
             self::STATUS_PENDING,
             self::STATUS_APPROVED,
             self::STATUS_REJECTED,
+            self::STATUS_ORDER_RECEIVED,
         ]);
     }
 
@@ -446,6 +473,15 @@ class Quotation extends Model
         return false;
     }
 
+    public function markAsOrderReceived(): bool
+    {
+        if ($this->validateStatusTransition(self::STATUS_ORDER_RECEIVED)) {
+            $this->status = self::STATUS_ORDER_RECEIVED;
+            return $this->save();
+        }
+        return false;
+    }
+
     // Status check methods
     public function isDraft(): bool
     {
@@ -465,5 +501,79 @@ class Quotation extends Model
     public function isRejected(): bool
     {
         return $this->status === self::STATUS_REJECTED;
+    }
+
+    public function isOrderReceived(): bool
+    {
+        return $this->status === self::STATUS_ORDER_RECEIVED;
+    }
+
+    // Terms and conditions helper methods
+    public function populateDefaultTerms(string $productType = null): void
+    {
+        $productType = $productType ?? $this->product_type ?? 'standard_led';
+
+        // Set general terms from config
+        $generalTerms = config('all.terms_and_conditions.general');
+        $this->general_pricing_terms = $generalTerms['pricing'];
+        $this->general_warranty_terms = $generalTerms['warranty'];
+        $this->general_delivery_terms = $generalTerms['delivery_timeline'];
+        $this->general_payment_terms = $generalTerms['payment_terms'];
+        $this->general_site_readiness_terms = $generalTerms['site_readiness_delays'];
+        $this->general_installation_scope_terms = $generalTerms['installation_scope'];
+        $this->general_ownership_risk_terms = $generalTerms['ownership_risk'];
+        $this->general_force_majeure_terms = $generalTerms['force_majeure'];
+
+        // Set product type specific terms
+        if ($productType === 'indoor') {
+            $indoorTerms = config('all.terms_and_conditions.indoor');
+            $this->indoor_data_connectivity_terms = $indoorTerms['data_connectivity'];
+            $this->indoor_infrastructure_readiness_terms = $indoorTerms['infrastructure_readiness'];
+            $this->indoor_logistics_support_terms = $indoorTerms['logistics_support'];
+            $this->indoor_general_conditions_terms = $indoorTerms['general_conditions'];
+        } elseif ($productType === 'outdoor') {
+            $outdoorTerms = config('all.terms_and_conditions.outdoor');
+            $this->outdoor_approvals_permissions_terms = $outdoorTerms['approvals_permissions'];
+            $this->outdoor_data_connectivity_terms = $outdoorTerms['data_connectivity'];
+            $this->outdoor_power_mounting_terms = $outdoorTerms['power_mounting_infrastructure'];
+            $this->outdoor_logistics_site_access_terms = $outdoorTerms['logistics_site_access'];
+            $this->outdoor_general_conditions_terms = $outdoorTerms['general_conditions'];
+        }
+        // For 'standard_led' and other types, only general terms apply
+    }
+
+    public function getApplicableTerms(): array
+    {
+        $terms = [
+            'general' => [
+                'pricing' => $this->general_pricing_terms,
+                'warranty' => $this->general_warranty_terms,
+                'delivery' => $this->general_delivery_terms,
+                'payment' => $this->general_payment_terms,
+                'site_readiness' => $this->general_site_readiness_terms,
+                'installation_scope' => $this->general_installation_scope_terms,
+                'ownership_risk' => $this->general_ownership_risk_terms,
+                'force_majeure' => $this->general_force_majeure_terms,
+            ]
+        ];
+
+        if ($this->product_type === 'indoor') {
+            $terms['indoor'] = [
+                'data_connectivity' => $this->indoor_data_connectivity_terms,
+                'infrastructure_readiness' => $this->indoor_infrastructure_readiness_terms,
+                'logistics_support' => $this->indoor_logistics_support_terms,
+                'general_conditions' => $this->indoor_general_conditions_terms,
+            ];
+        } elseif ($this->product_type === 'outdoor') {
+            $terms['outdoor'] = [
+                'approvals_permissions' => $this->outdoor_approvals_permissions_terms,
+                'data_connectivity' => $this->outdoor_data_connectivity_terms,
+                'power_mounting' => $this->outdoor_power_mounting_terms,
+                'logistics_site_access' => $this->outdoor_logistics_site_access_terms,
+                'general_conditions' => $this->outdoor_general_conditions_terms,
+            ];
+        }
+
+        return $terms;
     }
 }

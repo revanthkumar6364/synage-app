@@ -630,35 +630,187 @@
 
     <div class="terms-section">
         <h3 style="font-size: 28px; color: #1a1a1a; margin: 0 0 15px 0;">Terms and Conditions</h3>
-        <table class="terms-grid">
-            <tr>
-                <td>
-                    <div style="margin-bottom: 15px">
-                        <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Taxes</h4>
-                        <p style="font-size: 16px; color: #333;">{{ $quotation->taxes_terms }}</p>
-                    </div>
-                    <div style="margin-bottom: 15px">
-                        <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Warranty</h4>
-                        <p style="font-size: 16px; color: #333;">{{ $quotation->warranty_terms }}</p>
-                    </div>
-                    <div>
-                        <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Electrical Points and
-                            Installation</h4>
-                        <p style="font-size: 16px; color: #333;">{{ $quotation->electrical_terms }}</p>
-                    </div>
-                </td>
-                <td>
-                    <div style="margin-bottom: 15px">
-                        <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Delivery Terms</h4>
-                        <p style="font-size: 16px; color: #333;">{{ $quotation->delivery_terms }}</p>
-                    </div>
-                    <div>
-                        <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Payment Terms</h4>
-                        <p style="font-size: 16px; color: #333;">{{ $quotation->payment_terms }}</p>
-                    </div>
-                </td>
-            </tr>
-        </table>
+
+        @if($quotation->general_pricing_terms)
+            <!-- Comprehensive Terms Display -->
+
+            <!-- General Terms -->
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 22px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">General Terms & Conditions</h4>
+                <table class="terms-grid">
+                    <tr>
+                        <td>
+                            @if($quotation->general_pricing_terms)
+                                <div style="margin-bottom: 15px">
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Pricing</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_pricing_terms }}</p>
+                                </div>
+                            @endif
+                            @if($quotation->general_warranty_terms)
+                                <div style="margin-bottom: 15px">
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Warranty</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_warranty_terms }}</p>
+                                </div>
+                            @endif
+                            @if($quotation->general_delivery_terms)
+                                <div style="margin-bottom: 15px">
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Delivery Timeline</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_delivery_terms }}</p>
+                                </div>
+                            @endif
+                            @if($quotation->general_payment_terms)
+                                <div style="margin-bottom: 15px">
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Payment Terms</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_payment_terms }}</p>
+                                </div>
+                            @endif
+                        </td>
+                        <td>
+                            @if($quotation->general_site_readiness_terms)
+                                <div style="margin-bottom: 15px">
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Site Readiness & Delays</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_site_readiness_terms }}</p>
+                                </div>
+                            @endif
+                            @if($quotation->general_installation_scope_terms)
+                                <div style="margin-bottom: 15px">
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Installation Scope</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_installation_scope_terms }}</p>
+                                </div>
+                            @endif
+                            @if($quotation->general_ownership_risk_terms)
+                                <div style="margin-bottom: 15px">
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Ownership & Risk</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_ownership_risk_terms }}</p>
+                                </div>
+                            @endif
+                            @if($quotation->general_force_majeure_terms)
+                                <div style="margin-bottom: 15px">
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Force Majeure</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_force_majeure_terms }}</p>
+                                </div>
+                            @endif
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            @if($quotation->product_type === 'indoor')
+                <!-- Indoor LED Installation Terms -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 22px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">Indoor LED Installation</h4>
+                    <table class="terms-grid">
+                        <tr>
+                            <td>
+                                @if($quotation->indoor_data_connectivity_terms)
+                                    <div style="margin-bottom: 15px">
+                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Data & Connectivity</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->indoor_data_connectivity_terms }}</p>
+                                    </div>
+                                @endif
+                                @if($quotation->indoor_infrastructure_readiness_terms)
+                                    <div style="margin-bottom: 15px">
+                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Infrastructure Readiness</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->indoor_infrastructure_readiness_terms }}</p>
+                                    </div>
+                                @endif
+                            </td>
+                            <td>
+                                @if($quotation->indoor_logistics_support_terms)
+                                    <div style="margin-bottom: 15px">
+                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Logistics & Support</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->indoor_logistics_support_terms }}</p>
+                                    </div>
+                                @endif
+                                @if($quotation->indoor_general_conditions_terms)
+                                    <div style="margin-bottom: 15px">
+                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">General Conditions</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->indoor_general_conditions_terms }}</p>
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            @endif
+
+            @if($quotation->product_type === 'outdoor')
+                <!-- Outdoor LED Installation Terms -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 22px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">Outdoor LED Installation</h4>
+                    <table class="terms-grid">
+                        <tr>
+                            <td>
+                                @if($quotation->outdoor_approvals_permissions_terms)
+                                    <div style="margin-bottom: 15px">
+                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Approvals & Permissions</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->outdoor_approvals_permissions_terms }}</p>
+                                    </div>
+                                @endif
+                                @if($quotation->outdoor_data_connectivity_terms)
+                                    <div style="margin-bottom: 15px">
+                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Data & Connectivity</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->outdoor_data_connectivity_terms }}</p>
+                                    </div>
+                                @endif
+                                @if($quotation->outdoor_power_mounting_terms)
+                                    <div style="margin-bottom: 15px">
+                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Power & Mounting Infrastructure</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->outdoor_power_mounting_terms }}</p>
+                                    </div>
+                                @endif
+                            </td>
+                            <td>
+                                @if($quotation->outdoor_logistics_site_access_terms)
+                                    <div style="margin-bottom: 15px">
+                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Logistics & Site Access</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->outdoor_logistics_site_access_terms }}</p>
+                                    </div>
+                                @endif
+                                @if($quotation->outdoor_general_conditions_terms)
+                                    <div style="margin-bottom: 15px">
+                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">General Conditions</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->outdoor_general_conditions_terms }}</p>
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            @endif
+
+        @else
+            <!-- Legacy Terms Display -->
+            <table class="terms-grid">
+                <tr>
+                    <td>
+                        <div style="margin-bottom: 15px">
+                            <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Taxes</h4>
+                            <p style="font-size: 16px; color: #333;">{{ $quotation->taxes_terms }}</p>
+                        </div>
+                        <div style="margin-bottom: 15px">
+                            <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Warranty</h4>
+                            <p style="font-size: 16px; color: #333;">{{ $quotation->warranty_terms }}</p>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Electrical Points and
+                                Installation</h4>
+                            <p style="font-size: 16px; color: #333;">{{ $quotation->electrical_terms }}</p>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="margin-bottom: 15px">
+                            <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Delivery Terms</h4>
+                            <p style="font-size: 16px; color: #333;">{{ $quotation->delivery_terms }}</p>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Payment Terms</h4>
+                            <p style="font-size: 16px; color: #333;">{{ $quotation->payment_terms }}</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        @endif
     </div>
 
     <div class="separator"></div>
@@ -699,6 +851,19 @@
         </div>
     </div>
 
+    <!-- Zapple QR Code for Customer Support -->
+    <div class="separator"></div>
+    <div style="text-align: center; margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+        <h3 style="font-size: 18px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">Customer Support</h3>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+            <img src="{{ public_path('images/zapple.png') }}" alt="Zapple QR Code" style="width: 120px; height: auto;">
+            <div style="text-align: left;">
+                <p style="font-size: 14px; color: #333; margin: 0 0 8px 0; font-weight: 600;">Scan QR Code for Support</p>
+                <p style="font-size: 12px; color: #666; margin: 0;">Get instant help with your quotation</p>
+            </div>
+        </div>
+    </div>
+
     @if ($commonFiles->isNotEmpty() || $quotationFiles->isNotEmpty())
         <div class="attachments">
             <div class="separator"></div>
@@ -706,8 +871,16 @@
                 <div style="margin-bottom: 25px">
                     <div class="attachments-grid">
                         @foreach ($commonFiles as $file)
-                            <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
-                                alt="{{ $file->name }}" class="attachment-img">
+                            @if ($file->category === 'pdf' || str_ends_with(strtolower($file->name ?? ''), '.pdf'))
+                                <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; text-align: center; background-color: #f9f9f9;">
+                                    <div style="font-size: 24px; color: #dc2626; margin-bottom: 8px;">📄</div>
+                                    <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">{{ $file->name }}</div>
+                                    <div style="font-size: 10px; color: #666;">PDF Document</div>
+                                </div>
+                            @else
+                                <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
+                                    alt="{{ $file->name }}" class="attachment-img">
+                            @endif
                         @endforeach
                     </div>
                 </div>
@@ -718,8 +891,16 @@
                     <h3>Attachments</h3>
                     <div class="attachments-grid">
                         @foreach ($quotationFiles as $file)
-                            <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
-                                alt="{{ $file->name }}" class="attachment-img1">
+                            @if ($file->category === 'pdf' || str_ends_with(strtolower($file->name ?? ''), '.pdf'))
+                                <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; text-align: center; background-color: #f9f9f9;">
+                                    <div style="font-size: 24px; color: #dc2626; margin-bottom: 8px;">📄</div>
+                                    <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">{{ $file->name }}</div>
+                                    <div style="font-size: 10px; color: #666;">PDF Document</div>
+                                </div>
+                            @else
+                                <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
+                                    alt="{{ $file->name }}" class="attachment-img1">
+                            @endif
                         @endforeach
                     </div>
                 </div>

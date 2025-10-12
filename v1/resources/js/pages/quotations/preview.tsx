@@ -229,11 +229,35 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
         notes: quotation.notes || '',
         client_scope: quotation.client_scope || '',
         status: 'pending',
+        // Legacy terms (for backward compatibility)
         taxes: quotation.taxes_terms || '',
         warranty: quotation.warranty_terms || '',
         delivery_terms: quotation.delivery_terms || '',
         payment_terms: quotation.payment_terms || '',
         electrical_terms: quotation.electrical_terms || '',
+
+        // New comprehensive terms
+        general_pricing_terms: quotation.general_pricing_terms || '',
+        general_warranty_terms: quotation.general_warranty_terms || '',
+        general_delivery_terms: quotation.general_delivery_terms || '',
+        general_payment_terms: quotation.general_payment_terms || '',
+        general_site_readiness_terms: quotation.general_site_readiness_terms || '',
+        general_installation_scope_terms: quotation.general_installation_scope_terms || '',
+        general_ownership_risk_terms: quotation.general_ownership_risk_terms || '',
+        general_force_majeure_terms: quotation.general_force_majeure_terms || '',
+
+        // Indoor terms
+        indoor_data_connectivity_terms: quotation.indoor_data_connectivity_terms || '',
+        indoor_infrastructure_readiness_terms: quotation.indoor_infrastructure_readiness_terms || '',
+        indoor_logistics_support_terms: quotation.indoor_logistics_support_terms || '',
+        indoor_general_conditions_terms: quotation.indoor_general_conditions_terms || '',
+
+        // Outdoor terms
+        outdoor_approvals_permissions_terms: quotation.outdoor_approvals_permissions_terms || '',
+        outdoor_data_connectivity_terms: quotation.outdoor_data_connectivity_terms || '',
+        outdoor_power_mounting_terms: quotation.outdoor_power_mounting_terms || '',
+        outdoor_logistics_site_access_terms: quotation.outdoor_logistics_site_access_terms || '',
+        outdoor_general_conditions_terms: quotation.outdoor_general_conditions_terms || '',
     });
 
     const handleSubmitForApproval = () => {
@@ -593,71 +617,391 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                 <div className="space-y-6">
                                     <h3 className="text-lg font-semibold text-primary">Terms and Conditions</h3>
 
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="space-y-4">
+                                    {/* Show comprehensive terms if available, otherwise show legacy terms */}
+                                    {quotation.general_pricing_terms ? (
+                                        <div className="space-y-6">
+                                            {/* General Terms */}
                                             <div>
-                                                <h4 className="font-medium mb-2">Taxes</h4>
-                                                {isEditing ? (
-                                                    <RichTextEditor
-                                                        value={form.data.taxes}
-                                                        onChange={e => form.setData('taxes', e)}
-                                                    />
-                                                ) : (
-                                                    <div
-                                                        className="text-sm text-muted-foreground whitespace-pre-line"
-                                                        dangerouslySetInnerHTML={{ __html: quotation.taxes_terms || '' }}
-                                                    />
-                                                )}
+                                                <h4 className="font-medium mb-3 text-primary">General Terms & Conditions</h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {quotation.general_pricing_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Pricing</h5>
+                                                            {isEditing ? (
+                                                                <RichTextEditor
+                                                                    value={form.data.general_pricing_terms}
+                                                                    onChange={e => form.setData('general_pricing_terms', e)}
+                                                                    rows={3}
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                    dangerouslySetInnerHTML={{ __html: quotation.general_pricing_terms || '' }}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_warranty_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Warranty</h5>
+                                                            {isEditing ? (
+                                                                <RichTextEditor
+                                                                    value={form.data.general_warranty_terms}
+                                                                    onChange={e => form.setData('general_warranty_terms', e)}
+                                                                    rows={3}
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                    dangerouslySetInnerHTML={{ __html: quotation.general_warranty_terms || '' }}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_delivery_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Delivery Timeline</h5>
+                                                            {isEditing ? (
+                                                                <RichTextEditor
+                                                                    value={form.data.general_delivery_terms}
+                                                                    onChange={e => form.setData('general_delivery_terms', e)}
+                                                                    rows={3}
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                    dangerouslySetInnerHTML={{ __html: quotation.general_delivery_terms || '' }}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_payment_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Payment Terms</h5>
+                                                            {isEditing ? (
+                                                                <RichTextEditor
+                                                                    value={form.data.general_payment_terms}
+                                                                    onChange={e => form.setData('general_payment_terms', e)}
+                                                                    rows={3}
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                    dangerouslySetInnerHTML={{ __html: quotation.general_payment_terms || '' }}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_site_readiness_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Site Readiness & Delays</h5>
+                                                            {isEditing ? (
+                                                                <RichTextEditor
+                                                                    value={form.data.general_site_readiness_terms}
+                                                                    onChange={e => form.setData('general_site_readiness_terms', e)}
+                                                                    rows={3}
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                    dangerouslySetInnerHTML={{ __html: quotation.general_site_readiness_terms || '' }}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_installation_scope_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Installation Scope</h5>
+                                                            {isEditing ? (
+                                                                <RichTextEditor
+                                                                    value={form.data.general_installation_scope_terms}
+                                                                    onChange={e => form.setData('general_installation_scope_terms', e)}
+                                                                    rows={3}
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                    dangerouslySetInnerHTML={{ __html: quotation.general_installation_scope_terms || '' }}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_ownership_risk_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Ownership & Risk</h5>
+                                                            {isEditing ? (
+                                                                <RichTextEditor
+                                                                    value={form.data.general_ownership_risk_terms}
+                                                                    onChange={e => form.setData('general_ownership_risk_terms', e)}
+                                                                    rows={3}
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                    dangerouslySetInnerHTML={{ __html: quotation.general_ownership_risk_terms || '' }}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {quotation.general_force_majeure_terms && (
+                                                        <div>
+                                                            <h5 className="font-medium mb-1">Force Majeure</h5>
+                                                            {isEditing ? (
+                                                                <RichTextEditor
+                                                                    value={form.data.general_force_majeure_terms}
+                                                                    onChange={e => form.setData('general_force_majeure_terms', e)}
+                                                                    rows={3}
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                    dangerouslySetInnerHTML={{ __html: quotation.general_force_majeure_terms || '' }}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
 
-                                            <div>
-                                                <h4 className="font-medium mb-2">Warranty</h4>
-                                                {isEditing ? (
-                                                    <RichTextEditor
-                                                        value={form.data.warranty}
-                                                        onChange={e => form.setData('warranty', e)}
-                                                    />
-                                                ) : (
-                                                    <div
-                                                        className="text-sm text-muted-foreground whitespace-pre-line"
-                                                        dangerouslySetInnerHTML={{ __html: quotation.warranty_terms || '' }}
-                                                    />
-                                                )}
+                                            {/* Indoor Terms */}
+                                            {quotation.product_type === 'indoor' && (
+                                                <div>
+                                                    <h4 className="font-medium mb-3 text-primary">Indoor LED Installation</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {quotation.indoor_data_connectivity_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Data & Connectivity</h5>
+                                                                {isEditing ? (
+                                                                    <RichTextEditor
+                                                                        value={form.data.indoor_data_connectivity_terms}
+                                                                        onChange={e => form.setData('indoor_data_connectivity_terms', e)}
+                                                                        rows={3}
+                                                                    />
+                                                                ) : (
+                                                                    <div
+                                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                        dangerouslySetInnerHTML={{ __html: quotation.indoor_data_connectivity_terms || '' }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {quotation.indoor_infrastructure_readiness_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Infrastructure Readiness</h5>
+                                                                {isEditing ? (
+                                                                    <RichTextEditor
+                                                                        value={form.data.indoor_infrastructure_readiness_terms}
+                                                                        onChange={e => form.setData('indoor_infrastructure_readiness_terms', e)}
+                                                                        rows={3}
+                                                                    />
+                                                                ) : (
+                                                                    <div
+                                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                        dangerouslySetInnerHTML={{ __html: quotation.indoor_infrastructure_readiness_terms || '' }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {quotation.indoor_logistics_support_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Logistics & Support</h5>
+                                                                {isEditing ? (
+                                                                    <RichTextEditor
+                                                                        value={form.data.indoor_logistics_support_terms}
+                                                                        onChange={e => form.setData('indoor_logistics_support_terms', e)}
+                                                                        rows={3}
+                                                                    />
+                                                                ) : (
+                                                                    <div
+                                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                        dangerouslySetInnerHTML={{ __html: quotation.indoor_logistics_support_terms || '' }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {quotation.indoor_general_conditions_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">General Conditions</h5>
+                                                                {isEditing ? (
+                                                                    <RichTextEditor
+                                                                        value={form.data.indoor_general_conditions_terms}
+                                                                        onChange={e => form.setData('indoor_general_conditions_terms', e)}
+                                                                        rows={3}
+                                                                    />
+                                                                ) : (
+                                                                    <div
+                                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                        dangerouslySetInnerHTML={{ __html: quotation.indoor_general_conditions_terms || '' }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Outdoor Terms */}
+                                            {quotation.product_type === 'outdoor' && (
+                                                <div>
+                                                    <h4 className="font-medium mb-3 text-primary">Outdoor LED Installation</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {quotation.outdoor_approvals_permissions_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Approvals & Permissions</h5>
+                                                                {isEditing ? (
+                                                                    <RichTextEditor
+                                                                        value={form.data.outdoor_approvals_permissions_terms}
+                                                                        onChange={e => form.setData('outdoor_approvals_permissions_terms', e)}
+                                                                        rows={3}
+                                                                    />
+                                                                ) : (
+                                                                    <div
+                                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                        dangerouslySetInnerHTML={{ __html: quotation.outdoor_approvals_permissions_terms || '' }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {quotation.outdoor_data_connectivity_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Data & Connectivity</h5>
+                                                                {isEditing ? (
+                                                                    <RichTextEditor
+                                                                        value={form.data.outdoor_data_connectivity_terms}
+                                                                        onChange={e => form.setData('outdoor_data_connectivity_terms', e)}
+                                                                        rows={3}
+                                                                    />
+                                                                ) : (
+                                                                    <div
+                                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                        dangerouslySetInnerHTML={{ __html: quotation.outdoor_data_connectivity_terms || '' }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {quotation.outdoor_power_mounting_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Power & Mounting Infrastructure</h5>
+                                                                {isEditing ? (
+                                                                    <RichTextEditor
+                                                                        value={form.data.outdoor_power_mounting_terms}
+                                                                        onChange={e => form.setData('outdoor_power_mounting_terms', e)}
+                                                                        rows={3}
+                                                                    />
+                                                                ) : (
+                                                                    <div
+                                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                        dangerouslySetInnerHTML={{ __html: quotation.outdoor_power_mounting_terms || '' }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {quotation.outdoor_logistics_site_access_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">Logistics & Site Access</h5>
+                                                                {isEditing ? (
+                                                                    <RichTextEditor
+                                                                        value={form.data.outdoor_logistics_site_access_terms}
+                                                                        onChange={e => form.setData('outdoor_logistics_site_access_terms', e)}
+                                                                        rows={3}
+                                                                    />
+                                                                ) : (
+                                                                    <div
+                                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                        dangerouslySetInnerHTML={{ __html: quotation.outdoor_logistics_site_access_terms || '' }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {quotation.outdoor_general_conditions_terms && (
+                                                            <div>
+                                                                <h5 className="font-medium mb-1">General Conditions</h5>
+                                                                {isEditing ? (
+                                                                    <RichTextEditor
+                                                                        value={form.data.outdoor_general_conditions_terms}
+                                                                        onChange={e => form.setData('outdoor_general_conditions_terms', e)}
+                                                                        rows={3}
+                                                                    />
+                                                                ) : (
+                                                                    <div
+                                                                        className="text-sm text-muted-foreground whitespace-pre-line"
+                                                                        dangerouslySetInnerHTML={{ __html: quotation.outdoor_general_conditions_terms || '' }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        // Legacy terms display
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Taxes</h4>
+                                                    {isEditing ? (
+                                                        <RichTextEditor
+                                                            value={form.data.taxes}
+                                                            onChange={e => form.setData('taxes', e)}
+                                                        />
+                                                    ) : (
+                                                        <div
+                                                            className="text-sm text-muted-foreground whitespace-pre-line"
+                                                            dangerouslySetInnerHTML={{ __html: quotation.taxes_terms || '' }}
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Warranty</h4>
+                                                    {isEditing ? (
+                                                        <RichTextEditor
+                                                            value={form.data.warranty}
+                                                            onChange={e => form.setData('warranty', e)}
+                                                        />
+                                                    ) : (
+                                                        <div
+                                                            className="text-sm text-muted-foreground whitespace-pre-line"
+                                                            dangerouslySetInnerHTML={{ __html: quotation.warranty_terms || '' }}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Delivery Terms</h4>
+                                                    {isEditing ? (
+                                                        <RichTextEditor
+                                                            value={form.data.delivery_terms}
+                                                            onChange={e => form.setData('delivery_terms', e)}
+                                                        />
+                                                    ) : (
+                                                        <div
+                                                            className="text-sm text-muted-foreground whitespace-pre-line"
+                                                            dangerouslySetInnerHTML={{ __html: quotation.delivery_terms || '' }}
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Payment Terms</h4>
+                                                    {isEditing ? (
+                                                        <RichTextEditor
+                                                            value={form.data.payment_terms}
+                                                            onChange={e => form.setData('payment_terms', e)}
+                                                        />
+                                                    ) : (
+                                                        <div
+                                                            className="text-sm text-muted-foreground whitespace-pre-line"
+                                                            dangerouslySetInnerHTML={{ __html: quotation.payment_terms || '' }}
+                                                        />
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <div className="space-y-4">
-                                            <div>
-                                                <h4 className="font-medium mb-2">Delivery Terms</h4>
-                                                {isEditing ? (
-                                                    <RichTextEditor
-                                                        value={form.data.delivery_terms}
-                                                        onChange={e => form.setData('delivery_terms', e)}
-                                                    />
-                                                ) : (
-                                                    <div
-                                                        className="text-sm text-muted-foreground whitespace-pre-line"
-                                                        dangerouslySetInnerHTML={{ __html: quotation.delivery_terms || '' }}
-                                                    />
-                                                )}
-                                            </div>
-
-                                            <div>
-                                                <h4 className="font-medium mb-2">Payment Terms</h4>
-                                                {isEditing ? (
-                                                    <RichTextEditor
-                                                        value={form.data.payment_terms}
-                                                        onChange={e => form.setData('payment_terms', e)}
-                                                    />
-                                                ) : (
-                                                    <div
-                                                        className="text-sm text-muted-foreground whitespace-pre-line"
-                                                        dangerouslySetInnerHTML={{ __html: quotation.payment_terms || '' }}
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
 
                                 <Separator className="my-6" />
@@ -711,6 +1055,23 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                     <a href="https://radiantsynage.com" target="_blank" rel="noopener noreferrer" title="Website">
                                         <Globe className="h-6 w-6 text-gray-700 hover:text-black" />
                                     </a>
+                                </div>
+
+                                {/* Zapple QR Code for Customer Support */}
+                                <Separator className="my-6" />
+                                <div className="bg-muted/30 p-6 rounded-lg border border-border/50 text-center">
+                                    <h3 className="text-lg font-semibold text-primary mb-4">Customer Support</h3>
+                                    <div className="flex items-center justify-center gap-6">
+                                        <img
+                                            src="/images/zapple.png"
+                                            alt="Zapple QR Code"
+                                            className="w-24 h-24 object-contain"
+                                        />
+                                        <div className="text-left">
+                                            <p className="text-sm font-medium text-foreground mb-1">Scan QR Code for Support</p>
+                                            <p className="text-xs text-muted-foreground">Get instant help with your quotation</p>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Attachments */}

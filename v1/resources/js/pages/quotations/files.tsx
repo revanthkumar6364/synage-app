@@ -44,6 +44,31 @@ interface Props {
 export default function QuotationFiles({ quotation, quotationFiles = [], commonFiles = [], flash }: Props) {
     const [uploading, setUploading] = useState(false);
     const [fileCategory, setFileCategory] = useState('image');
+    const [fileMimeType, setFileMimeType] = useState('image/jpeg');
+
+    // File type mapping for different categories
+    const fileTypeMap = {
+        'image': '.jpg,.jpeg,.png,.gif,.svg',
+        'pdf': '.pdf',
+        'brochure': '.jpg,.jpeg,.png,.gif,.svg,.pdf',
+        'supplement': '.jpg,.jpeg,.png,.gif,.svg,.pdf'
+    };
+
+    // Handle category change and auto-set MIME type
+    const handleCategoryChange = (category: string) => {
+        setFileCategory(category);
+        // For brochure and supplement, we'll let the file's actual MIME type be used
+        // For specific categories, set default MIME types
+        if (category === 'image') {
+            setFileMimeType('image/jpeg');
+        } else if (category === 'pdf') {
+            setFileMimeType('application/pdf');
+        } else {
+            // For brochure and supplement, don't set a specific MIME type
+            // Let the backend use the file's detected MIME type
+            setFileMimeType('');
+        }
+    };
 
     // Handle flash messages
     useEffect(() => {
@@ -62,6 +87,7 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
         const formData = new FormData();
         formData.append('file', file);
         formData.append('category', fileCategory);
+        formData.append('mime_type', fileMimeType);
 
         setUploading(true);
 
@@ -205,7 +231,7 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
                                                         <label className="text-sm">Category:</label>
                                                         <select
                                                             value={fileCategory}
-                                                            onChange={e => setFileCategory(e.target.value)}
+                                                            onChange={e => handleCategoryChange(e.target.value)}
                                                             className="border rounded px-2 py-1 text-sm"
                                                         >
                                                             <option value="image">Image</option>
@@ -213,9 +239,13 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
                                                             <option value="brochure">Brochure</option>
                                                             <option value="supplement">Supplement</option>
                                                         </select>
+                                                        <span className="text-xs text-gray-500">
+                                                            {fileMimeType ? `MIME: ${fileMimeType}` : 'MIME: Auto-detect'}
+                                                        </span>
                                                     </div>
                                                     <Input
                                                         type="file"
+                                                        accept={fileTypeMap[fileCategory as keyof typeof fileTypeMap] || '*'}
                                                         onChange={handleFileChange}
                                                         disabled={uploading}
                                                         className="max-w-xs"
