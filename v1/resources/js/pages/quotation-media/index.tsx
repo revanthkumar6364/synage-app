@@ -253,21 +253,51 @@ export default function Index({ media, filters, categories }: Props) {
                                     <TableRow key={item.id}>
                                         <TableCell>
                                             <div className="relative group">
-                                                <img
-                                                    src={item.full_url}
-                                                    alt={item.name}
-                                                    className="w-16 h-16 object-cover rounded transition-transform duration-200 group-hover:scale-105"
-                                                />
-                                                <a
-                                                    href={item.full_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors duration-200 rounded"
-                                                >
-                                                    <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs font-medium">
-                                                        View
-                                                    </span>
-                                                </a>
+                                                {item.mime_type === 'application/pdf' ? (
+                                                    <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border border-gray-200">
+                                                        <svg
+                                                            className="h-8 w-8 text-red-500"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                                            />
+                                                        </svg>
+                                                        <a
+                                                            href={item.full_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors duration-200 rounded"
+                                                        >
+                                                            <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs font-medium">
+                                                                View
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <img
+                                                            src={item.full_url}
+                                                            alt={item.name}
+                                                            className="w-16 h-16 object-cover rounded transition-transform duration-200 group-hover:scale-105"
+                                                        />
+                                                        <a
+                                                            href={item.full_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors duration-200 rounded"
+                                                        >
+                                                            <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs font-medium">
+                                                                View
+                                                            </span>
+                                                        </a>
+                                                    </>
+                                                )}
                                             </div>
                                         </TableCell>
                                         <TableCell>{item.name}</TableCell>

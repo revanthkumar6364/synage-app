@@ -56,7 +56,7 @@ class QuotationMediaController extends Controller
             abort(403);
         }
         $validated = $request->validate([
-            'file' => 'required|file|mimes:jpg,jpeg,png,gif,svg|max:5120',
+            'file' => 'required|file|mimes:jpg,jpeg,png,gif,svg,pdf|max:10240',
             'category' => 'required|string|in:' . implode(',', array_keys(config('all.quotation_images_categories'))),
             'name' => 'required|string|max:255',
         ]);

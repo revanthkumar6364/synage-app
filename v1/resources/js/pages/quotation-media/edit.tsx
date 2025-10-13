@@ -133,25 +133,57 @@ const Edit: FC<Props> = ({ media, categories }) => {
                                 {media.full_url && (
                                     <div className="space-y-4">
                                         <div className="relative">
-                                            <img
-                                                src={media.full_url}
-                                                alt={media.name}
-                                                className="w-full rounded-lg object-contain max-h-[400px]"
-                                            />
-                                            <a
-                                                href={media.full_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium shadow-sm transition-colors duration-200"
-                                            >
-                                                View Full Size
-                                            </a>
+                                            {media.mime_type === 'application/pdf' ? (
+                                                <div className="space-y-4">
+                                                    <div className="text-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                                        <svg
+                                                            className="mx-auto h-12 w-12 text-gray-400"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke="currentColor"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                                            />
+                                                        </svg>
+                                                        <p className="mt-2 text-sm font-medium text-gray-900">PDF Document</p>
+                                                        <p className="text-xs text-gray-500">{media.name}</p>
+                                                    </div>
+                                                    <a
+                                                        href={media.full_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors duration-200"
+                                                    >
+                                                        Open PDF
+                                                    </a>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <img
+                                                        src={media.full_url}
+                                                        alt={media.name}
+                                                        className="w-full rounded-lg object-contain max-h-[400px]"
+                                                    />
+                                                    <a
+                                                        href={media.full_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium shadow-sm transition-colors duration-200"
+                                                    >
+                                                        View Full Size
+                                                    </a>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 )}
                                 {!media.full_url && (
                                     <div className="text-center p-8 bg-gray-50 rounded-lg">
-                                        <p className="text-gray-500">Image preview not available</p>
+                                        <p className="text-gray-500">Preview not available</p>
                                     </div>
                                 )}
                                 <div className="text-sm text-gray-500">

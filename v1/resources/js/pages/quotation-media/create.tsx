@@ -24,7 +24,7 @@ const Create: FC<Props> = ({ categories }) => {
         name: '',
         category: 'custom',
         file: null as File | null,
-        is_active: true,
+        is_active: true as boolean,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -87,8 +87,9 @@ const Create: FC<Props> = ({ categories }) => {
                                     id="file"
                                     type="file"
                                     onChange={handleFileChange}
-                                    accept="image/*"
+                                    accept="image/*,.pdf"
                                 />
+                                <p className="text-xs text-gray-500">Supported formats: Images (JPG, PNG, GIF, SVG) and PDF</p>
                                 {errors.file && <p className="text-sm text-red-500">{errors.file}</p>}
                                 {progress && (
                                     <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -104,13 +105,9 @@ const Create: FC<Props> = ({ categories }) => {
                                 <Label htmlFor="is_active">Active</Label>
                                 <Switch
                                     id="is_active"
-                                    defaultChecked
+                                    checked={data.is_active}
                                     aria-label="Toggle active state"
-                                    onCheckedChange={(checked) => {
-                                        if (typeof checked === 'boolean') {
-                                            setData('is_active', checked);
-                                        }
-                                    }}
+                                    onCheckedChange={(checked: boolean) => setData('is_active', checked)}
                                 />
                             </div>
 
