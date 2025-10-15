@@ -43,6 +43,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('quotations.reject');
     Route::post('/quotations/{quotation}/mark-as-order-received', [QuotationController::class, 'markAsOrderReceived'])
         ->name('quotations.mark-as-order-received');
+    Route::post('/quotations/{quotation}/update-sub-status', [QuotationController::class, 'updateSubStatus'])
+        ->name('quotations.update-sub-status');
     Route::post('/quotations/{quotation}/create-version', [QuotationController::class, 'createVersion'])
         ->name('quotations.create-version');
     Route::get('quotations/{quotation}/files', [QuotationController::class, 'files'])->name('quotations.files');

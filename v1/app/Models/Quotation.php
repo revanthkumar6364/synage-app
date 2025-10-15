@@ -20,6 +20,10 @@ class Quotation extends Model
     const STATUS_REJECTED = 'rejected';
     const STATUS_ORDER_RECEIVED = 'order_received';
 
+    const SUB_STATUS_OPEN = 'open';
+    const SUB_STATUS_HOT = 'hot';
+    const SUB_STATUS_COLD = 'cold';
+
     protected $fillable = [
         'parent_id',
         'reference',
@@ -98,6 +102,9 @@ class Quotation extends Model
         'grand_total',
         'category',
         'status',
+        'sub_status',
+        'sub_status_updated_at',
+        'sub_status_notes',
         'editable',
         'last_action',
         'created_by',
@@ -138,10 +145,11 @@ class Quotation extends Model
         'deleted_at' => 'datetime',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
+        'sub_status_updated_at' => 'datetime',
     ];
 
     protected $with = ['account', 'account_contact', 'salesUser'];
-    protected $appends = ['can'];
+    protected $appends = ['can', 'sub_status_color', 'effective_sub_status'];
 
     public function getCanAttribute()
     {
@@ -433,6 +441,16 @@ class Quotation extends Model
                 $quotation->quotation_number = $quotation->generateQuotationNumber();
             }
         });
+
+        static::updating(function ($quotation) {
+            // When a quotation is approved, set sub_status to 'open' if not already set
+            if ($quotation->isDirty('status') && $quotation->status === self::STATUS_APPROVED) {
+                if (!$quotation->sub_status) {
+                    $quotation->sub_status = self::SUB_STATUS_OPEN;
+                    $quotation->sub_status_updated_at = now();
+                }
+            }
+        });
     }
 
 
@@ -506,6 +524,67 @@ class Quotation extends Model
     public function isOrderReceived(): bool
     {
         return $this->status === self::STATUS_ORDER_RECEIVED;
+    }
+
+    // Sub-status helper methods
+    public function setSubStatus(string $subStatus, string $notes = null): bool
+    {
+        if (!in_array($subStatus, [self::SUB_STATUS_OPEN, self::SUB_STATUS_HOT, self::SUB_STATUS_COLD])) {
+            return false;
+        }
+
+        $this->sub_status = $subStatus;
+        $this->sub_status_updated_at = now();
+
+        if ($notes !== null) {
+            $this->sub_status_notes = $notes;
+        }
+
+        return $this->save();
+    }
+
+    /**
+     * Get the effective sub-status (from DB or calculated from approval date)
+     */
+    public function getEffectiveSubStatusAttribute(): ?string
+    {
+        // Only apply sub-status logic to approved quotations
+        if ($this->status !== self::STATUS_APPROVED) {
+            return null;
+        }
+
+        // If sub_status is explicitly set, use it
+        if ($this->sub_status) {
+            return $this->sub_status;
+        }
+
+        // If no sub_status is set, calculate based on approval date
+        if ($this->approved_at) {
+            $daysSinceApproval = $this->approved_at->diffInDays(now());
+
+            // If approved more than 30 days ago, it's cold
+            if ($daysSinceApproval > 30) {
+                return self::SUB_STATUS_COLD;
+            }
+
+            // Otherwise, it's open
+            return self::SUB_STATUS_OPEN;
+        }
+
+        // Default to open if approved but no approved_at date
+        return self::SUB_STATUS_OPEN;
+    }
+
+    public function getSubStatusColorAttribute(): string
+    {
+        $effectiveSubStatus = $this->effective_sub_status;
+
+        return match($effectiveSubStatus) {
+            self::SUB_STATUS_HOT => 'red',
+            self::SUB_STATUS_COLD => 'blue',
+            self::SUB_STATUS_OPEN => 'yellow',
+            default => 'gray',
+        };
     }
 
     // Terms and conditions helper methods

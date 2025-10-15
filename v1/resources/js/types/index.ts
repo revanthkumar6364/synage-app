@@ -202,6 +202,11 @@ export interface Quotation {
     total_amount: number;
     grand_total: number;
     status: 'draft' | 'pending' | 'approved' | 'order_received' | 'rejected';
+    sub_status?: 'open' | 'hot' | 'cold';
+    sub_status_updated_at?: string;
+    sub_status_notes?: string;
+    sub_status_color?: string;
+    effective_sub_status?: 'open' | 'hot' | 'cold';
     editable: boolean;
     last_action?: string;
     created_by: number;

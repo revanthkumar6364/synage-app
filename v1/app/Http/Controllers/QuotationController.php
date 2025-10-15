@@ -934,6 +934,43 @@ class QuotationController extends Controller
     }
 
     /**
+     * Update sub-status for approved quotations
+     */
+    public function updateSubStatus(Request $request, Quotation $quotation)
+    {
+        // Only approved quotations can have sub-status
+        if ($quotation->status !== Quotation::STATUS_APPROVED) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sub-status can only be updated for approved quotations.'
+            ], 400);
+        }
+
+        $validated = $request->validate([
+            'sub_status' => 'required|in:open,hot,cold',
+            'sub_status_notes' => 'nullable|string',
+        ]);
+
+        try {
+            $quotation->setSubStatus(
+                $validated['sub_status'],
+                $validated['sub_status_notes'] ?? null
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Sub-status updated successfully.',
+                'quotation' => $quotation->fresh(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update sub-status.'
+            ], 500);
+        }
+    }
+
+    /**
      * Automatically attach default files to a quotation
      */
     private function attachDefaultFiles(Quotation $quotation)

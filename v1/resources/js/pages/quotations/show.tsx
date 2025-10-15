@@ -12,6 +12,8 @@ import { useTheme } from 'next-themes';
 import { Table, TableHeader, TableBody, TableCell, TableRow, TableHead } from '@/components/ui/table';
 import { MessageCircle, Facebook, Instagram, Youtube, Linkedin, Globe } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import SubStatusDialog from '@/components/SubStatusDialog';
+import { Badge } from '@/components/ui/badge';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -64,6 +66,15 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                 return `${baseStyle} bg-red-500 text-white`;
             default:
                 return `${baseStyle} bg-muted text-muted-foreground`;
+        }
+    };
+
+    const getSubStatusColor = (subStatus?: string) => {
+        switch (subStatus) {
+            case 'hot': return 'bg-red-100 text-red-800 border-red-300';
+            case 'cold': return 'bg-blue-100 text-blue-800 border-blue-300';
+            case 'open': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+            default: return 'bg-gray-100 text-gray-800';
         }
     };
 
@@ -186,11 +197,28 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
                         <div>
                             <CardTitle className="text-2xl">View Quotation</CardTitle>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center flex-wrap gap-2 mt-1">
                                 <p className="text-sm text-muted-foreground">Reference: {quotation.reference}</p>
                                 <div className={getStatusBadgeStyle(quotation.status)}>
                                     {quotation.status === 'order_received' ? 'Order Received' : quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)}
                                 </div>
+                                {quotation.status === 'approved' && quotation.effective_sub_status && (
+                                    <div className="flex items-center gap-1">
+                                        <Badge className={getSubStatusColor(quotation.effective_sub_status)}>
+                                            {quotation.effective_sub_status.charAt(0).toUpperCase() + quotation.effective_sub_status.slice(1)}
+                                        </Badge>
+                                        <SubStatusDialog
+                                            quotationId={quotation.id}
+                                            currentSubStatus={quotation.sub_status || quotation.effective_sub_status}
+                                            currentNotes={quotation.sub_status_notes}
+                                            trigger={
+                                                <Button variant="ghost" size="sm" className="h-6 text-xs">
+                                                    Update
+                                                </Button>
+                                            }
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="flex gap-2">

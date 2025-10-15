@@ -270,10 +270,10 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                             const value = e.target.value.replace(/\D/g, '');
                                             setData('hsn_code', value);
                                         }}
-                                        placeholder="Enter HSN Code (min 5 digits)"
-                                        maxLength={10}
+                                        placeholder="Enter HSN Code (exactly 5 digits)"
+                                        maxLength={5}
                                     />
-                                    <p className="text-xs text-muted-foreground">Minimum 5 digits required</p>
+                                    <p className="text-xs text-muted-foreground">Exactly 5 digits required</p>
                                     {errors.hsn_code && <p className="text-sm text-red-500">{errors.hsn_code}</p>}
                                 </div>
 

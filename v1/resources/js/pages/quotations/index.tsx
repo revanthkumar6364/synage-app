@@ -7,9 +7,10 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Search, RefreshCcw, Plus, EyeIcon, PencilIcon, CheckIcon } from 'lucide-react';
+import { Search, RefreshCcw, Plus, EyeIcon, PencilIcon, CheckIcon, Flame } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
+import SubStatusDialog from '@/components/SubStatusDialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -26,6 +27,10 @@ interface Quotation {
     estimate_date: string;
     total_amount: number | null;
     status: 'draft' | 'pending' | 'approved' | 'order_received' | 'rejected';
+    sub_status?: 'open' | 'hot' | 'cold';
+    effective_sub_status?: 'open' | 'hot' | 'cold';
+    sub_status_color?: string;
+    sub_status_notes?: string;
     parent_id?: number;
     creator?: any;
     sales_user?: any;
@@ -97,6 +102,28 @@ export default function Index({ quotations, filters, statuses }: Props) {
             case 'rejected': return 'bg-red-100 text-red-800';
             default: return 'bg-gray-100 text-gray-800';
         }
+    };
+
+    const getSubStatusColor = (subStatus?: string) => {
+        switch (subStatus) {
+            case 'hot': return 'bg-red-100 text-red-800 border-red-300';
+            case 'cold': return 'bg-blue-100 text-blue-800 border-blue-300';
+            case 'open': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getRowBackgroundColor = (quotation: Quotation) => {
+        // Only apply background color for approved quotations with sub-status
+        if (quotation.status === 'approved' && quotation.effective_sub_status) {
+            switch (quotation.effective_sub_status) {
+                case 'hot': return 'bg-red-50 hover:bg-red-100';
+                case 'cold': return 'bg-blue-50 hover:bg-blue-100';
+                case 'open': return 'bg-yellow-50 hover:bg-yellow-100';
+                default: return 'bg-white hover:bg-gray-50';
+            }
+        }
+        return 'bg-white hover:bg-gray-50';
     };
 
     const formatAmount = (amount: number | null): string => {
@@ -179,6 +206,7 @@ export default function Index({ quotations, filters, statuses }: Props) {
                                         <TableHead className="min-w-[100px]">Date</TableHead>
                                         <TableHead className="min-w-[120px]">Total</TableHead>
                                         <TableHead className="min-w-[100px]">Status</TableHead>
+                                        <TableHead className="min-w-[100px]">Sub-Status</TableHead>
                                         <TableHead className="min-w-[120px]">Actions</TableHead>
                                         <TableHead className="min-w-[150px]">Team</TableHead>
 
@@ -187,7 +215,7 @@ export default function Index({ quotations, filters, statuses }: Props) {
                                 </TableHeader>
                                 <TableBody>
                                     {quotations.data.map((quotation: Quotation) => (
-                                        <TableRow key={quotation.id}>
+                                        <TableRow key={quotation.id} className={getRowBackgroundColor(quotation)}>
                                             <TableCell className="font-medium">
                                                 <div className="flex flex-col">
                                                     <span className="break-all">{quotation.reference}</span>
@@ -218,6 +246,25 @@ export default function Index({ quotations, filters, statuses }: Props) {
                                                 <Badge className={getStatusColor(quotation.status)}>
                                                     {quotation.status === 'order_received' ? 'Order Received' : quotation.status}
                                                 </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                {quotation.status === 'approved' && quotation.effective_sub_status && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge className={getSubStatusColor(quotation.effective_sub_status)}>
+                                                            {quotation.effective_sub_status.charAt(0).toUpperCase() + quotation.effective_sub_status.slice(1)}
+                                                        </Badge>
+                                                        <SubStatusDialog
+                                                            quotationId={quotation.id}
+                                                            currentSubStatus={quotation.sub_status || quotation.effective_sub_status}
+                                                            currentNotes={quotation.sub_status_notes}
+                                                            trigger={
+                                                                <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                                    <Flame className="h-3 w-3" />
+                                                                </Button>
+                                                            }
+                                                        />
+                                                    </div>
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex flex-wrap gap-1">
