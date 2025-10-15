@@ -988,15 +988,9 @@ class QuotationController extends Controller
                 'editable' => false,
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Quotation marked as order received successfully.'
-            ]);
+            return back()->with('success', 'Quotation marked as order received successfully.');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to mark quotation as order received.'
-            ], 500);
+            return back()->with('error', 'Failed to mark quotation as order received.');
         }
     }
 
