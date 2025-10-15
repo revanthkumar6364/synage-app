@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useTheme } from 'next-themes';
 import { Table, TableHeader, TableBody, TableCell, TableRow, TableHead } from '@/components/ui/table';
-import { MessageCircle, Facebook, Instagram, Youtube, Linkedin, Globe, AlertCircle } from 'lucide-react';
+import { MessageCircle, Facebook, Instagram, Youtube, Linkedin, Globe, AlertCircle, FileText, Download } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import SubStatusDialog from '@/components/SubStatusDialog';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +31,8 @@ interface QuotationMedia {
     id: number;
     name: string;
     full_url: string;
+    category?: string;
+    file_name?: string;
 }
 
 interface FormData {
@@ -884,14 +886,34 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                     <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-6 object-contain opacity-30" />
                                                 </div>
                                                 <div className="grid grid-cols-3 gap-4">
-                                                    {commonFiles.map((file) => (
-                                                        <img
-                                                            key={file.id}
-                                                            src={file.full_url}
-                                                            alt={file.name}
-                                                            className="rounded-lg shadow-sm h-30 w-30 object-cover"
-                                                        />
-                                                    ))}
+                                                    {commonFiles.map((file) => {
+                                                        const isPdf = file.category === 'pdf' || file.name?.toLowerCase().endsWith('.pdf') || file.file_name?.toLowerCase().endsWith('.pdf');
+                                                        
+                                                        if (isPdf) {
+                                                            return (
+                                                                <a
+                                                                    key={file.id}
+                                                                    href={file.full_url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                                                >
+                                                                    <FileText className="h-12 w-12 text-red-600 mb-2" />
+                                                                    <span className="text-xs text-center text-gray-700 line-clamp-2">{file.name}</span>
+                                                                    <Download className="h-4 w-4 text-gray-400 mt-1" />
+                                                                </a>
+                                                            );
+                                                        }
+                                                        
+                                                        return (
+                                                            <img
+                                                                key={file.id}
+                                                                src={file.full_url}
+                                                                alt={file.name}
+                                                                className="rounded-lg shadow-sm h-30 w-30 object-cover"
+                                                            />
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         )}
@@ -903,14 +925,34 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                         <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-6 object-contain opacity-30" />
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-4">
-                                                        {quotationFiles.map((file) => (
-                                                            <img
-                                                                key={file.id}
-                                                                src={file.full_url}
-                                                                alt={file.name}
-                                                                className="rounded-lg shadow-sm h-100 w-100 object-cover"
-                                                            />
-                                                        ))}
+                                                        {quotationFiles.map((file) => {
+                                                            const isPdf = file.category === 'pdf' || file.name?.toLowerCase().endsWith('.pdf') || file.file_name?.toLowerCase().endsWith('.pdf');
+                                                            
+                                                            if (isPdf) {
+                                                                return (
+                                                                    <a
+                                                                        key={file.id}
+                                                                        href={file.full_url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                                                    >
+                                                                        <FileText className="h-12 w-12 text-red-600 mb-2" />
+                                                                        <span className="text-xs text-center text-gray-700 line-clamp-2">{file.name}</span>
+                                                                        <Download className="h-4 w-4 text-gray-400 mt-1" />
+                                                                    </a>
+                                                                );
+                                                            }
+                                                            
+                                                            return (
+                                                                <img
+                                                                    key={file.id}
+                                                                    src={file.full_url}
+                                                                    alt={file.name}
+                                                                    className="rounded-lg shadow-sm h-100 w-100 object-cover"
+                                                                />
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             </>

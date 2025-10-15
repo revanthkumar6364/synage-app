@@ -860,7 +860,7 @@ class QuotationController extends Controller
 
             DB::commit();
 
-            $message = $quotation->status === 'order_received' 
+            $message = $quotation->status === 'order_received'
                 ? 'Repeat order created successfully. You can now edit pricing for this customer.'
                 : 'New version created successfully.';
 

@@ -1086,14 +1086,35 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                                         <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-6 object-contain opacity-30" />
                                                     </div>
                                                     <div className="grid grid-cols-3 gap-4">
-                                                        {commonFiles.map((file) => (
-                                                            <img
-                                                                key={file.id}
-                                                                src={file.full_url}
-                                                                alt={file.name}
-                                                                className="rounded-lg shadow-sm h-30 w-30 object-cover"
-                                                            />
-                                                        ))}
+                                                        {commonFiles.map((file) => {
+                                                            const isImage = file.category === 'image' || (file.full_url && file.full_url.match(/\.(jpg|jpeg|png|gif)$/i));
+                                                            const isPdf = file.category === 'pdf' || file.name?.toLowerCase().endsWith('.pdf');
+                                                            
+                                                            if (isPdf) {
+                                                                return (
+                                                                    <a
+                                                                        key={file.id}
+                                                                        href={file.full_url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="flex flex-col items-center justify-center border rounded-lg p-4 bg-white hover:bg-gray-50 transition"
+                                                                    >
+                                                                        <FileTextIcon className="h-8 w-8 text-red-600 mb-2" />
+                                                                        <span className="text-xs text-center">{file.name}</span>
+                                                                        <span className="text-blue-600 underline mt-1">View PDF</span>
+                                                                    </a>
+                                                                );
+                                                            }
+                                                            
+                                                            return (
+                                                                <img
+                                                                    key={file.id}
+                                                                    src={file.full_url}
+                                                                    alt={file.name}
+                                                                    className="rounded-lg shadow-sm h-30 w-30 object-cover"
+                                                                />
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             </>
