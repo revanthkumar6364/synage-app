@@ -27,14 +27,14 @@ class FixQuotationTerms extends Command
     public function handle()
     {
         $dryRun = $this->option('dry-run');
-        
+
         if ($dryRun) {
             $this->info('🔍 DRY RUN MODE - No changes will be saved');
             $this->newLine();
         }
 
         $quotations = Quotation::whereNotNull('product_type')->get();
-        
+
         if ($quotations->isEmpty()) {
             $this->warn('No quotations found with product_type set.');
             return Command::SUCCESS;
@@ -54,21 +54,21 @@ class FixQuotationTerms extends Command
                 // Store old values for comparison
                 $oldIndoor = $quotation->indoor_data_connectivity_terms;
                 $oldOutdoor = $quotation->outdoor_approvals_permissions_terms;
-                
+
                 // Repopulate terms based on product_type
                 $quotation->populateDefaultTerms($quotation->product_type);
-                
+
                 // Check if anything changed
-                $changed = ($oldIndoor !== $quotation->indoor_data_connectivity_terms) || 
+                $changed = ($oldIndoor !== $quotation->indoor_data_connectivity_terms) ||
                           ($oldOutdoor !== $quotation->outdoor_approvals_permissions_terms);
-                
+
                 if ($changed) {
                     if (!$dryRun) {
                         $quotation->save();
                     }
                     $fixed++;
                 }
-                
+
                 $bar->advance();
             } catch (\Exception $e) {
                 $errors++;

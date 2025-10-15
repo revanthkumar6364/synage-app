@@ -650,7 +650,7 @@ class Quotation extends Model
         $this->indoor_infrastructure_readiness_terms = null;
         $this->indoor_logistics_support_terms = null;
         $this->indoor_general_conditions_terms = null;
-        
+
         $this->outdoor_approvals_permissions_terms = null;
         $this->outdoor_data_connectivity_terms = null;
         $this->outdoor_power_mounting_terms = null;

@@ -365,12 +365,12 @@ class QuotationController extends Controller
 
         $validated['updated_by'] = $request->user()->id;
         $validated['last_action'] = 'updated';
-        
-        // Check if product_type has changed and repopulate T&C accordingly
-        if (isset($validated['product_type']) && $validated['product_type'] !== $quotation->product_type) {
+
+        // Always repopulate T&C to ensure correct terms (fixes old quotations with wrong T&C)
+        if (isset($validated['product_type'])) {
             $quotation->populateDefaultTerms($validated['product_type']);
         }
-        
+
         $quotation->update($validated);
 
         // Check if this is a "save and next" action
