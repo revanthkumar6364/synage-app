@@ -836,6 +836,11 @@ class QuotationController extends Controller
             $newQuotation->rejected_at = null;
             $newQuotation->rejected_by = null;
             $newQuotation->rejection_reason = null;
+            $newQuotation->requires_pricing_approval = false;
+            $newQuotation->pricing_approval_notes = null;
+            $newQuotation->sub_status = null;
+            $newQuotation->sub_status_updated_at = null;
+            $newQuotation->sub_status_notes = null;
             $newQuotation->sales_user_id = $quotation->sales_user_id;
             $newQuotation->save();
 
@@ -855,8 +860,12 @@ class QuotationController extends Controller
 
             DB::commit();
 
+            $message = $quotation->status === 'order_received' 
+                ? 'Repeat order created successfully. You can now edit pricing for this customer.'
+                : 'New version created successfully.';
+
             return redirect()->route('quotations.edit', $newQuotation->id)
-                ->with('success', 'New version created successfully.');
+                ->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Failed to create new version: ' . $e->getMessage());

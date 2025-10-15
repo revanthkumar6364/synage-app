@@ -283,7 +283,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     {loading ? 'Processing...' : 'Mark as Order Received'}
                                 </Button>
                             )}
-                            {(quotation.status === 'pending' || quotation.status === 'approved') && (
+                            {(quotation.status === 'pending' || quotation.status === 'approved' || quotation.status === 'order_received') && (
                                 <Button
                                     variant="outline"
                                     onClick={() => {
@@ -302,7 +302,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     }}
                                     disabled={loading}
                                 >
-                                    {loading ? 'Creating...' : 'Make New Version'}
+                                    {loading ? 'Creating...' : quotation.status === 'order_received' ? 'Create Repeat Order' : 'Make New Version'}
                                 </Button>
                             )}
                             <Button
