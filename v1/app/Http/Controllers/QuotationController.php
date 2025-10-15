@@ -504,15 +504,34 @@ class QuotationController extends Controller
             // Check if pricing approval is required
             $quotation->checkAndSetPricingApproval();
 
+            // Auto-approve if within standard pricing and status is pending
+            if ($quotation->status === 'pending' && !$quotation->requires_pricing_approval) {
+                $quotation->update([
+                    'status' => 'approved',
+                    'approved_at' => now(),
+                    'approved_by' => $request->user()->id,
+                    'last_action' => 'auto_approved',
+                    'editable' => false,
+                ]);
+            }
+
             DB::commit();
+
+            // Success message varies based on auto-approval
+            $successMessage = 'Quotation products updated successfully.';
+            if ($quotation->status === 'approved' && $quotation->last_action === 'auto_approved') {
+                $successMessage .= ' ✓ Quotation auto-approved (pricing within standard range).';
+            } elseif ($quotation->requires_pricing_approval) {
+                $successMessage .= ' ⚠ Pricing approval required (items outside standard range).';
+            }
 
             // Check if this is a "save and preview" action
             if ($request->has('action') && $request->action === 'save_and_preview') {
                 return redirect()->route('quotations.preview', $quotation)
-                    ->with('success', 'Quotation products updated successfully. Now preview your quotation.');
+                    ->with('success', $successMessage);
             } else {
                 // Regular save - stay on products page
-                return back()->with('success', 'Quotation products updated successfully.');
+                return back()->with('success', $successMessage);
             }
         } catch (\Exception $e) {
             DB::rollBack();

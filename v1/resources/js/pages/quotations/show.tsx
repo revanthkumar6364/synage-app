@@ -226,6 +226,11 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                 <div className={getStatusBadgeStyle(quotation.status)}>
                                     {quotation.status === 'order_received' ? 'Order Received' : quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)}
                                 </div>
+                                {quotation.status === 'approved' && quotation.last_action === 'auto_approved' && (
+                                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs">
+                                        ✓ Auto-Approved
+                                    </Badge>
+                                )}
                                 {quotation.status === 'approved' && quotation.effective_sub_status && (
                                     <div className="flex items-center gap-1">
                                         <Badge className={getSubStatusColor(quotation.effective_sub_status)}>
