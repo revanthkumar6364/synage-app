@@ -218,6 +218,35 @@ const Show: FC<ShowProps> = ({ product }) => {
                                 </div>
                             )}
 
+                            {/* Specification Image */}
+                            {(product.specification_image_url || product.specification_image) && (
+                                <div className="md:col-span-2">
+                                    <h3 className="font-semibold text-lg mb-3">Specification Image</h3>
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        {product.specification_image_url ? (
+                                            <img
+                                                src={product.specification_image_url}
+                                                alt={`${product.name} specification`}
+                                                className="max-w-full h-auto rounded-lg shadow-sm"
+                                                style={{ maxHeight: '500px' }}
+                                            />
+                                        ) : (
+                                            <div className="flex items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
+                                                <div className="text-center">
+                                                    <p className="text-gray-500 mb-2">Specification Image Available</p>
+                                                    <p className="text-sm text-gray-400">{product.specification_image}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {product.specification_image && (
+                                            <p className="text-sm text-gray-600 mt-2">
+                                                File: {product.specification_image}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
 
                         </div>
                     </CardContent>

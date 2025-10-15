@@ -329,23 +329,40 @@
 
         .attachments-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            grid-template-columns: 1fr;
+            gap: 30px;
             margin-top: 15px;
         }
 
         .attachment-img {
-            width: 200px;
-            height: 200px;
+            width: 100%;
+            height: auto;
+            max-height: 700px;
             border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            object-fit: contain;
+            page-break-inside: avoid;
+        }
+
+        .specification-section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
         }
 
         .attachment-img1 {
             width: auto;
-            height: 500px;
+            max-width: 100%;
+            height: auto;
+            max-height: 500px;
             border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .pdf-link {
+            margin-bottom: 8px;
+            padding: 8px;
+            background-color: #fef3f2;
+            border-left: 3px solid #dc2626;
         }
     </style>
 </head>
@@ -868,42 +885,68 @@
         <div class="attachments">
             <div class="separator"></div>
             @if ($commonFiles->isNotEmpty())
-                <div style="margin-bottom: 25px">
-                    <div class="attachments-grid">
-                        @foreach ($commonFiles as $file)
-                            @if ($file->category === 'pdf' || str_ends_with(strtolower($file->name ?? ''), '.pdf'))
-                                <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; text-align: center; background-color: #f9f9f9;">
-                                    <div style="font-size: 24px; color: #dc2626; margin-bottom: 8px;">📄</div>
-                                    <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">{{ $file->name }}</div>
-                                    <div style="font-size: 10px; color: #666;">PDF Document</div>
+                @php
+                    $commonImages = $commonFiles->filter(fn($f) => $f->category !== 'pdf' && !str_ends_with(strtolower($f->name ?? ''), '.pdf'));
+                    $commonPdfs = $commonFiles->filter(fn($f) => $f->category === 'pdf' || str_ends_with(strtolower($f->name ?? ''), '.pdf'));
+                @endphp
+
+                @if ($commonPdfs->isNotEmpty())
+                    <div style="margin-bottom: 15px;">
+                        <h4 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px;">Reference Documents:</h4>
+                        @foreach ($commonPdfs as $file)
+                            <div class="pdf-link">
+                                <div style="font-size: 11px; font-weight: bold; color: #333; margin-bottom: 3px;">
+                                    📄 {{ $file->name }}
                                 </div>
-                            @else
-                                <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
-                                    alt="{{ $file->name }}" class="attachment-img">
-                            @endif
+                                <div style="font-size: 8px; color: #0066cc; word-break: break-all; font-family: monospace;">
+                                    {{ $file->full_url ?? url('storage/' . $file->file_path . '/' . $file->file_name) }}
+                                </div>
+                            </div>
                         @endforeach
                     </div>
-                </div>
+                @endif
+
+                @if ($commonImages->isNotEmpty())
+                    @foreach ($commonImages as $file)
+                        <div class="specification-section">
+                            <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
+                                alt="{{ $file->name }}" class="attachment-img" style="display: block; margin: 0 auto;">
+                        </div>
+                    @endforeach
+                @endif
             @endif
             @if ($quotationFiles->isNotEmpty())
+                @php
+                    $images = $quotationFiles->filter(fn($f) => $f->category !== 'pdf' && !str_ends_with(strtolower($f->name ?? ''), '.pdf'));
+                    $pdfs = $quotationFiles->filter(fn($f) => $f->category === 'pdf' || str_ends_with(strtolower($f->name ?? ''), '.pdf'));
+                @endphp
+
                 <div class="separator"></div>
-                <div>
-                    <h3>Attachments</h3>
-                    <div class="attachments-grid">
-                        @foreach ($quotationFiles as $file)
-                            @if ($file->category === 'pdf' || str_ends_with(strtolower($file->name ?? ''), '.pdf'))
-                                <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; text-align: center; background-color: #f9f9f9;">
-                                    <div style="font-size: 24px; color: #dc2626; margin-bottom: 8px;">📄</div>
-                                    <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">{{ $file->name }}</div>
-                                    <div style="font-size: 10px; color: #666;">PDF Document</div>
+
+                @if ($pdfs->isNotEmpty())
+                    <div style="margin-bottom: 15px;">
+                        <h4 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px;">Additional Documents:</h4>
+                        @foreach ($pdfs as $file)
+                            <div class="pdf-link">
+                                <div style="font-size: 11px; font-weight: bold; color: #333; margin-bottom: 3px;">
+                                    📄 {{ $file->name }}
                                 </div>
-                            @else
-                                <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
-                                    alt="{{ $file->name }}" class="attachment-img1">
-                            @endif
+                                <div style="font-size: 8px; color: #0066cc; word-break: break-all; font-family: monospace;">
+                                    {{ $file->full_url ?? url('storage/' . $file->file_path . '/' . $file->file_name) }}
+                                </div>
+                            </div>
                         @endforeach
                     </div>
-                </div>
+                @endif
+
+                @if ($images->isNotEmpty())
+                    @foreach ($images as $file)
+                        <div class="specification-section">
+                            <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
+                                alt="{{ $file->name }}" class="attachment-img" style="display: block; margin: 0 auto;">
+                        </div>
+                    @endforeach
+                @endif
             @endif
         </div>
     @endif

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -94,6 +95,22 @@ class ProductController extends Controller
             }
         }
 
+        // Handle specification image upload
+        if ($request->hasFile('specification_image')) {
+            $image = $request->file('specification_image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $imagePath = 'product-specifications';
+            $fullPath = "{$imagePath}/{$imageName}";
+
+            // Store the file - this automatically creates directories
+            if (!Storage::disk('public')->put($fullPath, file_get_contents($image->getRealPath()))) {
+                throw new \Exception('Failed to store specification image: ' . $image->getClientOriginalName());
+            }
+
+            $validated['specification_image'] = $imageName;
+            $validated['specification_image_path'] = $imagePath;
+        }
+
         // Get the category and set product_type from category slug
         $category = Category::find($validated['category_id']);
         if ($category) {
@@ -146,8 +163,30 @@ class ProductController extends Controller
             'status' => 'required|in:active,inactive',
             'pixel_pitch' => 'nullable|numeric|min:0',
             'refresh_rate' => 'nullable|integer|min:0',
-            'cabinet_type' => 'nullable|string|max:255'
+            'cabinet_type' => 'nullable|string|max:255',
+            'specification_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120'
         ]);
+
+        // Handle specification image upload
+        if ($request->hasFile('specification_image')) {
+            $image = $request->file('specification_image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $imagePath = 'product-specifications';
+            $fullPath = "{$imagePath}/{$imageName}";
+
+            // Delete old image if exists
+            if ($product->specification_image && $product->specification_image_path) {
+                Storage::disk('public')->delete($product->specification_image_path . '/' . $product->specification_image);
+            }
+
+            // Store the file - this automatically creates directories
+            if (!Storage::disk('public')->put($fullPath, file_get_contents($image->getRealPath()))) {
+                throw new \Exception('Failed to store specification image: ' . $image->getClientOriginalName());
+            }
+
+            $validated['specification_image'] = $imageName;
+            $validated['specification_image_path'] = $imagePath;
+        }
 
         // Convert empty strings to 0 for numeric fields that have default values
         $numericFieldsWithDefaults = ['h_mm', 'w_mm', 'upto_pix', 'price_per_sqft', 'gst_percentage', 'min_price', 'max_price'];

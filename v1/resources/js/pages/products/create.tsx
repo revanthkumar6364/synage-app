@@ -56,11 +56,14 @@ const Create: FC<CreateProps> = ({ categories }) => {
         pixel_pitch: '',
         refresh_rate: '',
         cabinet_type: '',
+        specification_image: null as File | null,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('products.store'));
+        post(route('products.store'), {
+            forceFormData: true,
+        });
     };
 
     return (
@@ -237,6 +240,23 @@ const Create: FC<CreateProps> = ({ categories }) => {
                                     />
                                     <p className="text-xs text-muted-foreground">Exactly 5 digits required</p>
                                     {errors.hsn_code && <p className="text-sm text-red-500">{errors.hsn_code}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="specification_image">Specification Image (Optional)</Label>
+                                    <Input
+                                        id="specification_image"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setData('specification_image', file as any);
+                                            }
+                                        }}
+                                    />
+                                    <p className="text-xs text-muted-foreground">Upload product specification image (auto-attached to quotations)</p>
+                                    {errors.specification_image && <p className="text-sm text-red-500">{errors.specification_image}</p>}
                                 </div>
 
                                 <div className="space-y-2">

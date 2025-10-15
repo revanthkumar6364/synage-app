@@ -437,6 +437,9 @@ class QuotationController extends Controller
             }
         }
 
+        // Auto-attach product specification images
+        $this->attachProductSpecificationImages($quotation);
+
         return Inertia::render('quotations/products', [
             'quotation' => $quotation->load(['items', 'selectedProduct']),
             'products' => Product::get(),
@@ -500,6 +503,9 @@ class QuotationController extends Controller
 
             // Recalculate quotation totals
             $quotation->calculateTotals();
+
+            // Auto-attach product specification images
+            $this->attachProductSpecificationImages($quotation);
 
             // Load items with products to check pricing
             $quotation->load('items.product');
@@ -620,6 +626,9 @@ class QuotationController extends Controller
                     'editable' => false,
                 ]);
             }
+
+            // Auto-attach product specification images
+            $this->attachProductSpecificationImages($quotation);
 
             DB::commit();
 
@@ -979,10 +988,79 @@ class QuotationController extends Controller
             $filename = str_replace(['/', '\\'], '_', $quotation->reference);
             $filename = preg_replace('/[^a-zA-Z0-9_-]/', '', $filename);
 
+            // Disable PDF merging due to compatibility issues with DomPDF
+            // The merger causes encoding/language issues
+            $enablePdfMerging = false;
+
+            // Check if there are uploaded PDF files to merge
+            $uploadedPdfs = $quotationFiles->filter(function($file) {
+                $fileName = strtolower($file->file_name ?? '');
+                $name = strtolower($file->name ?? '');
+                return $file->category === 'pdf' ||
+                       substr($fileName, -4) === '.pdf' ||
+                       substr($name, -4) === '.pdf';
+            });
+
+            // If there are PDFs to merge, use PDF merger
+            if ($enablePdfMerging && $uploadedPdfs->count() > 0) {
+                try {
+                    // Save the main PDF temporarily
+                    $tempMainPdf = storage_path('app/temp/quotation_' . $quotation->id . '_main.pdf');
+
+                    // Ensure temp directory exists
+                    if (!file_exists(storage_path('app/temp'))) {
+                        mkdir(storage_path('app/temp'), 0755, true);
+                    }
+
+                    $pdf->save($tempMainPdf);
+
+                    // Initialize PDF merger
+                    $pdfMerger = \Webklex\PDFMerger\Facades\PDFMergerFacade::init();
+
+                    // Add main quotation PDF
+                    $pdfMerger->addPDF($tempMainPdf, 'all');
+
+                    // Add each uploaded PDF
+                    foreach ($uploadedPdfs as $uploadedPdf) {
+                        $pdfPath = storage_path('app/public/' . $uploadedPdf->file_path . '/' . $uploadedPdf->file_name);
+                        if (file_exists($pdfPath)) {
+                            $pdfMerger->addPDF($pdfPath, 'all');
+                        }
+                    }
+
+                    // Merge and save
+                    $mergedPdfPath = storage_path('app/temp/quotation_' . $quotation->id . '_merged.pdf');
+                    $pdfMerger->merge();
+                    $pdfMerger->save($mergedPdfPath);
+
+                    // Download the merged PDF
+                    $response = response()->download($mergedPdfPath, "quotation_{$filename}.pdf");
+
+                    // Clean up temp files after download
+                    register_shutdown_function(function() use ($tempMainPdf, $mergedPdfPath) {
+                        if (file_exists($tempMainPdf)) @unlink($tempMainPdf);
+                        if (file_exists($mergedPdfPath)) @unlink($mergedPdfPath);
+                    });
+
+                    return $response;
+                } catch (\Exception $e) {
+                    // If PDF merge fails, log it and return normal PDF
+                    \Log::error('PDF merge failed: ' . $e->getMessage());
+
+                    // Clean up any temp files
+                    if (isset($tempMainPdf) && file_exists($tempMainPdf)) @unlink($tempMainPdf);
+                    if (isset($mergedPdfPath) && file_exists($mergedPdfPath)) @unlink($mergedPdfPath);
+
+                    // Return normal PDF as fallback
+                    return $pdf->download("quotation_{$filename}.pdf");
+                }
+            }
+
+            // No PDFs to merge, return normal PDF
             return $pdf->download("quotation_{$filename}.pdf");
 
         } catch (\Exception $e) {
-            abort(500, 'Failed to generate PDF. Please try again later.');
+            abort(500, 'Failed to generate PDF: ' . $e->getMessage());
         }
     }
 
@@ -1037,6 +1115,47 @@ class QuotationController extends Controller
                 'success' => false,
                 'message' => 'Failed to update sub-status.'
             ], 500);
+        }
+    }
+
+    /**
+     * Automatically attach product specification images to quotation
+     */
+    private function attachProductSpecificationImages(Quotation $quotation)
+    {
+        // Get all products in this quotation that have specification images
+        $quotation->load('items.product');
+
+        foreach ($quotation->items as $item) {
+            $product = $item->product;
+
+            if ($product && $product->hasSpecificationImage()) {
+                // Check if this specification image is already attached
+                $exists = QuotationMedia::where('quotation_id', $quotation->id)
+                    ->where('file_name', $product->specification_image)
+                    ->exists();
+
+                if (!$exists) {
+                    // Attach the specification image
+                    $filePath = storage_path('app/public/' . $product->specification_image_path . '/' . $product->specification_image);
+
+                    if (file_exists($filePath)) {
+                        QuotationMedia::create([
+                            'quotation_id' => $quotation->id,
+                            'category' => 'image',
+                            'name' => 'Specification - ' . $product->name,
+                            'file_name' => $product->specification_image,
+                            'file_path' => $product->specification_image_path,
+                            'mime_type' => mime_content_type($filePath),
+                            'file_size' => filesize($filePath),
+                            'is_active' => true,
+                            'sort_order' => 999, // Put specification images at the end
+                            'created_by' => auth()->id() ?? 1, // Default to user ID 1 if no auth
+                            'updated_by' => auth()->id() ?? 1, // Default to user ID 1 if no auth
+                        ]);
+                    }
+                }
+            }
         }
     }
 

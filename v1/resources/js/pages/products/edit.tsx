@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import { ArrowLeftIcon } from 'lucide-react';
 import { type FC } from 'react';
 
@@ -51,6 +51,8 @@ interface EditProps {
         pixel_pitch?: number;
         refresh_rate?: number;
         cabinet_type?: string;
+        specification_image?: string;
+        specification_image_path?: string;
         category?: {
             id: number;
             name: string;
@@ -94,11 +96,18 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
         pixel_pitch: product.pixel_pitch?.toString() || '',
         refresh_rate: product.refresh_rate?.toString() || '',
         cabinet_type: product.cabinet_type || '',
+        specification_image: null as File | null,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('products.update', product.id));
+        router.post(route('products.update', product.id), {
+            ...data,
+            _method: 'put'
+        }, {
+            forceFormData: true,
+            preserveScroll: true,
+        });
     };
 
     return (
@@ -275,6 +284,28 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                     />
                                     <p className="text-xs text-muted-foreground">Exactly 5 digits required</p>
                                     {errors.hsn_code && <p className="text-sm text-red-500">{errors.hsn_code}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="specification_image">Specification Image (Optional)</Label>
+                                    <Input
+                                        id="specification_image"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setData('specification_image', file as any);
+                                            }
+                                        }}
+                                    />
+                                    {product.specification_image && (
+                                        <div className="text-xs text-muted-foreground">
+                                            Current: {product.specification_image}
+                                        </div>
+                                    )}
+                                    <p className="text-xs text-muted-foreground">Upload product specification image (auto-attached to quotations)</p>
+                                    {errors.specification_image && <p className="text-sm text-red-500">{errors.specification_image}</p>}
                                 </div>
 
                                 <div className="space-y-2">

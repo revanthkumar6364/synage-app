@@ -35,7 +35,9 @@ class Product extends Model
         'status',
         'pixel_pitch',
         'refresh_rate',
-        'cabinet_type'
+        'cabinet_type',
+        'specification_image',
+        'specification_image_path'
     ];
 
     protected $casts = [
@@ -51,7 +53,7 @@ class Product extends Model
         'refresh_rate' => 'integer'
     ];
 
-    protected $appends = ['price_range', 'can', 'unit_size'];
+    protected $appends = ['price_range', 'can', 'unit_size', 'specification_image_url'];
 
     public function category(): BelongsTo
     {
@@ -124,5 +126,18 @@ class Product extends Model
     public function scopeByMainType($query, $mainType)
     {
         return $this->scopeByType($query, $mainType);
+    }
+
+    public function getSpecificationImageUrlAttribute()
+    {
+        if ($this->specification_image && $this->specification_image_path) {
+            return asset('storage/' . $this->specification_image_path . '/' . $this->specification_image);
+        }
+        return null;
+    }
+
+    public function hasSpecificationImage(): bool
+    {
+        return !empty($this->specification_image) && !empty($this->specification_image_path);
     }
 }

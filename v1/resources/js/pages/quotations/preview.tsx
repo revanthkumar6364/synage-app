@@ -1078,98 +1078,107 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                 {(commonFiles.length > 0 || quotationFiles.length > 0) && (
                                     <div className="mt-8 space-y-6">
 
-                                        {commonFiles.length > 0 && (
-                                            <>
-                                                <Separator />
-                                                <div className="space-y-4">
-                                                    <div className="flex items-center justify-between">
-                                                        <img src={'/images/logo.png'} alt="Radiant Synage Logo" className="h-6 object-contain opacity-30" />
+                                        {commonFiles.length > 0 && (() => {
+                                            const commonPdfs = commonFiles.filter(f => f.category === 'pdf' || f.name?.toLowerCase().endsWith('.pdf'));
+                                            const commonImages = commonFiles.filter(f => f.category !== 'pdf' && !f.name?.toLowerCase().endsWith('.pdf'));
+
+                                            return (
+                                                <>
+                                                    <Separator />
+                                                    <div className="space-y-4">
+                                                        {commonPdfs.length > 0 && (
+                                                            <div>
+                                                                <h4 className="text-sm font-semibold mb-2">Reference Documents:</h4>
+                                                                <div className="space-y-2">
+                                                                    {commonPdfs.map((file) => (
+                                                                        <a
+                                                                            key={file.id}
+                                                                            href={file.full_url}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 transition-colors rounded"
+                                                                        >
+                                                                            <FileTextIcon className="h-5 w-5 text-red-600 flex-shrink-0" />
+                                                                            <span className="text-xs text-gray-700 flex-1">{file.name}</span>
+                                                                            <FileIcon className="h-4 w-4 text-gray-400" />
+                                                                        </a>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {commonImages.length > 0 && (
+                                                            <div className="grid grid-cols-3 gap-4">
+                                                                {commonImages.map((file) => (
+                                                                    <div key={file.id} className="space-y-2">
+                                                                        <img
+                                                                            src={file.full_url}
+                                                                            alt={file.name}
+                                                                            className="rounded-lg shadow-sm w-full h-auto object-cover"
+                                                                        />
+                                                                        <p className="text-xs text-center text-gray-600 font-medium">
+                                                                            {file.name.replace('Specification - ', '')}
+                                                                        </p>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <div className="grid grid-cols-3 gap-4">
-                                                        {commonFiles.map((file) => {
-                                                            const isImage = file.category === 'image' || (file.full_url && file.full_url.match(/\.(jpg|jpeg|png|gif)$/i));
-                                                            const isPdf = file.category === 'pdf' || file.name?.toLowerCase().endsWith('.pdf');
-                                                            
-                                                            if (isPdf) {
-                                                                return (
-                                                                    <a
-                                                                        key={file.id}
-                                                                        href={file.full_url}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="flex flex-col items-center justify-center border rounded-lg p-4 bg-white hover:bg-gray-50 transition"
-                                                                    >
-                                                                        <FileTextIcon className="h-8 w-8 text-red-600 mb-2" />
-                                                                        <span className="text-xs text-center">{file.name}</span>
-                                                                        <span className="text-blue-600 underline mt-1">View PDF</span>
-                                                                    </a>
-                                                                );
-                                                            }
-                                                            
-                                                            return (
-                                                                <img
-                                                                    key={file.id}
-                                                                    src={file.full_url}
-                                                                    alt={file.name}
-                                                                    className="rounded-lg shadow-sm h-30 w-30 object-cover"
-                                                                />
-                                                            );
-                                                        })}
+                                                </>
+                                            );
+                                        })()}
+                                        {quotationFiles.length > 0 && (() => {
+                                            const pdfs = quotationFiles.filter(f => f.category === 'pdf' || f.name?.toLowerCase().endsWith('.pdf'));
+                                            const images = quotationFiles.filter(f => f.category !== 'pdf' && !f.name?.toLowerCase().endsWith('.pdf'));
+
+                                            return (
+                                                <>
+                                                    <Separator />
+                                                    <div className="space-y-4">
+                                                        {pdfs.length > 0 && (
+                                                            <div>
+                                                                <h4 className="text-sm font-semibold mb-2">Additional Documents:</h4>
+                                                                <div className="space-y-2">
+                                                                    {pdfs.map((file) => (
+                                                                        <a
+                                                                            key={file.id}
+                                                                            href={file.full_url}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 transition-colors rounded"
+                                                                        >
+                                                                            <FileTextIcon className="h-5 w-5 text-red-600 flex-shrink-0" />
+                                                                            <span className="text-xs text-gray-700 flex-1">{file.name}</span>
+                                                                            <FileIcon className="h-4 w-4 text-gray-400" />
+                                                                        </a>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {images.length > 0 && (
+                                                            <div>
+                                                                <h4 className="text-sm font-semibold mb-2">Product Specifications:</h4>
+                                                                <div className="grid grid-cols-3 gap-4">
+                                                                    {images.map((file) => (
+                                                                        <div key={file.id} className="space-y-2">
+                                                                            <img
+                                                                                src={file.full_url}
+                                                                                alt={file.name}
+                                                                                className="rounded-lg shadow-sm w-full h-auto object-cover"
+                                                                            />
+                                                                            <p className="text-xs text-center text-gray-600 font-medium">
+                                                                                {file.name.replace('Specification - ', '')}
+                                                                            </p>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                </div>
-                                            </>
-                                        )}
-                                        {quotationFiles.length > 0 && (
-                                            <>
-                                                <Separator />
-                                                <div className="space-y-4">
-                                                    <div className="grid grid-cols-3 gap-4">
-                                                        {quotationFiles.map((file) => {
-                                                            const isImage = file.category === 'image' || (file.full_url && file.full_url.match(/\.(jpg|jpeg|png|gif)$/i));
-                                                            const isPdf = file.category === 'pdf' || file.name?.toLowerCase().endsWith('.pdf');
-                                                            if (isImage) {
-                                                                return (
-                                                                    <img
-                                                                        key={file.id}
-                                                                        src={file.full_url}
-                                                                        alt={file.name}
-                                                                        className="rounded-lg shadow-sm h-100 w-100 object-cover"
-                                                                    />
-                                                                );
-                                                            } else if (isPdf) {
-                                                                return (
-                                                                    <a
-                                                                        key={file.id}
-                                                                        href={file.full_url}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="flex flex-col items-center justify-center border rounded-lg p-4 bg-white hover:bg-gray-50 transition"
-                                                                    >
-                                                                        <FileTextIcon className="h-8 w-8 text-red-600 mb-2" />
-                                                                        <span className="text-xs text-center">{file.name}</span>
-                                                                        <span className="text-blue-600 underline mt-1">View PDF</span>
-                                                                    </a>
-                                                                );
-                                                            } else {
-                                                                return (
-                                                                    <a
-                                                                        key={file.id}
-                                                                        href={file.full_url}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="flex flex-col items-center justify-center border rounded-lg p-4 bg-white hover:bg-gray-50 transition"
-                                                                    >
-                                                                        <FileIcon className="h-8 w-8 text-gray-400 mb-2" />
-                                                                        <span className="text-xs text-center">{file.name}</span>
-                                                                        <span className="text-blue-600 underline mt-1">Download</span>
-                                                                    </a>
-                                                                );
-                                                            }
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            </>
-                                        )}
+                                                </>
+                                            );
+                                        })()}
                                     </div>
                                 )}
                             </div>

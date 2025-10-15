@@ -256,3 +256,14 @@ input[type="date"] {
 .rich-text-editor u {
     text-decoration: underline;
 }
+
+/* Form Validation Styles - Global */
+.text-muted-foreground.form-requirement {
+    color: rgb(220 38 38) !important; /* red-600 */
+}
+
+/* Alternative: Make ALL validation helper text under inputs red */
+.space-y-2 > .text-xs.text-muted-foreground {
+    color: rgb(220 38 38); /* red-600 */
+    font-weight: 500;
+}

@@ -82,6 +82,9 @@ export interface Product {
     pixel_pitch?: number;
     refresh_rate?: number;
     cabinet_type?: string;
+    specification_image?: string;
+    specification_image_path?: string;
+    specification_image_url?: string;
     unit_size?: {
         width_mm: number;
         height_mm: number;
