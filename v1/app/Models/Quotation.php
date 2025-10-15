@@ -645,7 +645,19 @@ class Quotation extends Model
         $this->general_ownership_risk_terms = $generalTerms['ownership_risk'];
         $this->general_force_majeure_terms = $generalTerms['force_majeure'];
 
-        // Set product type specific terms
+        // Clear all product-type specific terms first
+        $this->indoor_data_connectivity_terms = null;
+        $this->indoor_infrastructure_readiness_terms = null;
+        $this->indoor_logistics_support_terms = null;
+        $this->indoor_general_conditions_terms = null;
+        
+        $this->outdoor_approvals_permissions_terms = null;
+        $this->outdoor_data_connectivity_terms = null;
+        $this->outdoor_power_mounting_terms = null;
+        $this->outdoor_logistics_site_access_terms = null;
+        $this->outdoor_general_conditions_terms = null;
+
+        // Set product type specific terms based on selection
         if ($productType === 'indoor') {
             $indoorTerms = config('all.terms_and_conditions.indoor');
             $this->indoor_data_connectivity_terms = $indoorTerms['data_connectivity'];
@@ -660,7 +672,7 @@ class Quotation extends Model
             $this->outdoor_logistics_site_access_terms = $outdoorTerms['logistics_site_access'];
             $this->outdoor_general_conditions_terms = $outdoorTerms['general_conditions'];
         }
-        // For 'standard_led' and other types, only general terms apply
+        // For 'standard_led' and other types, only general terms apply (specific terms cleared above)
     }
 
     public function getApplicableTerms(): array
