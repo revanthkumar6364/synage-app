@@ -207,6 +207,8 @@ export interface Quotation {
     sub_status_notes?: string;
     sub_status_color?: string;
     effective_sub_status?: 'open' | 'hot' | 'cold';
+    requires_pricing_approval?: boolean;
+    pricing_approval_notes?: string;
     editable: boolean;
     last_action?: string;
     created_by: number;

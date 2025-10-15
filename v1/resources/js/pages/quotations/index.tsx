@@ -7,7 +7,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Search, RefreshCcw, Plus, EyeIcon, PencilIcon, CheckIcon, Flame } from 'lucide-react';
+import { Search, RefreshCcw, Plus, EyeIcon, PencilIcon, CheckIcon, Flame, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import SubStatusDialog from '@/components/SubStatusDialog';
@@ -31,6 +31,8 @@ interface Quotation {
     effective_sub_status?: 'open' | 'hot' | 'cold';
     sub_status_color?: string;
     sub_status_notes?: string;
+    requires_pricing_approval?: boolean;
+    pricing_approval_notes?: string;
     parent_id?: number;
     creator?: any;
     sales_user?: any;
@@ -243,9 +245,17 @@ export default function Index({ quotations, filters, statuses }: Props) {
                                                 {formatAmount(quotation.total_amount)}
                                             </TableCell>
                                             <TableCell>
-                                                <Badge className={getStatusColor(quotation.status)}>
-                                                    {quotation.status === 'order_received' ? 'Order Received' : quotation.status}
-                                                </Badge>
+                                                <div className="flex flex-col gap-1">
+                                                    <Badge className={getStatusColor(quotation.status)}>
+                                                        {quotation.status === 'order_received' ? 'Order Received' : quotation.status}
+                                                    </Badge>
+                                                    {quotation.requires_pricing_approval && quotation.status === 'pending' && (
+                                                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300 text-xs">
+                                                            <AlertCircle className="h-3 w-3 mr-1" />
+                                                            Pricing Approval
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </TableCell>
                                             <TableCell>
                                                 {quotation.status === 'approved' && quotation.effective_sub_status && (

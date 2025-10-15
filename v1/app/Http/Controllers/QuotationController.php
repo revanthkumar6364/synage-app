@@ -501,6 +501,9 @@ class QuotationController extends Controller
             // Recalculate quotation totals
             $quotation->calculateTotals();
 
+            // Check if pricing approval is required
+            $quotation->checkAndSetPricingApproval();
+
             DB::commit();
 
             // Check if this is a "save and preview" action

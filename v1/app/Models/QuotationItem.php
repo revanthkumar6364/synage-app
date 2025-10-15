@@ -75,4 +75,44 @@ class QuotationItem extends Model
 
         return $this;
     }
+
+    /**
+     * Check if proposed price is outside the product's standard pricing range
+     */
+    public function isOutsideStandardRange(): bool
+    {
+        if (!$this->product) {
+            return false;
+        }
+
+        // If product doesn't have min/max price defined, no standard range exists
+        if (!$this->product->min_price || !$this->product->max_price) {
+            return false;
+        }
+
+        // Check if proposed price is below min or above max
+        return $this->proposed_unit_price < $this->product->min_price
+            || $this->proposed_unit_price > $this->product->max_price;
+    }
+
+    /**
+     * Get the standard pricing range message
+     */
+    public function getStandardRangeMessage(): ?string
+    {
+        if (!$this->product || !$this->product->min_price || !$this->product->max_price) {
+            return null;
+        }
+
+        if ($this->isOutsideStandardRange()) {
+            return sprintf(
+                "Price ₹%s is outside standard range (₹%s - ₹%s)",
+                number_format($this->proposed_unit_price, 2),
+                number_format($this->product->min_price, 2),
+                number_format($this->product->max_price, 2)
+            );
+        }
+
+        return null;
+    }
 }

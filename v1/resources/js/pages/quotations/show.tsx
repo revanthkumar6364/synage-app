@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useTheme } from 'next-themes';
 import { Table, TableHeader, TableBody, TableCell, TableRow, TableHead } from '@/components/ui/table';
-import { MessageCircle, Facebook, Instagram, Youtube, Linkedin, Globe } from 'lucide-react';
+import { MessageCircle, Facebook, Instagram, Youtube, Linkedin, Globe, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import SubStatusDialog from '@/components/SubStatusDialog';
 import { Badge } from '@/components/ui/badge';
@@ -158,6 +158,30 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
             <Toaster position="top-right" />
 
             <div className="container mx-auto py-6 space-y-6">
+                {/* Pricing Approval Warning */}
+                {quotation.requires_pricing_approval && quotation.status === 'pending' && (
+                    <Card className="border-orange-200 bg-orange-50">
+                        <CardHeader>
+                            <div className="flex items-center gap-2">
+                                <AlertCircle className="h-5 w-5 text-orange-600" />
+                                <CardTitle className="text-orange-900">Pricing Approval Required</CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-2">
+                                <p className="text-sm text-orange-800 font-medium">
+                                    This quotation has items priced outside the standard range and requires management approval.
+                                </p>
+                                {quotation.pricing_approval_notes && (
+                                    <div className="mt-3 p-3 bg-white rounded-md border border-orange-200">
+                                        <p className="text-sm text-gray-700 whitespace-pre-line">{quotation.pricing_approval_notes}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
                 {/* Approval Actions - moved to top */}
                 {quotation.status === 'pending' && (
                     <Card>

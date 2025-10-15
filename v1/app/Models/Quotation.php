@@ -105,6 +105,8 @@ class Quotation extends Model
         'sub_status',
         'sub_status_updated_at',
         'sub_status_notes',
+        'requires_pricing_approval',
+        'pricing_approval_notes',
         'editable',
         'last_action',
         'created_by',
@@ -146,6 +148,7 @@ class Quotation extends Model
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
         'sub_status_updated_at' => 'datetime',
+        'requires_pricing_approval' => 'boolean',
     ];
 
     protected $with = ['account', 'account_contact', 'salesUser'];
@@ -524,6 +527,45 @@ class Quotation extends Model
     public function isOrderReceived(): bool
     {
         return $this->status === self::STATUS_ORDER_RECEIVED;
+    }
+
+    // Pricing approval helper methods
+    public function checkAndSetPricingApproval(): void
+    {
+        $itemsOutsideRange = [];
+
+        foreach ($this->items as $item) {
+            if ($item->isOutsideStandardRange()) {
+                $product = $item->product;
+                $itemsOutsideRange[] = sprintf(
+                    "• %s: Quoted ₹%s (Standard: ₹%s - ₹%s)",
+                    $product->name,
+                    number_format($item->proposed_unit_price, 2),
+                    number_format($product->min_price, 2),
+                    number_format($product->max_price, 2)
+                );
+            }
+        }
+
+        if (!empty($itemsOutsideRange)) {
+            $this->requires_pricing_approval = true;
+            $this->pricing_approval_notes = "Pricing approval required for:\n" . implode("\n", $itemsOutsideRange);
+        } else {
+            $this->requires_pricing_approval = false;
+            $this->pricing_approval_notes = null;
+        }
+
+        $this->save();
+    }
+
+    public function hasItemsOutsideStandardPricing(): bool
+    {
+        foreach ($this->items as $item) {
+            if ($item->isOutsideStandardRange()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Sub-status helper methods
