@@ -501,8 +501,14 @@ class QuotationController extends Controller
             // Recalculate quotation totals
             $quotation->calculateTotals();
 
+            // Load items with products to check pricing
+            $quotation->load('items.product');
+
             // Check if pricing approval is required
             $quotation->checkAndSetPricingApproval();
+
+            // Refresh quotation to get updated requires_pricing_approval value
+            $quotation->refresh();
 
             // Auto-approve if within standard pricing and status is pending
             if ($quotation->status === 'pending' && !$quotation->requires_pricing_approval) {
@@ -569,24 +575,63 @@ class QuotationController extends Controller
         try {
             DB::beginTransaction();
 
-            // Update the quotation
-            $quotation->update([
-                'notes' => $validated['notes'],
-                'client_scope' => $validated['client_scope'],
-                'status' => $validated['status'],
-                'taxes_terms' => $validated['taxes'],
-                'warranty_terms' => $validated['warranty'],
-                'delivery_terms' => $validated['delivery_terms'],
-                'payment_terms' => $validated['payment_terms'],
-                'electrical_terms' => $validated['electrical_terms'],
-                'updated_by' => $request->user()->id,
-                'last_action' => 'updated',
-                'editable' => false,
-            ]);
+            // Load items with products to check pricing
+            $quotation->load('items.product');
+
+            // Check if pricing approval is needed before status change
+            $quotation->checkAndSetPricingApproval();
+
+            // Refresh to get updated requires_pricing_approval value
+            $quotation->refresh();
+
+            // Auto-approve if changing to pending and within standard pricing
+            $shouldAutoApprove = ($validated['status'] === 'pending' && !$quotation->requires_pricing_approval);
+
+            if ($shouldAutoApprove) {
+                // Auto-approve instead of pending
+                $quotation->update([
+                    'notes' => $validated['notes'],
+                    'client_scope' => $validated['client_scope'],
+                    'status' => 'approved',
+                    'taxes_terms' => $validated['taxes'],
+                    'warranty_terms' => $validated['warranty'],
+                    'delivery_terms' => $validated['delivery_terms'],
+                    'payment_terms' => $validated['payment_terms'],
+                    'electrical_terms' => $validated['electrical_terms'],
+                    'updated_by' => $request->user()->id,
+                    'last_action' => 'auto_approved',
+                    'approved_at' => now(),
+                    'approved_by' => $request->user()->id,
+                    'editable' => false,
+                ]);
+            } else {
+                // Normal update
+                $quotation->update([
+                    'notes' => $validated['notes'],
+                    'client_scope' => $validated['client_scope'],
+                    'status' => $validated['status'],
+                    'taxes_terms' => $validated['taxes'],
+                    'warranty_terms' => $validated['warranty'],
+                    'delivery_terms' => $validated['delivery_terms'],
+                    'payment_terms' => $validated['payment_terms'],
+                    'electrical_terms' => $validated['electrical_terms'],
+                    'updated_by' => $request->user()->id,
+                    'last_action' => 'updated',
+                    'editable' => false,
+                ]);
+            }
 
             DB::commit();
 
-            return back()->with('success', 'Quotation updated successfully.');
+            $message = $shouldAutoApprove
+                ? 'Quotation auto-approved successfully (pricing within standard range).'
+                : 'Quotation updated successfully.';
+
+            if ($validated['status'] === 'pending' && $quotation->requires_pricing_approval) {
+                $message .= ' Pricing approval required.';
+            }
+
+            return back()->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Failed to update quotation: ' . $e->getMessage());
