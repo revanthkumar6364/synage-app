@@ -900,7 +900,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                                     >
                                                                         <FileText className="h-5 w-5 text-red-600 flex-shrink-0" />
                                                                         <span className="text-xs text-gray-700 flex-1">{file.name}</span>
-                                                                        <Download className="h-4 w-4 text-gray-400" />
+                                                                        <Download className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                                                                     </a>
                                                                 ))}
                                                             </div>
@@ -947,8 +947,8 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                                             className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 transition-colors rounded"
                                                                         >
                                                                             <FileText className="h-5 w-5 text-red-600 flex-shrink-0" />
-                                                                            <span className="text-xs text-gray-700 flex-1">{file.name}</span>
-                                                                            <Download className="h-4 w-4 text-gray-400" />
+                                                                            <span className="text-xs text-gray-800 dark:text-gray-200 flex-1">{file.name}</span>
+                                                                            <Download className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                                                                         </a>
                                                                     ))}
                                                                 </div>
