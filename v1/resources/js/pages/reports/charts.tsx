@@ -286,21 +286,8 @@ export default function VisualCharts({ chartData, filters }: Props) {
                     </CardContent>
                 </Card>
 
-                {/* Data Summary */}
+                {/* Status Summary Cards */}
                 <div className="grid gap-4 md:grid-cols-4">
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Estimates</p>
-                                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                                        {chartData.estimatesData.reduce((sum, data) => sum + data.series1, 0)}
-                                    </p>
-                                </div>
-                                <BarChart3 className="h-8 w-8 text-blue-600" />
-                            </div>
-                        </CardContent>
-                    </Card>
                     <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
@@ -310,33 +297,46 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                         {chartData.estimatesData.reduce((sum, data) => sum + data.series2, 0)}
                                     </p>
                                 </div>
-                                <Users className="h-8 w-8 text-green-600" />
+                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20">
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300">Pending</p>
-                                    <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">
+                                    <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Rejected</p>
+                                    <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">0</p>
+                                </div>
+                                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20">
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-red-700 dark:text-red-300">Pending</p>
+                                    <p className="text-2xl font-bold text-red-900 dark:text-red-100">
                                         {chartData.estimatesData.reduce((sum, data) => sum + data.series3, 0)}
                                     </p>
                                 </div>
-                                <TrendingUp className="h-8 w-8 text-yellow-600" />
+                                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-700/20">
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Revenue</p>
-                                    <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                                        ₹{chartData.proformaData.reduce((sum, data) => sum + data.value, 0).toLocaleString()}
+                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Draft</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                        {chartData.estimatesData.reduce((sum, data) => sum + data.series1, 0) -
+                                         chartData.estimatesData.reduce((sum, data) => sum + data.series2, 0) -
+                                         chartData.estimatesData.reduce((sum, data) => sum + data.series3, 0)}
                                     </p>
                                 </div>
-                                <DollarSign className="h-8 w-8 text-purple-600" />
+                                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
                             </div>
                         </CardContent>
                     </Card>
@@ -459,7 +459,7 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-6 flex justify-between text-xs text-muted-foreground px-4">
+                            <div className="mt-6 flex justify-between text-xs text-muted-foreground dark:text-gray-300 px-4">
                                 {chartData.proformaData.map((data, index) => (
                                     <span key={index} className="px-2 truncate max-w-[80px] text-center font-medium">
                                         {data.month}
@@ -576,14 +576,14 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                 </svg>
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div className="text-center">
-                                        <div className="text-2xl font-bold text-indigo-600">
+                                        <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                                             ₹{cumulativeRevenue.toLocaleString()}
                                         </div>
-                                        <div className="text-sm text-muted-foreground">Cumulative Revenue</div>
+                                        <div className="text-sm text-muted-foreground dark:text-gray-300">Cumulative Revenue</div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-6 flex justify-between text-xs text-muted-foreground px-4">
+                            <div className="mt-6 flex justify-between text-xs text-muted-foreground dark:text-gray-300 px-4">
                                 {chartData.proformaData.map((data, index) => (
                                     <span key={index} className="px-2 truncate max-w-[80px] text-center font-medium">
                                         {data.month}
