@@ -325,18 +325,18 @@ export default function VisualCharts({ chartData, filters }: Props) {
                             </div>
                         </CardContent>
                     </Card>
-                    <Card className="border-0 shadow-lg bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-700/20">
+                    <Card className="border-0 shadow-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800/30 dark:to-gray-700/30">
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Draft</p>
+                                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Draft</p>
                                     <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                        {chartData.estimatesData.reduce((sum, data) => sum + data.series1, 0) -
-                                         chartData.estimatesData.reduce((sum, data) => sum + data.series2, 0) -
+                                        {chartData.estimatesData.reduce((sum, data) => sum + data.series1, 0) - 
+                                         chartData.estimatesData.reduce((sum, data) => sum + data.series2, 0) - 
                                          chartData.estimatesData.reduce((sum, data) => sum + data.series3, 0)}
                                     </p>
                                 </div>
-                                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                                <div className="w-3 h-3 bg-gray-600 dark:bg-gray-400 rounded-full"></div>
                             </div>
                         </CardContent>
                     </Card>
@@ -459,7 +459,7 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-6 flex justify-between text-xs text-muted-foreground dark:text-gray-300 px-4">
+                            <div className="mt-6 flex justify-between text-xs text-muted-foreground dark:text-gray-200 px-4">
                                 {chartData.proformaData.map((data, index) => (
                                     <span key={index} className="px-2 truncate max-w-[80px] text-center font-medium">
                                         {data.month}
@@ -576,14 +576,14 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                 </svg>
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div className="text-center">
-                                        <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                                        <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-300">
                                             ₹{cumulativeRevenue.toLocaleString()}
                                         </div>
-                                        <div className="text-sm text-muted-foreground dark:text-gray-300">Cumulative Revenue</div>
+                                        <div className="text-sm text-muted-foreground dark:text-gray-200">Cumulative Revenue</div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-6 flex justify-between text-xs text-muted-foreground dark:text-gray-300 px-4">
+                            <div className="mt-6 flex justify-between text-xs text-muted-foreground dark:text-gray-200 px-4">
                                 {chartData.proformaData.map((data, index) => (
                                     <span key={index} className="px-2 truncate max-w-[80px] text-center font-medium">
                                         {data.month}
