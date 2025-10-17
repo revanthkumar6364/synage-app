@@ -57,26 +57,26 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
         const baseStyle = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
         switch (status) {
             case 'draft':
-                return `${baseStyle} bg-muted text-muted-foreground`;
+                return `${baseStyle} bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100`;
             case 'pending':
-                return `${baseStyle} bg-yellow-500 text-white`;
+                return `${baseStyle} bg-yellow-500 text-white dark:bg-yellow-600`;
             case 'approved':
-                return `${baseStyle} bg-green-500 text-white`;
+                return `${baseStyle} bg-green-500 text-white dark:bg-green-600`;
             case 'order_received':
-                return `${baseStyle} bg-blue-500 text-white`;
+                return `${baseStyle} bg-blue-500 text-white dark:bg-blue-600`;
             case 'rejected':
-                return `${baseStyle} bg-red-500 text-white`;
+                return `${baseStyle} bg-red-500 text-white dark:bg-red-600`;
             default:
-                return `${baseStyle} bg-muted text-muted-foreground`;
+                return `${baseStyle} bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100`;
         }
     };
 
     const getSubStatusColor = (subStatus?: string) => {
         switch (subStatus) {
-            case 'hot': return 'bg-red-100 text-red-800 border-red-300';
-            case 'cold': return 'bg-blue-100 text-blue-800 border-blue-300';
-            case 'open': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-            default: return 'bg-gray-100 text-gray-800';
+            case 'hot': return 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900 dark:text-red-100 dark:border-red-700';
+            case 'cold': return 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-700';
+            case 'open': return 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900 dark:text-yellow-100 dark:border-yellow-700';
+            default: return 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100';
         }
     };
 
@@ -327,7 +327,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                 ✓ HSN Code
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
                                                 ✗ HSN Code
                                             </span>
                                         )}
@@ -336,7 +336,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                 ✓ Number of Pixels
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
                                                 ✗ Number of Pixels
                                             </span>
                                         )}
@@ -345,7 +345,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                 ✓ Billing Address
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
                                                 ✗ Billing Address
                                             </span>
                                         )}
@@ -354,7 +354,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                 ✓ Shipping Address
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
                                                 ✗ Shipping Address
                                             </span>
                                         )}
@@ -896,7 +896,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                                         href={file.full_url}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
-                                                                        className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 transition-colors rounded"
+                                                                        className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 transition-colors rounded"
                                                                     >
                                                                         <FileText className="h-5 w-5 text-red-600 flex-shrink-0" />
                                                                         <span className="text-xs text-gray-700 flex-1">{file.name}</span>
@@ -944,7 +944,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                                             href={file.full_url}
                                                                             target="_blank"
                                                                             rel="noopener noreferrer"
-                                                                            className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 transition-colors rounded"
+                                                                            className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 transition-colors rounded"
                                                                         >
                                                                             <FileText className="h-5 w-5 text-red-600 flex-shrink-0" />
                                                                             <span className="text-xs text-gray-700 flex-1">{file.name}</span>

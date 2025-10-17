@@ -80,7 +80,7 @@ export default function Preview({ quotation }: Props) {
                         <div className="bg-blue-500 text-white p-4 flex flex-col justify-center items-center">
                             <div className="text-center font-bold">P 2.5 Active LED</div>
                             <div className="text-center text-sm mt-2">Best Active LED Panels</div>
-                            <div className="text-center text-sm mt-2 bg-yellow-100 text-black w-full py-1">
+                            <div className="text-center text-sm mt-2 bg-yellow-100 text-black dark:bg-yellow-900 dark:text-yellow-100 w-full py-1">
                                 Territory Digital Solutions with P 2.5 Indoor Active LED
                             </div>
                         </div>

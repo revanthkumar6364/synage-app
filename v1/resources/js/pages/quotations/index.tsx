@@ -97,21 +97,21 @@ export default function Index({ quotations, filters, statuses }: Props) {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'draft': return 'bg-gray-100 text-gray-800';
-            case 'pending': return 'bg-yellow-100 text-yellow-800';
-            case 'approved': return 'bg-green-100 text-green-800';
-            case 'order_received': return 'bg-blue-100 text-blue-800';
-            case 'rejected': return 'bg-red-100 text-red-800';
-            default: return 'bg-gray-100 text-gray-800';
+            case 'draft': return 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100';
+            case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100';
+            case 'approved': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100';
+            case 'order_received': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
+            case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100';
+            default: return 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100';
         }
     };
 
     const getSubStatusColor = (subStatus?: string) => {
         switch (subStatus) {
-            case 'hot': return 'bg-red-100 text-red-800 border-red-300';
-            case 'cold': return 'bg-blue-100 text-blue-800 border-blue-300';
-            case 'open': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-            default: return 'bg-gray-100 text-gray-800';
+            case 'hot': return 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900 dark:text-red-100 dark:border-red-700';
+            case 'cold': return 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-100 dark:border-blue-700';
+            case 'open': return 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900 dark:text-yellow-100 dark:border-yellow-700';
+            default: return 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100';
         }
     };
 
@@ -119,13 +119,13 @@ export default function Index({ quotations, filters, statuses }: Props) {
         // Only apply background color for approved quotations with sub-status
         if (quotation.status === 'approved' && quotation.effective_sub_status) {
             switch (quotation.effective_sub_status) {
-                case 'hot': return 'bg-red-50 hover:bg-red-100';
-                case 'cold': return 'bg-blue-50 hover:bg-blue-100';
-                case 'open': return 'bg-yellow-50 hover:bg-yellow-100';
-                default: return 'bg-white hover:bg-gray-50';
+                case 'hot': return 'bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30';
+                case 'cold': return 'bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30';
+                case 'open': return 'bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30';
+                default: return 'bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700';
             }
         }
-        return 'bg-white hover:bg-gray-50';
+        return 'bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700';
     };
 
     const formatAmount = (amount: number | null): string => {

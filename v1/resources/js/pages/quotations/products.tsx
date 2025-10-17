@@ -355,7 +355,7 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                             {filteredProducts.map((product) => (
                                                 <div
                                                     key={product.id}
-                                                    className="flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer"
+                                                    className="flex items-center justify-between p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                                                     onClick={() => handleAddProduct(product)}
                                                 >
                                                     <div>
