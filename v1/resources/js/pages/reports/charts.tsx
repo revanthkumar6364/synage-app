@@ -331,8 +331,8 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                 <div>
                                     <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Draft</p>
                                     <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                        {chartData.estimatesData.reduce((sum, data) => sum + data.series1, 0) - 
-                                         chartData.estimatesData.reduce((sum, data) => sum + data.series2, 0) - 
+                                        {chartData.estimatesData.reduce((sum, data) => sum + data.series1, 0) -
+                                         chartData.estimatesData.reduce((sum, data) => sum + data.series2, 0) -
                                          chartData.estimatesData.reduce((sum, data) => sum + data.series3, 0)}
                                     </p>
                                 </div>
@@ -515,14 +515,14 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                                 </g>
                                             );
                                         })}
-                                        <circle cx="50" cy="50" r="20" fill="white" />
+                                        <circle cx="50" cy="50" r="20" fill="white" className="dark:fill-gray-800" />
                                     </svg>
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <div className="text-center">
-                                            <div className="text-2xl font-bold text-gray-700">
+                                            <div className="text-2xl font-bold text-gray-700 dark:text-gray-200">
                                                 {chartData.conversionData.reduce((sum, item) => sum + item.value, 0)}
                                             </div>
-                                            <div className="text-sm text-muted-foreground">Total</div>
+                                            <div className="text-sm text-muted-foreground dark:text-gray-300">Total</div>
                                         </div>
                                     </div>
                                 </div>
@@ -532,14 +532,14 @@ export default function VisualCharts({ chartData, filters }: Props) {
                                     const colors = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
                                     const color = colors[index % colors.length];
                                     return (
-                                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                        <div key={index} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
                                             <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color }}></div>
                                             <div className="flex-1">
-                                                <span className="text-sm font-medium">{data.category}</span>
+                                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{data.category}</span>
                                             </div>
                                             <div className="text-right">
-                                                <div className="text-sm font-bold">{data.value}</div>
-                                                <div className="text-xs text-muted-foreground">({data.percentage}%)</div>
+                                                <div className="text-sm font-bold text-gray-900 dark:text-gray-100">{data.value}</div>
+                                                <div className="text-xs text-gray-600 dark:text-gray-300">({data.percentage}%)</div>
                                             </div>
                                         </div>
                                     );
