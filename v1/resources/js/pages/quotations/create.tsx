@@ -370,7 +370,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                         />
                                         <Label htmlFor="indoor" className="cursor-pointer">
                                             <div className="font-medium">Indoor LED</div>
-                                            <div className="text-sm text-gray-500">Indoor display panels</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">Indoor display panels</div>
                                         </Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
@@ -385,7 +385,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                         />
                                         <Label htmlFor="outdoor" className="cursor-pointer">
                                             <div className="font-medium">Outdoor LED</div>
-                                            <div className="text-sm text-gray-500">Outdoor display panels</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">Outdoor display panels</div>
                                         </Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
@@ -400,7 +400,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                         />
                                         <Label htmlFor="standard_led" className="cursor-pointer">
                                             <div className="font-medium">Display And Other</div>
-                                            <div className="text-sm text-gray-500">Kiosks, controllers, TV screens and other</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">Kiosks, controllers, TV screens and other</div>
                                         </Label>
                                     </div>
                                 </div>
@@ -420,7 +420,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                                 <SelectItem key={product.id} value={product.id.toString()}>
                                                     <div className="flex flex-col">
                                                         <span className="font-medium">{product.name}</span>
-                                                        <span className="text-sm text-gray-500">
+                                                        <span className="text-sm text-gray-600 dark:text-gray-300">
                                                             {product.brand} • {getProductTypeDisplayName(product.product_type || '')}
                                                             {(() => {
                                                                 if (product.product_type === 'tv_screens' && product.size_inch) {
@@ -519,7 +519,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                                 </Select>
                                             </div>
                                         </div>
-                                        <div className="mt-2 text-sm text-gray-500">
+                                        <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                                             {parseFloat(data.available_size_width_ft) || 0} ft x {parseFloat(data.available_size_height_ft) || 0} ft
                                             ({parseFloat(data.available_size_sqft) || 0} sq.ft)
                                             {data.available_size_unit === 'ft' && (
@@ -535,7 +535,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
 
                                     <div>
                                         <Label>Suggested Size (Auto-calculated)</Label>
-                                        <p className="mt-2 text-sm text-gray-500">
+                                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                                             Unit size: {getSelectedProduct()?.unit_size?.width_mm || 0}mm x {getSelectedProduct()?.unit_size?.height_mm || 0}mm
                                             {data.max_quantity && (
                                                 <> | Total quantity: {data.max_quantity} units</>
@@ -564,7 +564,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="mt-2 text-sm text-gray-500">
+                                        <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                                             {parseFloat(data.proposed_size_width_ft) || 0} ft x {parseFloat(data.proposed_size_height_ft) || 0} ft
                                             ({parseFloat(data.proposed_size_sqft) || 0} sq.ft)
                                         </div>
@@ -585,7 +585,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                                     strokeWidth={2}
                                                 />
                                             </svg>
-                                            <span className="mt-1 text-xs text-gray-500">
+                                            <span className="mt-1 text-xs text-gray-600 dark:text-gray-300">
                                                 {parseFloat(data.available_size_width_mm) || 0}mm × {parseFloat(data.available_size_height_mm) || 0}mm
                                             </span>
                                         </div>
@@ -602,7 +602,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                                     strokeWidth={2}
                                                 />
                                             </svg>
-                                            <span className="mt-1 text-xs text-gray-500">
+                                            <span className="mt-1 text-xs text-gray-600 dark:text-gray-300">
                                                 {parseFloat(data.proposed_size_width) || 0}mm × {parseFloat(data.proposed_size_height) || 0}mm
                                             </span>
                                         </div>
@@ -639,7 +639,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                         </SelectContent>
                                     </Select>
                                     {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
-                                    <p className="mt-2 text-sm text-gray-500">
+                                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                                         Select a category to organize quotation files
                                     </p>
                                 </div>

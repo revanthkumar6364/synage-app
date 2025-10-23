@@ -359,7 +359,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                         className={errors.reference ? 'border-red-500' : ''}
                                         required
                                     />
-                                    <p className="text-sm text-gray-500 mt-1">
+                                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                                         Format: RSPL/4characters of Client name/MUM - region/Date-5
                                     </p>
                                     {errors.reference && <span className="text-red-500 text-sm">{errors.reference}</span>}
@@ -413,7 +413,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                                     </SelectItem>
                                                 ))
                                             ) : (
-                                                <div className="px-2 py-1 text-sm text-gray-500">
+                                                <div className="px-2 py-1 text-sm text-gray-600 dark:text-gray-300">
                                                     No contacts found for this account. Add contacts first.
                                                 </div>
                                             )}
@@ -595,7 +595,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                         />
                                         <Label htmlFor="indoor" className="cursor-pointer">
                                             <div className="font-medium">Indoor LED</div>
-                                            <div className="text-sm text-gray-500">Indoor display panels</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">Indoor display panels</div>
                                         </Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
@@ -610,7 +610,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                         />
                                         <Label htmlFor="outdoor" className="cursor-pointer">
                                             <div className="font-medium">Outdoor LED</div>
-                                            <div className="text-sm text-gray-500">Outdoor display panels</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">Outdoor display panels</div>
                                         </Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
@@ -625,7 +625,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                         />
                                         <Label htmlFor="standard_led" className="cursor-pointer">
                                             <div className="font-medium">Display And Other</div>
-                                            <div className="text-sm text-gray-500">Kiosks, controllers, TV screens and other</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-300">Kiosks, controllers, TV screens and other</div>
                                         </Label>
                                     </div>
                                 </div>
@@ -645,7 +645,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                                 <SelectItem key={product.id} value={product.id.toString()}>
                                                     <div className="flex flex-col">
                                                         <span className="font-medium">{product.name}</span>
-                                                        <span className="text-sm text-gray-500">
+                                                        <span className="text-sm text-gray-600 dark:text-gray-300">
                                                             {product.brand} • {getProductTypeDisplayName(product.product_type || '')}
                                                             {(() => {
                                                                 if (product.product_type === 'tv_screens' && product.size_inch) {
@@ -705,7 +705,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                             </div>
                                         </div>
                                     )}
-                                    <p className="mt-2 text-sm text-gray-500">
+                                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                                         {(() => {
                                             const product = getSelectedProduct();
                                             if (!product) return null;
@@ -771,7 +771,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                                     </Select>
                                                 </div>
                                             </div>
-                                            <div className="mt-2 text-sm text-gray-500">
+                                            <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                                                 {parseFloat(data.available_size_width_ft) || 0} ft x {parseFloat(data.available_size_height_ft) || 0} ft
                                                 ({parseFloat(data.available_size_sqft) || 0} sq.ft)
                                                 {data.available_size_unit === 'ft' && (
@@ -810,7 +810,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="mt-2 text-sm text-gray-500">
+                                            <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                                                 Calculated: {parseFloat(data.proposed_size_width_mm) || 0}mm x {parseFloat(data.proposed_size_height_mm) || 0}mm ({parseFloat(data.proposed_size_width_ft) || 0}ft x {parseFloat(data.proposed_size_height_ft) || 0}ft) |
                                                 Area: {parseFloat(data.proposed_size_sqft) || 0} sq.ft
                                             </div>
@@ -831,7 +831,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                                         strokeWidth={2}
                                                     />
                                                 </svg>
-                                                <span className="mt-1 text-xs text-gray-500">
+                                                <span className="mt-1 text-xs text-gray-600 dark:text-gray-300">
                                                     {parseFloat(data.available_size_width_mm) || 0}mm × {parseFloat(data.available_size_height_mm) || 0}mm
                                                 </span>
                                             </div>
@@ -848,7 +848,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                                         strokeWidth={2}
                                                     />
                                                 </svg>
-                                                <span className="mt-1 text-xs text-gray-500">
+                                                <span className="mt-1 text-xs text-gray-600 dark:text-gray-300">
                                                     {parseFloat(data.proposed_size_width) || 0}mm × {parseFloat(data.proposed_size_height) || 0}mm
                                                 </span>
                                             </div>
