@@ -213,6 +213,12 @@ class QuotationController extends Controller
 
             $quotation = Quotation::create($validated);
 
+            // Calculate quantity based on proposed square feet for indoor/outdoor products
+            if (in_array($quotation->product_type, ['indoor', 'outdoor'])) {
+                $calculatedQuantity = $quotation->calculateQuantityFromSquareFeet();
+                $quotation->update(['quantity' => $calculatedQuantity]);
+            }
+
             // Automatically attach default files
             $this->attachDefaultFiles($quotation);
 
@@ -373,6 +379,12 @@ class QuotationController extends Controller
 
         $quotation->update($validated);
 
+        // Calculate quantity based on proposed square feet for indoor/outdoor products
+        if (in_array($quotation->product_type, ['indoor', 'outdoor'])) {
+            $calculatedQuantity = $quotation->calculateQuantityFromSquareFeet();
+            $quotation->update(['quantity' => $calculatedQuantity]);
+        }
+
         // Check if this is a "save and next" action
         if ($request->has('action') && $request->action === 'save_and_next') {
             return redirect()->route('quotations.files', $quotation)
@@ -489,10 +501,23 @@ class QuotationController extends Controller
 
             // Create new items with calculations based on proposed_unit_price
             foreach ($validated['items'] as $item) {
+                // Calculate quantity based on square feet for indoor/outdoor products
+                $quantity = $item['quantity'];
+                if (in_array($quotation->product_type, ['indoor', 'outdoor'])) {
+                    $product = Product::find($item['product_id']);
+                    if ($product && $quotation->proposed_size_sqft) {
+                        $unitSizeSqft = $product->unit_size['width_ft'] * $product->unit_size['height_ft'];
+                        if ($unitSizeSqft > 0) {
+                            $proposedSqft = floatval($quotation->proposed_size_sqft);
+                            $quantity = ceil($proposedSqft / $unitSizeSqft);
+                        }
+                    }
+                }
+
                 $quotationItem = new QuotationItem([
                     'quotation_id' => $quotation->id,
                     'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
+                    'quantity' => $quantity,
                     'unit_price' => $item['unit_price'],
                     'proposed_unit_price' => $item['proposed_unit_price'],
                     'discount_percentage' => $item['discount_percentage'],

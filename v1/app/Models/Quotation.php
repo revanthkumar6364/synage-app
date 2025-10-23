@@ -709,4 +709,40 @@ class Quotation extends Model
 
         return $terms;
     }
+
+    /**
+     * Calculate quantity based on proposed square feet for indoor/outdoor products
+     */
+    public function calculateQuantityFromSquareFeet()
+    {
+        // Only calculate for indoor and outdoor products
+        if (!in_array($this->product_type, ['indoor', 'outdoor'])) {
+            return $this->quantity;
+        }
+
+        // Get the selected product to get unit size
+        $product = $this->selectedProduct;
+        if (!$product) {
+            return $this->quantity;
+        }
+
+        // Get unit size in square feet
+        $unitSizeSqft = $product->unit_size['width_ft'] * $product->unit_size['height_ft'];
+        
+        // If unit size is 0 or invalid, return original quantity
+        if ($unitSizeSqft <= 0) {
+            return $this->quantity;
+        }
+
+        // Calculate quantity based on proposed square feet
+        $proposedSqft = floatval($this->proposed_size_sqft);
+        if ($proposedSqft <= 0) {
+            return $this->quantity;
+        }
+
+        // Calculate how many units needed to cover the proposed square feet
+        $calculatedQuantity = (float) ceil($proposedSqft / $unitSizeSqft);
+        
+        return $calculatedQuantity;
+    }
 }
