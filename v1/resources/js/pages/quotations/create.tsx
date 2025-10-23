@@ -538,7 +538,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                         <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                                             Unit size: {getSelectedProduct()?.unit_size?.width_mm || 0}mm x {getSelectedProduct()?.unit_size?.height_mm || 0}mm
                                             {data.max_quantity && (
-                                                <> | Total Panels : {data.max_quantity} units</>
+                                                <> | Total quantity: {data.max_quantity} units</>
                                             )}
                                         </p>
                                         <div className="grid grid-cols-3 gap-2">
