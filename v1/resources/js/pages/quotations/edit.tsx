@@ -728,7 +728,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                             return <>Unit size: 320mm x 160mm</>;
                                         })()}
                                         {data.max_quantity && (
-                                            <> | Total quantity: {data.max_quantity} units</>
+                                            <> | Total Panels : {data.max_quantity} units</>
                                         )}
                                     </p>
                                 </div>
