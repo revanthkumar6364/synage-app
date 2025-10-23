@@ -450,10 +450,10 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
 
                                     {/* Selected Product Info */}
                                     {getSelectedProduct() && (
-                                        <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                                        <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                             <div className="text-sm">
-                                                <div className="font-medium">Selected Product: {getSelectedProduct()?.name}</div>
-                                                <div className="text-gray-600">
+                                                <div className="font-medium text-gray-900 dark:text-gray-100">Selected Product: {getSelectedProduct()?.name}</div>
+                                                <div className="text-gray-600 dark:text-gray-300">
                                                     Brand: {getSelectedProduct()?.brand} |
                                                     Type: {getProductTypeDisplayName(getSelectedProduct()?.product_type || '')} |
                                                     {(() => {
