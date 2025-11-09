@@ -15,32 +15,32 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'name' => 'Ganesh Hs',
-            'email' => 'admin@gullygroup.in',
+            'name' => 'Admin',
+            'email' => 'vsrao@radiantsynage.com',
             'country_code' => '+91',
             'mobile' => '9876543210',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('Vsrao123'),
             'role' => 'admin',
             'status' => 'active',
         ]);
 
         User::create([
-            'name' => 'Rajesh Kumar',
-            'email' => 'manager@gullygroup.in',
+            'name' => 'Manager Dhanunjay',
+            'email' => 'dhanunjay@radiantsynage.com',
             'country_code' => '+91',
             'mobile' => '9876543201',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('Dhanunjay123'),
             'role' => 'manager',
             'status' => 'active',
         ]);
 
         User::create([
-            'name' => 'Rohit Kumar',
-            'email' => 'sales@gullygroup.in',
+            'name' => 'Manager Ajit Kumar',
+            'email' => 'ajit.kumar@radiantsynage.com',
             'country_code' => '+91',
             'mobile' => '9876543202',
-            'password' => Hash::make('password'),
-            'role' => 'sales',
+            'password' => Hash::make('Ajit123'),
+            'role' => 'manager',
             'status' => 'active',
         ]);
     }
