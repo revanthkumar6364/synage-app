@@ -46,7 +46,8 @@ services:
   # ------------------------------------------------------------------
   mysql:
     image: mysql:8.4              # MySQL 8.4 LTS, ARM-compatible
-    platform: linux/arm64/v8      # Force Apple Silicon architecture
+    # platform: linux/arm64/v8      # Force Apple Silicon architecture
+    platform: linux/amd64         # Force Intel architecture
     container_name: rs_mysql
     command: >                    # Database server options
       --character-set-server=utf8mb4
