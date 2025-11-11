@@ -47,6 +47,15 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
     const [comments, setComments] = useState('');
     const contentRef = useRef<HTMLDivElement>(null);
     const { theme } = useTheme();
+    const defaultSalesEmail = 'mail@radiantsynage.com';
+    const salesContact = quotation?.sales_user ?? quotation?.salesUser ?? null;
+    const salesEmail = salesContact?.email ?? defaultSalesEmail;
+    const salesName = salesContact?.name ?? auth.user?.name ?? 'Radiant Synage Pvt Ltd';
+    const salesCountryCode = salesContact?.country_code ?? auth.user?.country_code ?? '';
+    const salesRawMobile = salesContact?.mobile ?? auth.user?.mobile ?? '';
+    const salesMobile = [salesCountryCode, salesRawMobile].filter(Boolean).join(' ').trim();
+    const whatsappNumber = salesRawMobile ? salesRawMobile.replace(/\D/g, '') : '';
+    const whatsappLink = whatsappNumber ? `https://wa.me/${whatsappNumber}` : undefined;
 
     const form = useForm<FormData>({
         status: 'pending',
@@ -373,14 +382,17 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     <div className="text-right">
                                         <h3 className="text-lg font-semibold text-primary mb-2">Radiant Synage Pvt Ltd</h3>
                                         <p className="text-sm text-muted-foreground leading-relaxed">
-                                            317, 2nd Floor, East of NGEF Layout<br />
-                                            Kasthuri Nagar, Bangalore - 560 043
+                                            317, Amogha Arcade, 2nd Main Road,<br />
+                                            East of NGEF Layout, Kasthuri Nagar,<br />
+                                            Bangalore - 560 043
                                         </p>
-                                        <p className="text-sm text-primary hover:underline mt-2">
-                                            <a href="mailto:murali.krishna@radiantsynage.com">
-                                                murali.krishna@radiantsynage.com
-                                            </a>
-                                        </p>
+                                        {salesEmail && (
+                                            <p className="text-sm text-primary hover:underline mt-2">
+                                                <a href={`mailto:${salesEmail}`}>
+                                                    {salesEmail}
+                                                </a>
+                                            </p>
+                                        )}
                                         <div className="text-sm text-muted-foreground mt-2 space-y-1">
                                             <p><span className="font-medium">GSTIN/UIN:</span> 29AAHCR7203C1ZJ</p>
                                             <p><span className="font-medium">CIN:</span> U74999KA2016PTC092481</p>
@@ -818,9 +830,9 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     <div className="flex items-end justify-between">
                                         <div>
                                             <p className="text-sm">For Radiant Synage Pvt Ltd.,</p>
-                                            <p className="text-sm font-semibold text-primary">{auth.user.name}</p>
-                                            <p className="text-sm font-semibold text-primary">EMAIL: {auth.user.email}</p>
-                                            <p className="text-sm font-semibold text-primary">MOBILE: {auth.user.mobile}</p>
+                                            <p className="text-sm font-semibold text-primary">{salesName}</p>
+                                            <p className="text-sm font-semibold text-primary">EMAIL: {salesEmail}</p>
+                                            <p className="text-sm font-semibold text-primary">MOBILE: {salesMobile}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-muted-foreground">Generated on</p>
@@ -832,7 +844,14 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                 {/* Social Media Links */}
                                 <div className="flex items-center gap-4 mt-6">
                                     {/* WhatsApp */}
-                                    <a href={`https://wa.me/${auth.user.mobile}`} target="_blank" rel="noopener noreferrer" title="WhatsApp" className="text-green-600 hover:text-green-700 text-xl">
+                                    <a
+                                        href={whatsappLink ?? '#'}
+                                        target={whatsappLink ? '_blank' : undefined}
+                                        rel={whatsappLink ? 'noopener noreferrer' : undefined}
+                                        title="WhatsApp"
+                                        className={`text-green-600 hover:text-green-700 text-xl ${whatsappLink ? '' : 'pointer-events-none opacity-50'}`}
+                                        aria-disabled={!whatsappLink}
+                                    >
                                         <MessageCircle className="h-6 w-6 text-green-600 hover:text-green-700" />
                                     </a>
                                     {/* Facebook */}

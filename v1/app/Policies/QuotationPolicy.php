@@ -62,6 +62,6 @@ class QuotationPolicy
 
     public function delete(User $user, Quotation $quotation): bool
     {
-        return in_array($user->role, ['admin', 'manager']);
+        return $user->role === 'admin';
     }
 }

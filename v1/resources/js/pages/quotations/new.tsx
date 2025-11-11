@@ -19,6 +19,8 @@ interface Props {
 
 export default function Preview({ quotation }: Props) {
     const [activeTab, setActiveTab] = useState("Quotation")
+    const defaultSalesEmail = 'mail@radiantsynage.com'
+    const salesEmail = quotation?.sales_user?.email ?? quotation?.salesUser?.email ?? defaultSalesEmail
 
     const form = useForm({
         notes: quotation.notes || '',
@@ -87,9 +89,10 @@ export default function Preview({ quotation }: Props) {
                         <div className="text-right">
                             <div className="font-bold">Radiant Synage Pvt Ltd</div>
                             <div className="text-xs mt-2">
-                                317, 2nd Floor, East of NGEF Layout<br />
-                                Kasthuri Nagar, Bangalore - 560 043<br />
-                                <span className="text-blue-500">mail@radiantsynage.com</span>
+                                317, Amogha Arcade, 2nd Main Road,<br />
+                                East of NGEF Layout, Kasthuri Nagar,<br />
+                                Bangalore - 560 043<br />
+                                <span className="text-blue-500">{salesEmail}</span>
                             </div>
                             <div className="text-xs mt-4">
                                 GSTIN: 29AAKCR7393C1ZT<br />

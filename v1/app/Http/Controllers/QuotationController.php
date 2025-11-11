@@ -262,7 +262,7 @@ class QuotationController extends Controller
 
     public function show(Request $request, $quotationId)
     {
-        $quotation = Quotation::with(['items.product', 'account', 'account_contact'])->find($quotationId);
+        $quotation = Quotation::with(['items.product', 'account', 'account_contact', 'salesUser'])->find($quotationId);
         $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
         $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->get();
         return Inertia::render('quotations/show', [
@@ -559,7 +559,7 @@ class QuotationController extends Controller
 
     public function preview(Request $request, $quotationId)
     {
-        $quotation = Quotation::with(['items.product', 'account', 'account_contact'])->find($quotationId);
+        $quotation = Quotation::with(['items.product', 'account', 'account_contact', 'salesUser'])->find($quotationId);
         $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
         $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->get();
         return Inertia::render('quotations/preview', [
@@ -653,9 +653,14 @@ class QuotationController extends Controller
         }
     }
 
-    public function destroy(Quotation $quotation)
+    public function destroy(Request $request, Quotation $quotation)
     {
+        if ($request->user()->cannot('delete', $quotation)) {
+            abort(403);
+        }
         try {
+            $quotation->quotationItems()->delete();
+            $quotation->quotationMedia()->delete();
             $quotation->delete();
             return redirect()->route('quotations.index')
                 ->with('success', 'Quotation deleted successfully.');
@@ -968,7 +973,7 @@ class QuotationController extends Controller
             $quotationFiles = QuotationMedia::where('quotation_id', $quotation->id)->get();
 
             // Load quotation with all necessary relationships
-            $quotation->load(['items.product', 'account', 'account_contact']);
+            $quotation->load(['items.product', 'account', 'account_contact', 'salesUser']);
 
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.quotation', [
                 'quotation' => $quotation,

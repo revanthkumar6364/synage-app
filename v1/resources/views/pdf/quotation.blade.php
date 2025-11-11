@@ -406,10 +406,11 @@
                 <td style="width: 40%;" class="company-info">
                     <h3>Radiant Synage Pvt Ltd</h3>
                     <p>
-                        317, 2nd Floor, East of NGEF Layout<br>
-                        Kasthuri Nagar, Bangalore - 560 043
+                        317, Amogha Arcade, 2nd Main Road,<br>
+                        East of NGEF Layout, Kasthuri Nagar,<br>
+                        Bangalore - 560 043
                     </p>
-                    <p class="email">murali.krishna@radiantsynage.com</p>
+                    <p class="email">{{ $quotation->salesUser?->email ?? 'mail@radiantsynage.com' }}</p>
                     <p>
                         <span style="font-weight: 500">GSTIN/UIN:</span> 29AAHCR7203C1ZJ<br>
                         <span style="font-weight: 500">CIN:</span> U74999KA2016PTC092481
@@ -839,16 +840,26 @@
             </div>
         </div>
         <div class="separator"></div>
+        @php
+            $salesContact = $quotation->salesUser;
+            $contactName = $salesContact->name ?? ($user->name ?? '');
+            $contactEmail = $salesContact->email ?? 'mail@radiantsynage.com';
+            $contactCountryCode = $salesContact->country_code ?? ($user->country_code ?? '');
+            $rawMobile = $salesContact->mobile ?? ($user->mobile ?? '');
+            $contactMobile = trim(trim(($contactCountryCode ? $contactCountryCode . ' ' : '') . $rawMobile));
+            $whatsappNumber = $rawMobile ? preg_replace('/\D/', '', $rawMobile) : '';
+            $whatsappLink = $whatsappNumber ? 'https://wa.me/' . $whatsappNumber : null;
+        @endphp
         <div class="signature-section">
             <div class="signature-block">
                 For Radiant Synage Pvt Ltd.,<br>
-                <div class="signature-name">{{ $user->name ?? '' }}</div>
+                <div class="signature-name">{{ $contactName }}</div>
                 <div class="signature-name">
-                    EMAIL: {{ $user->email ?? '' }}<br>
-                    MOBILE: {{ $user->mobile ?? '' }}
+                    EMAIL: {{ $contactEmail }}<br>
+                    MOBILE: {{ $contactMobile }}
                 </div>
                 <div style="margin-top: 8px; font-size: 11px;">
-                    <a href="https://wa.me/918884491377"
+                    <a href="{{ $whatsappLink ?? '#' }}"
                         style="margin-right: 8px; text-decoration: none; color: #25D366;">WhatsApp</a>
                     <a href="https://facebook.com/radiantsynage"
                         style="margin-right: 8px; text-decoration: none; color: #1877F3;">Facebook</a>

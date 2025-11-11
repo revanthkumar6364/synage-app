@@ -154,6 +154,7 @@ export interface Quotation {
     estimate_date?: string;
     account_id: number;
     account_contact_id?: number;
+    sales_user_id?: number | null;
     billing_address?: string;
     billing_location?: string;
     billing_city?: string;
@@ -226,6 +227,8 @@ export interface Quotation {
     rejection_reason?: string;
     account?: Account;
     account_contact?: AccountContact;
+    sales_user?: User | null;
+    salesUser?: User | null;
     selected_product?: Product;
     items: QuotationItem[];
     show_billing_in_print?: boolean;
@@ -274,6 +277,8 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    mobile?: string | null;
+    country_code?: string | null;
 }
 
 export interface NavItem {

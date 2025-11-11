@@ -7,10 +7,11 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Search, RefreshCcw, Plus, EyeIcon, PencilIcon, CheckIcon, Flame, AlertCircle } from 'lucide-react';
+import { Search, RefreshCcw, Plus, EyeIcon, PencilIcon, CheckIcon, Flame, AlertCircle, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import SubStatusDialog from '@/components/SubStatusDialog';
+import { Toaster, toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -92,6 +93,18 @@ export default function Index({ quotations, filters, statuses }: Props) {
         }, {
             preserveState: true,
             preserveScroll: true,
+        });
+    };
+
+    const handleDelete = (quotationId: number) => {
+        if (!window.confirm('Are you sure you want to delete this quotation? This action cannot be undone.')) {
+            return;
+        }
+
+        router.delete(route('quotations.destroy', quotationId), {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Quotation deleted successfully.'),
+            onError: () => toast.error('Failed to delete quotation.'),
         });
     };
 
@@ -299,6 +312,16 @@ export default function Index({ quotations, filters, statuses }: Props) {
                                                                 <PencilIcon className="h-3 w-3" />
                                                             </Button>
                                                         </Link>
+                                                    )}
+                                                    {quotation.can?.delete && (
+                                                        <Button
+                                                            variant="destructive"
+                                                            size="icon"
+                                                            className="h-8 w-8"
+                                                            onClick={() => handleDelete(quotation.id)}
+                                                        >
+                                                            <Trash2 className="h-3 w-3" />
+                                                        </Button>
                                                     )}
                                                 </div>
                                             </TableCell>
