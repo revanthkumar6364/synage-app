@@ -13,6 +13,10 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
+        if ($request->user()->cannot('viewAny', Product::class)) {
+            abort(403);
+        }
+
         $query = Product::with('category');
 
         // Handle search
@@ -44,8 +48,12 @@ class ProductController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if ($request->user()->cannot('create', Product::class)) {
+            abort(403);
+        }
+
         $categories = Category::all();
         return Inertia::render('products/create', [
             'categories' => $categories
@@ -54,6 +62,10 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->user()->cannot('create', Product::class)) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
@@ -123,15 +135,23 @@ class ProductController extends Controller
             ->with('success', 'Product created successfully.');
     }
 
-    public function show(Product $product)
+    public function show(Request $request, Product $product)
     {
+        if ($request->user()->cannot('view', $product)) {
+            abort(403);
+        }
+
         return Inertia::render('products/show', [
             'product' => $product->load('category')
         ]);
     }
 
-        public function edit(Product $product)
+    public function edit(Request $request, Product $product)
     {
+        if ($request->user()->cannot('update', $product)) {
+            abort(403);
+        }
+
         $categories = Category::all();
         return Inertia::render('products/edit', [
             'product' => $product->load('category'),
@@ -141,6 +161,10 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        if ($request->user()->cannot('update', $product)) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
@@ -216,8 +240,12 @@ class ProductController extends Controller
             ->with('success', 'Product updated successfully.');
     }
 
-    public function destroy(Product $product)
+    public function destroy(Request $request, Product $product)
     {
+        if ($request->user()->cannot('delete', $product)) {
+            abort(403);
+        }
+
         $product->delete();
 
         return redirect()->route('products.index')

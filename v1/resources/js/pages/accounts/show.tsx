@@ -44,18 +44,22 @@ export default function AccountShow({ account }: AccountShowProps) {
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-xl font-bold tracking-tight">{account.data.business_name}</CardTitle>
                         <div className="flex items-center gap-1">
+                            {account.data.can.view && (
                             <Link href={route('accounts.contacts.index', { account: account.data.id })}>
                                 <Button>
                                     <UsersIcon className="mr-1 h-3 w-3" />
                                     Manage Contacts
                                 </Button>
                             </Link>
+                            )}
+                            {account.data.can.edit && (
                             <Link href={route('accounts.edit', account.data.id)}>
                                 <Button variant="outline">
                                     <PencilIcon className="mr-1 h-3 w-3" />
                                     Edit
                                 </Button>
                             </Link>
+                            )}
                             {account.data.can.delete && (
                                 <Button variant="outline" onClick={handleDelete} className="text-red-600">
                                     <TrashIcon className="mr-1 h-3 w-3" />

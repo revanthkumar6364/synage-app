@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 use App\Models\AccountContact;
 use App\Http\Resources\AccountContactResource;
+use App\Http\Resources\AccountResource;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,14 +14,19 @@ class AccountContactController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Account $account)
+    public function index(Request $request, Account $account)
     {
+        if ($request->user()->cannot('view', $account)) {
+            abort(403);
+        }
+
         $contacts = $account->contacts()
+            ->with('account')
             ->orderBy('name')
             ->get();
 
         return Inertia::render('accounts/contacts/index', [
-            'account' => $account,
+            'account' => new AccountResource($account),
             'contacts' => AccountContactResource::collection($contacts),
         ]);
     }
@@ -28,10 +34,14 @@ class AccountContactController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(Account $account)
+    public function create(Request $request, Account $account)
     {
+        if ($request->user()->cannot('update', $account)) {
+            abort(403);
+        }
+
         return Inertia::render('accounts/contacts/create', [
-            'account' => $account,
+            'account' => new AccountResource($account),
             'statuses' => config('all.statuses'),
         ]);
     }
@@ -41,6 +51,10 @@ class AccountContactController extends Controller
      */
     public function store(Request $request, Account $account)
     {
+        if ($request->user()->cannot('update', $account)) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -63,21 +77,29 @@ class AccountContactController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Account $account, AccountContact $contact)
-    {
-        return Inertia::render('accounts/contacts/show', [
-            'account' => $account,
-            'contact' => new AccountContactResource($contact),
-        ]);
-    }
+    // public function show(Account $account, AccountContact $contact)
+    // {
+    //     if ($request->user()->cannot('view', $account)) {
+    //         abort(403);
+    //     }
+
+    //     return Inertia::render('accounts/contacts/show', [
+    //         'account' => $account,
+    //         'contact' => new AccountContactResource($contact),
+    //     ]);
+    // }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Account $account, AccountContact $contact)
+    public function edit(Request $request, Account $account, AccountContact $contact)
     {
+        if ($request->user()->cannot('update', $account)) {
+            abort(403);
+        }
+
         return Inertia::render('accounts/contacts/edit', [
-            'account' => $account,
+            'account' => new AccountResource($account),
             'contact' => new AccountContactResource($contact),
             'statuses' => config('all.statuses'),
         ]);
@@ -88,6 +110,10 @@ class AccountContactController extends Controller
      */
     public function update(Request $request, Account $account, AccountContact $contact)
     {
+        if ($request->user()->cannot('update', $account)) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -110,8 +136,12 @@ class AccountContactController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Account $account, AccountContact $contact)
+    public function destroy(Request $request, Account $account, AccountContact $contact)
     {
+        if ($request->user()->cannot('delete', $account)) {
+            abort(403);
+        }
+
         $contact->delete();
 
         return redirect()->route('accounts.contacts.index', $account)

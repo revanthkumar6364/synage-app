@@ -7,7 +7,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { MoreVertical, PencilIcon, PlusIcon, TrashIcon, UsersIcon, SearchIcon, EyeIcon, X } from 'lucide-react';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -82,12 +82,14 @@ export default function AccountsIndex({ accounts, filters, statuses }: {
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-2xl font-bold tracking-tight">Accounts</CardTitle>
-                            <Link href={route('accounts.create')}>
-                                <Button>
-                                    <PlusIcon className="mr-2 h-4 w-4" />
-                                    Add Account
+                            {(usePage().props.auth as any).can.accounts.create && (
+                                <Link href={route('accounts.create')}>
+                                    <Button>
+                                        <PlusIcon className="mr-2 h-4 w-4" />
+                                        Add Account
                                 </Button>
                             </Link>
+                            )}
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -154,11 +156,13 @@ export default function AccountsIndex({ accounts, filters, statuses }: {
                                         </TableCell>
                                         <TableCell>
                                             <div className="inline-flex gap-2">
+                                                {account.can.view && (
                                                 <Link href={route('accounts.show', account.id)}>
                                                     <Button variant="outline" size="icon">
                                                         <EyeIcon className="h-4 w-4" />
                                                     </Button>
                                                 </Link>
+                                                )}
                                                 {account.can.edit && (
                                                     <Link href={route('accounts.edit', account.id)}>
                                                         <Button variant="outline" size="icon">
@@ -166,11 +170,13 @@ export default function AccountsIndex({ accounts, filters, statuses }: {
                                                         </Button>
                                                     </Link>
                                                 )}
-                                                <Link href={route('accounts.contacts.index', account.id)}>
-                                                    <Button variant="outline" size="icon">
-                                                        <UsersIcon className="h-4 w-4" />
-                                                    </Button>
-                                                </Link>
+                                                {account.can.view && (
+                                                    <Link href={route('accounts.contacts.index', account.id)}>
+                                                        <Button variant="outline" size="icon">
+                                                            <UsersIcon className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+                                                )}
                                                 {account.can.delete && (
                                                     <Button
                                                         variant="outline"

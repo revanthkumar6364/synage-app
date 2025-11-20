@@ -15,16 +15,22 @@ interface AccountContactIndexProps {
     contacts: any;
 }
 
-const breadcrumbs = (account: any): BreadcrumbItem[] => [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Accounts', href: '/accounts' },
-    { title: account.business_name, href: `/accounts/${account.id}` },
-    { title: 'Contacts', href: '#' },
-];
+const breadcrumbs = (account: any): BreadcrumbItem[] => {
+    const accountData = account.data || account;
+    return [
+        { title: 'Dashboard', href: '/dashboard' },
+        { title: 'Accounts', href: '/accounts' },
+        { title: accountData.business_name, href: `/accounts/${accountData.id}` },
+        { title: 'Contacts', href: '#' },
+    ];
+};
 
 export default function AccountContactIndex({ account, contacts }: AccountContactIndexProps) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [contactToDelete, setContactToDelete] = useState<any>(null);
+
+    const accountData = account.data || account;
+    const contactsList = Array.isArray(contacts) ? contacts : (contacts.data || []);
 
     const handleDelete = (contact: any) => {
         setContactToDelete(contact);
@@ -33,7 +39,7 @@ export default function AccountContactIndex({ account, contacts }: AccountContac
 
     const handleDeleteConfirm = () => {
         if (contactToDelete) {
-            router.delete(route('accounts.contacts.destroy', [account.id, contactToDelete.id]), {
+            router.delete(route('accounts.contacts.destroy', [accountData.id, contactToDelete.id]), {
                 onSuccess: () => {
                     setDeleteDialogOpen(false);
                     setContactToDelete(null);
@@ -52,12 +58,14 @@ export default function AccountContactIndex({ account, contacts }: AccountContac
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-2xl font-bold tracking-tight">Account Contacts</CardTitle>
-                        <Link href={route('accounts.contacts.create', account.id)}>
-                            <Button>
-                                <PlusIcon className="mr-2 h-4 w-4" />
-                                Add Contact
-                            </Button>
-                        </Link>
+                        {(accountData.can?.edit || account.can?.edit) && (
+                            <Link href={route('accounts.contacts.create', accountData.id)}>
+                                <Button>
+                                    <PlusIcon className="mr-2 h-4 w-4" />
+                                    Add Contact
+                                </Button>
+                            </Link>
+                        )}
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -72,38 +80,50 @@ export default function AccountContactIndex({ account, contacts }: AccountContac
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {contacts.data.map((contact: any) => (
-                                    <TableRow key={contact.id}>
-                                        <TableCell>{contact.name}</TableCell>
-                                        <TableCell>{contact.email}</TableCell>
-                                        <TableCell>{contact.contact_number}</TableCell>
-                                        <TableCell>{contact.role}</TableCell>
-                                        <TableCell>
-                                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                                contact.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                            }`}>
-                                                {contact.status}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="inline-flex gap-2">
-                                                <Link href={route('accounts.contacts.edit', [account.id, contact.id])}>
-                                                    <Button variant="outline" size="icon">
-                                                        <PencilIcon className="h-4 w-4" />
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    onClick={() => handleDelete(contact)}
-                                                    className="text-red-600"
-                                                >
-                                                    <TrashIcon className="h-4 w-4" />
-                                                </Button>
-                                            </div>
+                                {contactsList.length > 0 ? (
+                                    contactsList.map((contact: any) => (
+                                        <TableRow key={contact.id}>
+                                            <TableCell>{contact.name}</TableCell>
+                                            <TableCell>{contact.email}</TableCell>
+                                            <TableCell>{contact.contact_number}</TableCell>
+                                            <TableCell>{contact.role}</TableCell>
+                                            <TableCell>
+                                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                                    contact.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                    {contact.status}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="inline-flex gap-2">
+                                                    {contact.can?.edit && (
+                                                        <Link href={route('accounts.contacts.edit', [accountData.id, contact.id])}>
+                                                            <Button variant="outline" size="icon">
+                                                                <PencilIcon className="h-4 w-4" />
+                                                            </Button>
+                                                        </Link>
+                                                    )}
+                                                    {contact.can?.delete && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="icon"
+                                                            onClick={() => handleDelete(contact)}
+                                                            className="text-red-600"
+                                                        >
+                                                            <TrashIcon className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center text-gray-500">
+                                            No contacts found
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )}
                             </TableBody>
                         </Table>
                     </CardContent>

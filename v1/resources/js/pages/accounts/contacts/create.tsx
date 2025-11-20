@@ -14,15 +14,20 @@ interface CreateAccountContactProps {
     statuses: Record<string, string>;
 }
 
-const breadcrumbs = (account: any): BreadcrumbItem[] => [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Accounts', href: '/accounts' },
-    { title: account.business_name, href: `/accounts/${account.id}` },
-    { title: 'Contacts', href: `/accounts/${account.id}/contacts` },
-    { title: 'Create Contact', href: '#' },
-];
+const breadcrumbs = (account: any): BreadcrumbItem[] => {
+    const accountData = account.data || account;
+    return [
+        { title: 'Dashboard', href: '/dashboard' },
+        { title: 'Accounts', href: '/accounts' },
+        { title: accountData.business_name, href: `/accounts/${accountData.id}` },
+        { title: 'Contacts', href: `/accounts/${accountData.id}/contacts` },
+        { title: 'Create Contact', href: '#' },
+    ];
+};
 
 const CreateAccountContact: FC<CreateAccountContactProps> = ({ account, statuses }) => {
+    const accountData = account.data || account;
+    
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
@@ -38,7 +43,7 @@ const CreateAccountContact: FC<CreateAccountContactProps> = ({ account, statuses
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('accounts.contacts.store', account.id));
+        post(route('accounts.contacts.store', accountData.id));
     };
 
     return (

@@ -12,6 +12,10 @@ class AccountController extends Controller
 
     public function index(Request $request)
     {
+        if ($request->user()->cannot('viewAny', Account::class)) {
+            abort(403);
+        }
+
         $accounts = Account::with('contacts')
             ->when($request->input('search'), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -35,8 +39,12 @@ class AccountController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        if ($request->user()->cannot('create', Account::class)) {
+            abort(403);
+        }
+
         return Inertia::render('accounts/create', [
             'industry_types' => config('all.industry_types'),
             'statuses' => config('all.statuses'),
@@ -45,6 +53,10 @@ class AccountController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->user()->cannot('create', Account::class)) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'business_name' => 'required|string|max:255',
             'gst_number' => 'nullable|string|max:255',
@@ -68,8 +80,12 @@ class AccountController extends Controller
             ->with('success', 'Account created successfully.');
     }
 
-    public function show(Account $account)
+    public function show(Request $request, Account $account)
     {
+        if ($request->user()->cannot('view', $account)) {
+            abort(403);
+        }
+
         $account->load(['contacts' => function ($query) {
             $query->orderBy('name');
         }]);
@@ -79,8 +95,12 @@ class AccountController extends Controller
         ]);
     }
 
-    public function edit(Account $account)
+    public function edit(Request $request, Account $account)
     {
+        if ($request->user()->cannot('update', $account)) {
+            abort(403);
+        }
+
         return Inertia::render('accounts/edit', [
             'account' => new AccountResource($account),
             'industry_types' => config('all.industry_types'),
@@ -90,6 +110,10 @@ class AccountController extends Controller
 
     public function update(Request $request, Account $account)
     {
+        if ($request->user()->cannot('update', $account)) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'business_name' => 'required|string|max:255',
             'gst_number' => 'nullable|string|max:255',
@@ -113,8 +137,12 @@ class AccountController extends Controller
             ->with('success', 'Account updated successfully.');
     }
 
-    public function destroy(Account $account)
+    public function destroy(Request $request, Account $account)
     {
+        if ($request->user()->cannot('delete', $account)) {
+            abort(403);
+        }
+
         $account->delete();
 
         return redirect()->route('accounts.index')

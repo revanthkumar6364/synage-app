@@ -14,6 +14,10 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
+        if ($request->user()->cannot('viewAny', Category::class)) {
+            abort(403);
+        }
+
         $categories = Category::query();
 
         if ($request->has('search')) {
@@ -36,8 +40,12 @@ class CategoryController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
+        if ($request->user()->cannot('create', Category::class)) {
+            abort(403);
+        }
+
         $categories = Category::all();
 
         return Inertia::render('categories/create', [
@@ -51,6 +59,10 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->user()->cannot('create', Category::class)) {
+            abort(403);
+        }
+
         $request->validate([
             'parent_id' => ['nullable', 'exists:categories,id', 'not_in:0'],
             'name' => ['required', 'string', 'max:255', 'unique:categories'],
@@ -94,8 +106,12 @@ class CategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Category $category)
+    public function edit(Request $request, Category $category)
     {
+        if ($request->user()->cannot('update', $category)) {
+            abort(403);
+        }
+
         $categories = Category::where('id', '!=', $category->id)
                          ->where(function($query) use ($category) {
                              $query->whereNull('parent_id')
@@ -115,6 +131,10 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
+        if ($request->user()->cannot('update', $category)) {
+            abort(403);
+        }
+
         $request->validate([
             'parent_id' => ['nullable', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255', 'unique:categories,name,' . $category->id],
@@ -169,8 +189,12 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(Request $request, Category $category)
     {
+        if ($request->user()->cannot('delete', $category)) {
+            abort(403);
+        }
+
         $category->delete();
 
         return redirect()->route('categories.index')

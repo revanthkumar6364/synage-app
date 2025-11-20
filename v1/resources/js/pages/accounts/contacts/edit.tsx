@@ -15,31 +15,37 @@ interface EditAccountContactProps {
     statuses: Record<string, string>;
 }
 
-const breadcrumbs = (account: any): BreadcrumbItem[] => [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Accounts', href: '/accounts' },
-    { title: account.business_name, href: `/accounts/${account.id}` },
-    { title: 'Contacts', href: `/accounts/${account.id}/contacts` },
-    { title: 'Edit Contact', href: '#' },
-];
+const breadcrumbs = (account: any): BreadcrumbItem[] => {
+    const accountData = account.data || account;
+    return [
+        { title: 'Dashboard', href: '/dashboard' },
+        { title: 'Accounts', href: '/accounts' },
+        { title: accountData.business_name, href: `/accounts/${accountData.id}` },
+        { title: 'Contacts', href: `/accounts/${accountData.id}/contacts` },
+        { title: 'Edit Contact', href: '#' },
+    ];
+};
 
 const EditAccountContact: FC<EditAccountContactProps> = ({ account, contact, statuses }) => {
+    const accountData = account.data || account;
+    const contactData = contact.data || contact;
+    
     const { data, setData, put, processing, errors } = useForm({
-        name: contact.data.name,
-        email: contact.data.email || '',
-        contact_number: contact.data.contact_number || '',
-        role: contact.data.role || '',
-        address: contact.data.address || '',
-        city: contact.data.city || '',
-        state: contact.data.state || '',
-        country: contact.data.country || '',
-        zip_code: contact.data.zip_code || '',
-        status: contact.data.status,
+        name: contactData.name,
+        email: contactData.email || '',
+        contact_number: contactData.contact_number || '',
+        role: contactData.role || '',
+        address: contactData.address || '',
+        city: contactData.city || '',
+        state: contactData.state || '',
+        country: contactData.country || '',
+        zip_code: contactData.zip_code || '',
+        status: contactData.status,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('accounts.contacts.update', [account.id, contact.data.id]));
+        put(route('accounts.contacts.update', [accountData.id, contactData.id]));
     };
 
     return (
