@@ -1175,8 +1175,10 @@ class QuotationController extends Controller
      */
     private function attachDefaultFiles(Quotation $quotation)
     {
-        // Get default files (files with null quotation_id)
+        // Get default files (files with null quotation_id) filtered by quotation category
+        // This ensures that when category is "custom", only files with category "custom" are attached
         $defaultFiles = QuotationMedia::whereNull('quotation_id')
+            ->where('category', $quotation->category)
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
