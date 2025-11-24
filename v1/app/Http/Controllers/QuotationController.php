@@ -1180,6 +1180,7 @@ class QuotationController extends Controller
         $defaultFiles = QuotationMedia::whereNull('quotation_id')
             ->where('category', $quotation->category)
             ->where('is_active', true)
+            ->active()
             ->orderBy('sort_order')
             ->get();
 
