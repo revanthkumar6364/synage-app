@@ -156,10 +156,13 @@ class QuotationMediaController extends Controller
 
         DB::beginTransaction();
 
-        // Delete the file
-        $filePath = "{$quotation_medium->file_path}/{$quotation_medium->file_name}";
-        if (Storage::disk('public')->exists($filePath)) {
-            Storage::disk('public')->delete($filePath);
+        // Only delete the file if it's not a specification image (shared across quotations)
+        if (!str_contains($quotation_medium->name, 'Specification')) {
+            // Delete the file
+            $filePath = "{$quotation_medium->file_path}/{$quotation_medium->file_name}";
+            if (Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
         }
 
         // Delete the record

@@ -263,8 +263,8 @@ class QuotationController extends Controller
     public function show(Request $request, $quotationId)
     {
         $quotation = Quotation::with(['items.product', 'account', 'account_contact', 'salesUser'])->find($quotationId);
-        $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
-        $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->get();
+        $commonFiles = QuotationMedia::where('category', $quotation->category)->active()->get();
+        $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->active()->get();
         return Inertia::render('quotations/show', [
             'quotation' => $quotation,
             'commonFiles' => $commonFiles,
@@ -560,8 +560,8 @@ class QuotationController extends Controller
     public function preview(Request $request, $quotationId)
     {
         $quotation = Quotation::with(['items.product', 'account', 'account_contact', 'salesUser'])->find($quotationId);
-        $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
-        $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->get();
+        $commonFiles = QuotationMedia::where('category', $quotation->category)->active()->get();
+        $quotationFiles = QuotationMedia::where('quotation_id', $quotationId)->where('category', '!=', 'logo')->active()->get();
         return Inertia::render('quotations/preview', [
             'quotation' => $quotation,
             'commonFiles' => $commonFiles,
@@ -902,11 +902,13 @@ class QuotationController extends Controller
         $quotationFiles = $quotation->media()
             ->with(['creator'])
             ->orderBy('sort_order')
+            ->active()
             ->get();
 
         // Get common files that can be used across quotations
         $commonFiles = QuotationMedia::whereNull('quotation_id')
             ->where('category', $quotation->category)
+            ->active()
             ->orderBy('sort_order')
             ->get();
         // Transform the data to ensure all required fields are present
@@ -969,8 +971,8 @@ class QuotationController extends Controller
                 abort(403, 'You are not authorized to view this quotation.');
             }
 
-            $commonFiles = QuotationMedia::where('category', $quotation->category)->get();
-            $quotationFiles = QuotationMedia::where('quotation_id', $quotation->id)->get();
+            $commonFiles = QuotationMedia::where('category', $quotation->category)->active()->get();
+            $quotationFiles = QuotationMedia::where('quotation_id', $quotation->id)->where('category', '!=', 'logo')->active()->get();
 
             // Load quotation with all necessary relationships
             $quotation->load(['items.product', 'account', 'account_contact', 'salesUser']);
@@ -1144,6 +1146,8 @@ class QuotationController extends Controller
                 // Check if this specification image is already attached
                 $exists = QuotationMedia::where('quotation_id', $quotation->id)
                     ->where('file_name', $product->specification_image)
+                    ->where('category', 'image')
+                    ->active()
                     ->exists();
 
                 if (!$exists) {
@@ -1179,7 +1183,6 @@ class QuotationController extends Controller
         // This ensures that when category is "custom", only files with category "custom" are attached
         $defaultFiles = QuotationMedia::whereNull('quotation_id')
             ->where('category', $quotation->category)
-            ->where('is_active', true)
             ->active()
             ->orderBy('sort_order')
             ->get();
