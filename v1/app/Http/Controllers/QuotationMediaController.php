@@ -28,8 +28,7 @@ class QuotationMediaController extends Controller
             })
             ->when($request->filled('category') && $request->category !== 'all', function ($q, $category) use ($request) {
                 $q->byCategory($request->category);
-            })
-            ->active();
+            });
 
         $media = $query->latest()->paginate(config('all.pagination.per_page'));
 
