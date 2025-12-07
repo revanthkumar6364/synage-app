@@ -32,7 +32,7 @@ services:
     container_name: rs_nginx
     restart: unless-stopped
     ports:
-      - "8001:80"                 # Access at http://localhost:8001
+      - "80:80"                   # Access at http://localhost
     volumes:
       - ./:/var/www/html          # Serve Laravel public directory
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro  # Custom config
