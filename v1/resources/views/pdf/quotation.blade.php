@@ -504,13 +504,18 @@
                 160);
 
             // Use the item's selected quantity
-            $quantity = $item->quantity;
+            $quantity = (float) $item->quantity;
             $boxes_in_width = $unit_width_mm > 0 ? floor($available_width_mm / $unit_width_mm) : 0;
             $boxes_in_height = $unit_height_mm > 0 ? floor($available_height_mm / $unit_height_mm) : 0;
             $max_possible_boxes = $boxes_in_width * $boxes_in_height;
+            // Limit quantity to max possible boxes to prevent calculation errors
+            $effective_quantity = min($quantity, $max_possible_boxes);
             // Proposed width/height based on selected quantity (fill rows first)
-            $proposed_width_mm = $boxes_in_width > 0 ? $unit_width_mm * min($boxes_in_width, $quantity) : 0;
-            $proposed_height_mm = $boxes_in_width > 0 ? $unit_height_mm * ceil($quantity / max($boxes_in_width, 1)) : 0;
+            $proposed_width_mm = $boxes_in_width > 0 ? $unit_width_mm * min($boxes_in_width, $effective_quantity) : 0;
+            $proposed_height_mm = $boxes_in_width > 0 ? $unit_height_mm * ceil($effective_quantity / max($boxes_in_width, 1)) : 0;
+            // Ensure proposed size doesn't exceed available size
+            $proposed_width_mm = min($proposed_width_mm, $available_width_mm);
+            $proposed_height_mm = min($proposed_height_mm, $available_height_mm);
             $proposed_width_ft = $proposed_width_mm / 304.8;
             $proposed_height_ft = $proposed_height_mm / 304.8;
             $proposed_sqft = $proposed_width_ft * $proposed_height_ft;

@@ -102,9 +102,15 @@ export default function Index({ quotations, filters, statuses }: Props) {
         }
 
         router.delete(route('quotations.destroy', quotationId), {
-            preserveScroll: true,
-            onSuccess: () => toast.success('Quotation deleted successfully.'),
-            onError: () => toast.error('Failed to delete quotation.'),
+            preserveScroll: false,
+            preserveState: false,
+            onSuccess: (page) => {
+                toast.success('Quotation deleted successfully.');
+            },
+            onError: (errors) => {
+                console.error('Delete error:', errors);
+                toast.error(errors?.error || 'Failed to delete quotation.');
+            },
         });
     };
 

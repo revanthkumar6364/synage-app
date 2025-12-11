@@ -659,12 +659,25 @@ class QuotationController extends Controller
             abort(403);
         }
         try {
-            $quotation->quotationItems()->delete();
-            $quotation->quotationMedia()->delete();
+            DB::beginTransaction();
+
+            // Delete related records (soft delete)
+            $quotation->items()->delete();
+            $quotation->media()->delete();
+
+            // Soft delete the quotation
             $quotation->delete();
+
+            DB::commit();
+
             return redirect()->route('quotations.index')
                 ->with('success', 'Quotation deleted successfully.');
         } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Quotation deletion failed: ' . $e->getMessage(), [
+                'quotation_id' => $quotation->id,
+                'exception' => $e
+            ]);
             return back()->with('error', 'Error deleting quotation: ' . $e->getMessage());
         }
     }

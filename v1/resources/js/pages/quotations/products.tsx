@@ -449,8 +449,11 @@ export default function QuotationProducts({ quotation, products }: Props) {
                                             const boxesInWidth = unitWidthMm > 0 ? Math.floor(availableWidthMm / unitWidthMm) : 0;
                                             const boxesInHeight = unitHeightMm > 0 ? Math.floor(availableHeightMm / unitHeightMm) : 0;
                                             const maxPossibleBoxes = boxesInWidth * boxesInHeight;
-                                            const proposedWidthMm = unitWidthMm * boxesInWidth;
-                                            const proposedHeightMm = unitHeightMm * (boxesInWidth > 0 ? Math.ceil(maxPossibleBoxes / boxesInWidth) : 0);
+                                            let proposedWidthMm = unitWidthMm * boxesInWidth;
+                                            let proposedHeightMm = unitHeightMm * (boxesInWidth > 0 ? Math.ceil(maxPossibleBoxes / boxesInWidth) : 0);
+                                            // Ensure proposed size doesn't exceed available size
+                                            proposedWidthMm = Math.min(proposedWidthMm, availableWidthMm);
+                                            proposedHeightMm = Math.min(proposedHeightMm, availableHeightMm);
                                             const proposedWidthFt = (proposedWidthMm / 304.8).toFixed(2);
                                             const proposedHeightFt = (proposedHeightMm / 304.8).toFixed(2);
                                             const proposedSqft = ((proposedWidthMm / 304.8) * (proposedHeightMm / 304.8)).toFixed(2);

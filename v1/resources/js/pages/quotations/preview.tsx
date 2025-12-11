@@ -494,12 +494,17 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                         const boxesInWidth = unitWidthMm > 0 ? Math.floor(availableWidthMm / unitWidthMm) : 0;
                                         const boxesInHeight = unitHeightMm > 0 ? Math.floor(availableHeightMm / unitHeightMm) : 0;
                                         const maxPossibleBoxes = boxesInWidth * boxesInHeight;
+                                        // Limit quantity to max possible boxes to prevent calculation errors
+                                        const effectiveQuantity = Math.min(quantity, maxPossibleBoxes);
 
                                         // Proposed width/height based on selected quantity (fill rows first)
-                                        const proposedWidthMm = boxesInWidth > 0 ? unitWidthMm * Math.min(boxesInWidth, quantity) : 0;
-                                        const proposedHeightMm = boxesInWidth > 0 ? unitHeightMm * Math.ceil(quantity / Math.max(boxesInWidth, 1)) : 0;
-                                        const proposedWidthFt = proposedWidthMm / 304.8;
-                                        const proposedHeightFt = proposedHeightMm / 304.8;
+                                        const proposedWidthMm = boxesInWidth > 0 ? unitWidthMm * Math.min(boxesInWidth, effectiveQuantity) : 0;
+                                        let proposedHeightMm = boxesInWidth > 0 ? unitHeightMm * Math.ceil(effectiveQuantity / Math.max(boxesInWidth, 1)) : 0;
+                                        // Ensure proposed size doesn't exceed available size
+                                        const finalProposedWidthMm = Math.min(proposedWidthMm, availableWidthMm);
+                                        const finalProposedHeightMm = Math.min(proposedHeightMm, availableHeightMm);
+                                        const proposedWidthFt = finalProposedWidthMm / 304.8;
+                                        const proposedHeightFt = finalProposedHeightMm / 304.8;
                                         const proposedSqft = proposedWidthFt * proposedHeightFt;
 
                                         return (
@@ -516,7 +521,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                                         <div>
                                                             <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">PROPOSED SIZE</h4>
                                                             <p className="text-sm text-muted-foreground">
-                                                                {proposedWidthMm.toFixed(2)} mm W x {proposedHeightMm.toFixed(2)} mm H |
+                                                                {finalProposedWidthMm.toFixed(2)} mm W x {finalProposedHeightMm.toFixed(2)} mm H |
                                                                 {proposedWidthFt.toFixed(2)} ft W x {proposedHeightFt.toFixed(2)} ft H =
                                                                 {proposedSqft.toFixed(2)} Sq ft |
                                                                 {boxesInHeight} R x {boxesInWidth} C of {unitWidthMm} W x {unitHeightMm} H mm
@@ -526,7 +531,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                                             <div>
                                                                 <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">RESOLUTION</h4>
                                                                 <p className="text-sm text-muted-foreground">
-                                                                    {Math.round(proposedWidthMm * 512)} Pixels
+                                                                    {Math.round(finalProposedWidthMm * 512)} Pixels
                                                                 </p>
                                                             </div>
                                                         )}
