@@ -546,7 +546,17 @@
                                 <div style="margin-top: 8px;">
                                     <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">NO OF PIXELS</h3>
                                     <p style="font-size: 16px; color: #333;">
-                                        {{ number_format($proposed_width_mm * 512, 0) }} Pixels</p>
+                                        @php
+                                            $pixel_pitch = (float) ($item->product->pixel_pitch ?? 0);
+                                            if ($pixel_pitch > 0) {
+                                                $width_pixels = $proposed_width_mm / $pixel_pitch;
+                                                $height_pixels = $proposed_height_mm / $pixel_pitch;
+                                                $total_pixels = $width_pixels * $height_pixels;
+                                            } else {
+                                                $total_pixels = 0;
+                                            }
+                                        @endphp
+                                        {{ $pixel_pitch > 0 ? number_format($total_pixels, 0) : 'N/A' }} Pixels</p>
                                 </div>
                             @endif
                         </td>

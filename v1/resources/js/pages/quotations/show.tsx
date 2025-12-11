@@ -531,6 +531,15 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                         const proposedHeightFt = finalProposedHeightMm / 304.8;
                                         const proposedSqft = proposedWidthFt * proposedHeightFt;
 
+                                        // Calculate total pixels based on pixel pitch
+                                        const pixelPitch = parseFloat(item.product.pixel_pitch) || 0;
+                                        let totalPixels = 0;
+                                        if (pixelPitch > 0) {
+                                            const widthPixels = finalProposedWidthMm / pixelPitch;
+                                            const heightPixels = finalProposedHeightMm / pixelPitch;
+                                            totalPixels = widthPixels * heightPixels;
+                                        }
+
                                         return (
                                             <div key={item.id} className="bg-muted/30 p-5 rounded-lg border border-border/50 space-y-4">
                                                 <h3 className="text-lg font-semibold text-primary">Product Specifications - {item.product.name}</h3>
@@ -554,7 +563,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                         <div>
                                                             <h4 className="text-sm font-medium text-primary uppercase tracking-wide mb-2">RESOLUTION</h4>
                                                             <p className="text-sm text-muted-foreground">
-                                                                {Math.round(finalProposedWidthMm * 512)} Pixels
+                                                                {pixelPitch > 0 ? Math.round(totalPixels).toLocaleString() : 'N/A'} Pixels
                                                             </p>
                                                         </div>
                                                     </div>
