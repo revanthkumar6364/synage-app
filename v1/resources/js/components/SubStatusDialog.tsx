@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { Flame, Snowflake, Clock } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface SubStatusDialogProps {
     quotationId: number;
@@ -33,6 +34,8 @@ export default function SubStatusDialog({
     const [notes, setNotes] = useState(currentNotes);
     const [loading, setLoading] = useState(false);
 
+    const { flash } = usePage().props as any;
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -45,12 +48,17 @@ export default function SubStatusDialog({
             },
             {
                 preserveScroll: true,
-                onSuccess: () => {
+                onSuccess: (page) => {
                     setOpen(false);
                     setLoading(false);
+                    // Show success message from flash or default message
+                    const message = (page.props as any)?.flash?.success || 'Sub-status updated successfully.';
+                    toast.success(message);
                 },
-                onError: () => {
+                onError: (errors) => {
                     setLoading(false);
+                    const errorMessage = errors?.sub_status || errors?.message || 'Failed to update sub-status.';
+                    toast.error(errorMessage);
                 },
             }
         );

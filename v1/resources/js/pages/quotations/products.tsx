@@ -137,20 +137,26 @@ export default function QuotationProducts({ quotation, products }: Props) {
         if (field === 'proposed_unit_price') {
             if (product) {
                 const numericValue = typeof value === 'string' ? parseFloat(value) : value;
-                const minPrice = product.min_price || 0;
+                // Only validate if min_price is set and greater than 0
+                const minPrice = (product.min_price && product.min_price > 0) ? product.min_price : 0;
 
                 // Remove any previous error
                 delete newProducts[index].priceError;
 
-                // For admins, show suggested range but don't enforce validation
-                if (auth.user.role === 'admin') {
-                    if (numericValue < minPrice) {
-                        newProducts[index].priceError = `Suggested minimum: ₹${minPrice} (You can set any price as admin)`;
-                    }
-                } else {
-                    // For other users, enforce validation
-                    if (numericValue < minPrice) {
-                        newProducts[index].priceError = `Price must not be less than ₹${minPrice}`;
+                // Only validate if min_price is actually set
+                if (minPrice > 0) {
+                    // For admins, show suggested range but don't enforce validation
+                    if (auth.user.role === 'admin') {
+                        if (numericValue < minPrice) {
+                            newProducts[index].priceError = `Suggested minimum: ₹${minPrice} (You can set any price as admin)`;
+                        }
+                    } else {
+                        // For other users, enforce validation only if price is significantly below minimum
+                        // Allow small variations (within 5% of min_price) to account for rounding/negotiation
+                        const threshold = minPrice * 0.95;
+                        if (numericValue < threshold) {
+                            newProducts[index].priceError = `Price must not be less than ₹${minPrice}`;
+                        }
                     }
                 }
 
@@ -233,9 +239,15 @@ export default function QuotationProducts({ quotation, products }: Props) {
             const hasErrors = selectedProducts.some(product => {
                 const productDetails = products.find(p => p.id === product.id);
                 if (productDetails) {
-                    const minPrice = productDetails.min_price || 0;
+                    // Only validate if min_price is set and greater than 0
+                    const minPrice = (productDetails.min_price && productDetails.min_price > 0) ? productDetails.min_price : 0;
+                    if (minPrice === 0) {
+                        return false; // No minimum price set, allow any price
+                    }
                     const proposedPrice = parseFloat(product.proposed_unit_price.toString());
-                    return proposedPrice < minPrice;
+                    // Allow small variations (within 5% of min_price) to account for rounding/negotiation
+                    const threshold = minPrice * 0.95;
+                    return proposedPrice < threshold;
                 }
                 return false;
             });
@@ -272,9 +284,15 @@ export default function QuotationProducts({ quotation, products }: Props) {
             const hasErrors = selectedProducts.some(product => {
                 const productDetails = products.find(p => p.id === product.id);
                 if (productDetails) {
-                    const minPrice = productDetails.min_price || 0;
+                    // Only validate if min_price is set and greater than 0
+                    const minPrice = (productDetails.min_price && productDetails.min_price > 0) ? productDetails.min_price : 0;
+                    if (minPrice === 0) {
+                        return false; // No minimum price set, allow any price
+                    }
                     const proposedPrice = parseFloat(product.proposed_unit_price.toString());
-                    return proposedPrice < minPrice;
+                    // Allow small variations (within 5% of min_price) to account for rounding/negotiation
+                    const threshold = minPrice * 0.95;
+                    return proposedPrice < threshold;
                 }
                 return false;
             });
