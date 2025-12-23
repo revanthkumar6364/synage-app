@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeftIcon } from 'lucide-react';
-import { type FC, useState, useEffect } from 'react';
+import { type FC } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -29,13 +29,9 @@ interface EditUserProps {
     roles: Record<string, string>;
     statuses: Record<string, string>;
     country_codes: Record<string, string>;
-    accounts: any[];
-    contacts: any[];
 }
 
-const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, accounts, contacts }) => {
-    const [accountContacts, setAccountContacts] = useState<any[]>([]);
-
+const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes }) => {
     const { data, setData, put, processing, errors } = useForm({
         name: user.data.name,
         email: user.data.email,
@@ -43,18 +39,7 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, acc
         status: user.data.status,
         country_code: user.data.country_code,
         mobile: user.data.mobile,
-        account_id: user.data.account_id,
-        account_contact_id: user.data.account_contact_id
     });
-
-    useEffect(() => {
-        if (data.account_id) {
-            const selectedAccount = accounts.find(account => account.id === data.account_id);
-            if (selectedAccount) {
-                setAccountContacts(selectedAccount.contacts || []);
-            }
-        }
-    }, [data.account_id, accounts]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -95,46 +80,6 @@ const EditUser: FC<EditUserProps> = ({ user, roles, statuses, country_codes, acc
                                         placeholder="Enter user email"
                                     />
                                     {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="account">Account</Label>
-                                    <Select value={data.account_id?.toString()} onValueChange={(value) => setData('account_id', parseInt(value))}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select account" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {accounts?.map((account) => (
-                                                <SelectItem key={account.id} value={account.id.toString()}>
-                                                    {account.business_name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.account_id && <p className="text-sm text-red-500">{errors.account_id}</p>}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="contact">Contact</Label>
-                                    <Select
-                                        value={data.account_contact_id?.toString()}
-                                        onValueChange={(value) => setData('account_contact_id', parseInt(value))}
-                                        disabled={!data.account_id}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select contact" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {accountContacts?.map((contact) => (
-                                                <SelectItem key={contact.id} value={contact.id.toString()}>
-                                                    {contact.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.account_contact_id && <p className="text-sm text-red-500">{errors.account_contact_id}</p>}
                                 </div>
                             </div>
 

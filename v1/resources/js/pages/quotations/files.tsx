@@ -98,13 +98,11 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
                     e.target.value = ''; // Reset input
                 },
                 onError: (errors) => {
-                    console.error(errors);
                     toast.error(errors.file || 'Failed to upload file');
                 },
                 onFinish: () => setUploading(false),
             });
         } catch (error) {
-            console.error(error);
             toast.error('Failed to upload file');
             setUploading(false);
         }
@@ -120,7 +118,6 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
                 router.reload();
             },
             onError: (errors) => {
-                console.error('Attach failed:', errors);
                 toast.error('Failed to attach file');
             },
         });
@@ -134,7 +131,6 @@ export default function QuotationFiles({ quotation, quotationFiles = [], commonF
                 router.reload();
             },
             onError: (errors) => {
-                console.error('Detach failed:', errors);
                 toast.error('Failed to detach file');
             },
         });

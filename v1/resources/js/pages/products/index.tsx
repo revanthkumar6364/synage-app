@@ -10,6 +10,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PlusIcon, SearchIcon, XIcon } from 'lucide-react';
 import { type FC, useState, useEffect } from 'react';
 import { formatCurrency } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,11 +38,32 @@ interface IndexProps {
         search?: string;
         category?: string;
     };
+    flash?: {
+        success?: string;
+        error?: string;
+    };
 }
 
-const Index: FC<IndexProps> = ({ products, categories, filters }) => {
-    const { auth } = usePage<{ auth: any }>().props;
+const Index: FC<IndexProps> = ({ products, categories, filters, flash: propFlash }) => {
+    const pageProps = usePage<{ auth: any; flash?: { success?: string; error?: string } }>().props;
+    const { auth, flash: sharedFlash } = pageProps;
+
+    // Use flash from props first, then fallback to shared flash
+    const flash = propFlash || sharedFlash;
+
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
+
+    // Show flash messages as toast notifications
+    useEffect(() => {
+        if (flash) {
+            if (flash.success) {
+                toast.success(flash.success);
+            }
+            if (flash.error) {
+                toast.error(flash.error);
+            }
+        }
+    }, [flash?.success, flash?.error]);
 
     useEffect(() => {
         setSearchTerm(filters.search || '');

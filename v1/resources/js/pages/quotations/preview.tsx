@@ -278,7 +278,6 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
             },
             onError: (errors) => {
                 toast.error('Failed to submit quotation for approval');
-                console.error('Form errors:', errors);
             }
         });
     };
@@ -291,7 +290,6 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
             },
             onError: (errors) => {
                 toast.error('Failed to save terms and conditions');
-                console.error('Form errors:', errors);
             }
         });
     };

@@ -45,8 +45,24 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $shared = parent::share($request);
+
+        // Get flash messages from session
+        $success = $request->session()->get('success');
+        $error = $request->session()->get('error');
+
+        // Merge with parent's flash if it exists, otherwise use our own
+        $flash = $shared['flash'] ?? [];
+        if ($success) {
+            $flash['success'] = $success;
+        }
+        if ($error) {
+            $flash['error'] = $error;
+        }
+
         return [
-            ...parent::share($request),
+            ...$shared,
+            'flash' => $flash,
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),

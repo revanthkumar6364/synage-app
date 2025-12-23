@@ -6,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import { ArrowLeftIcon } from 'lucide-react';
-import { type FC } from 'react';
+import { type FC, useState } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -71,42 +72,97 @@ interface EditProps {
 }
 
 const Edit: FC<EditProps> = ({ product, categories }) => {
+    // Get errors from Inertia page props (for router.post validation errors)
+    // Merge with any existing errors from useForm
+    const pageProps = usePage<{ errors?: Record<string, string> }>().props;
+    const pageErrors = pageProps.errors || {};
 
+    // Combine page errors with form errors (page errors take precedence)
+    const errors = pageErrors;
 
-    const { data, setData, put, processing, errors } = useForm({
-        category_id: product.category_id?.toString() || '',
-        name: product.name || '',
-        sku: product.sku || '',
-        description: product.description || '',
-        size: product.size || '',
+    // Loading state for form submission (since we're using router.post directly)
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Use useForm for form state management, but we'll use router.post for submission
+    const { data, setData } = useForm({
+        category_id: product.category_id ? String(product.category_id) : '',
+        name: product.name ? String(product.name) : '',
+        sku: product.sku ? String(product.sku) : '',
+        description: product.description ? String(product.description) : '',
+        size: product.size ? String(product.size) : '',
         h_mm: product.h_mm ?? 0,
         w_mm: product.w_mm ?? 0,
-        size_inch: product.size_inch || '',
+        size_inch: product.size_inch ? String(product.size_inch) : '',
         upto_pix: product.upto_pix ?? 0,
-        price: product.price?.toString() || '',
-        unit: product.unit || '',
+        price: product.price ? String(product.price) : '',
+        unit: product.unit ? String(product.unit) : '',
         price_per_sqft: product.price_per_sqft ?? 0,
-        brand: product.brand || '',
-        type: product.type || '',
+        brand: product.brand ? String(product.brand) : '',
+        type: product.type ? String(product.type) : '',
         gst_percentage: product.gst_percentage ?? 0,
-        hsn_code: product.hsn_code || '',
+        hsn_code: product.hsn_code ? String(product.hsn_code) : '',
         min_price: product.min_price ?? 0,
         max_price: product.max_price ?? 0,
-        status: product.status || 'active',
-        pixel_pitch: product.pixel_pitch?.toString() || '',
-        refresh_rate: product.refresh_rate?.toString() || '',
-        cabinet_type: product.cabinet_type || '',
+        status: product.status ? String(product.status) : 'active',
+        pixel_pitch: product.pixel_pitch ? String(product.pixel_pitch) : '',
+        refresh_rate: product.refresh_rate ? String(product.refresh_rate) : '',
+        cabinet_type: product.cabinet_type ? String(product.cabinet_type) : '',
         specification_image: null as File | null,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post(route('products.update', product.id), {
-            ...data,
-            _method: 'put'
-        }, {
+
+        // Prepare data for FormData - ensure all values are strings or proper types
+        const formData: Record<string, any> = {
+            _method: 'PUT', // Laravel method spoofing for PUT requests
+            category_id: String(data.category_id || ''),
+            name: String(data.name || ''),
+            sku: String(data.sku || ''),
+            price: String(data.price || ''),
+            status: String(data.status || 'active'),
+            description: String(data.description || ''),
+            size: String(data.size || ''),
+            size_inch: String(data.size_inch || ''),
+            unit: String(data.unit || ''),
+            brand: String(data.brand || ''),
+            type: String(data.type || ''),
+            hsn_code: String(data.hsn_code || ''),
+            cabinet_type: String(data.cabinet_type || ''),
+            h_mm: String(data.h_mm ?? 0),
+            w_mm: String(data.w_mm ?? 0),
+            upto_pix: String(data.upto_pix ?? 0),
+            price_per_sqft: String(data.price_per_sqft ?? 0),
+            gst_percentage: String(data.gst_percentage ?? 0),
+            min_price: String(data.min_price ?? 0),
+            max_price: String(data.max_price ?? 0),
+            pixel_pitch: String(data.pixel_pitch || ''),
+            refresh_rate: String(data.refresh_rate || ''),
+        };
+
+        // Add file if exists
+        if (data.specification_image) {
+            formData.specification_image = data.specification_image;
+        }
+
+        // Use router.post with method spoofing to ensure FormData includes all fields
+        // Errors will be available via usePage().props.errors
+        setIsSubmitting(true);
+        router.post(route('products.update', product.id), formData, {
             forceFormData: true,
-            preserveScroll: true,
+            preserveScroll: false,
+            // Backend will redirect with flash message, no need to manually visit
+            onError: (errors) => {
+                setIsSubmitting(false);
+                if (Object.keys(errors).length > 0) {
+                    toast.error('Please fix the validation errors');
+                } else {
+                    toast.error('Failed to update product');
+                }
+            },
+            onFinish: () => {
+                setIsSubmitting(false);
+            }
         });
     };
 
@@ -131,7 +187,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 <div className="space-y-2">
                                     <Label htmlFor="category_id">Category <span className="text-red-500">*</span></Label>
                                     <Select
-                                        value={data.category_id}
+                                        value={data.category_id ? String(data.category_id) : ''}
                                         onValueChange={(value) => setData('category_id', value)}
                                     >
                                         <SelectTrigger>
@@ -139,7 +195,7 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {categories.map((category) => (
-                                                <SelectItem key={category.id} value={category.id.toString()}>
+                                                <SelectItem key={category.id} value={String(category.id)}>
                                                     {category.name}
                                                 </SelectItem>
                                             ))}
@@ -442,8 +498,8 @@ const Edit: FC<EditProps> = ({ product, categories }) => {
                                 {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
                             </div>
 
-                            <Button type="submit" disabled={processing}>
-                                {processing ? 'Updating...' : 'Update Product'}
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? 'Updating...' : 'Update Product'}
                             </Button>
                         </form>
                     </CardContent>

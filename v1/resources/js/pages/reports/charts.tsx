@@ -137,7 +137,6 @@ export default function VisualCharts({ chartData, filters }: Props) {
             // Use browser's built-in print
             window.print();
         } catch (error) {
-            console.error('Error printing charts:', error);
             alert('Failed to print charts. Please use browser print function (Ctrl+P).');
         }
     };
@@ -181,7 +180,6 @@ export default function VisualCharts({ chartData, filters }: Props) {
             link.click();
             document.body.removeChild(link);
         } catch (error) {
-            console.error('Error exporting as CSV:', error);
             alert('Failed to export as CSV. Please try again.');
         }
     };

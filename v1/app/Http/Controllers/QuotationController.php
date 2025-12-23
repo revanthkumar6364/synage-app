@@ -1115,10 +1115,10 @@ class QuotationController extends Controller
         // Only approved quotations can have sub-status
         if ($quotation->status !== Quotation::STATUS_APPROVED) {
             if ($request->wantsJson() || !$request->header('X-Inertia')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Sub-status can only be updated for approved quotations.'
-                ], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Sub-status can only be updated for approved quotations.'
+            ], 400);
             }
             return back()->withErrors([
                 'sub_status' => 'Sub-status can only be updated for approved quotations.'
@@ -1139,21 +1139,21 @@ class QuotationController extends Controller
             // Return Inertia-compatible response
             if ($request->wantsJson() && !$request->header('X-Inertia')) {
                 // API request - return JSON
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Sub-status updated successfully.',
-                    'quotation' => $quotation->fresh(),
-                ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Sub-status updated successfully.',
+                'quotation' => $quotation->fresh(),
+            ]);
             }
 
             // Inertia request - redirect back with success message
             return back()->with('success', 'Sub-status updated successfully.');
         } catch (\Exception $e) {
             if ($request->wantsJson() && !$request->header('X-Inertia')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to update sub-status.'
-                ], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update sub-status.'
+            ], 500);
             }
             return back()->withErrors([
                 'sub_status' => 'Failed to update sub-status.'

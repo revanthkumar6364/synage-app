@@ -38,7 +38,6 @@ const ChangePassword: FC<ChangePasswordProps> = ({ user }) => {
         e.preventDefault();
 
         if (!user?.id) {
-            console.error('User ID not available:', user);
             return;
         }
 

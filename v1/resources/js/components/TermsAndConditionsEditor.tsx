@@ -103,7 +103,6 @@ export default function TermsAndConditionsEditor({ quotation, onSave }: TermsAnd
             },
             onError: (errors) => {
                 toast.error('Failed to update product type');
-                console.error('Errors:', errors);
             }
         });
     };
@@ -117,7 +116,6 @@ export default function TermsAndConditionsEditor({ quotation, onSave }: TermsAnd
             },
             onError: (errors) => {
                 toast.error('Failed to save terms and conditions');
-                console.error('Errors:', errors);
             }
         });
     };

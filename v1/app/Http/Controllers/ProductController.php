@@ -7,6 +7,7 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -168,7 +169,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'sku' => 'required|string|unique:products,sku,' . $product->id,
+            'sku' => ['required', 'string', Rule::unique('products', 'sku')->ignore($product->id)],
             'description' => 'nullable|string',
             'size' => 'nullable|string|max:255',
             'h_mm' => 'nullable|numeric|min:0',

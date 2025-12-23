@@ -116,7 +116,6 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
             // Use browser's built-in print
             window.print();
         } catch (error) {
-            console.error('Error printing report:', error);
             alert('Failed to print report. Please use browser print function (Ctrl+P).');
         }
     };
@@ -168,7 +167,6 @@ export default function EstimateAnalytics({ estimateData, pagination, analytics,
             link.click();
             document.body.removeChild(link);
         } catch (error) {
-            console.error('Error exporting as CSV:', error);
             alert('Failed to export as CSV. Please try again.');
         }
     };

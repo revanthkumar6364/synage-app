@@ -98,7 +98,6 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
             },
             onError: (errors: any) => {
                 toast.error('Failed to approve quotation');
-                console.error('Form errors:', errors);
             },
             onFinish: () => {
                 setLoading(false);
@@ -121,7 +120,6 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
             },
             onError: (errors: any) => {
                 toast.error('Failed to cancel quotation');
-                console.error('Form errors:', errors);
             },
             onFinish: () => {
                 setLoading(false);

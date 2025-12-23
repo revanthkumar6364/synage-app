@@ -145,17 +145,17 @@ export default function QuotationProducts({ quotation, products }: Props) {
 
                 // Only validate if min_price is actually set
                 if (minPrice > 0) {
-                    // For admins, show suggested range but don't enforce validation
-                    if (auth.user.role === 'admin') {
-                        if (numericValue < minPrice) {
-                            newProducts[index].priceError = `Suggested minimum: ₹${minPrice} (You can set any price as admin)`;
-                        }
-                    } else {
+                // For admins, show suggested range but don't enforce validation
+                if (auth.user.role === 'admin') {
+                    if (numericValue < minPrice) {
+                        newProducts[index].priceError = `Suggested minimum: ₹${minPrice} (You can set any price as admin)`;
+                    }
+                } else {
                         // For other users, enforce validation only if price is significantly below minimum
                         // Allow small variations (within 5% of min_price) to account for rounding/negotiation
                         const threshold = minPrice * 0.95;
                         if (numericValue < threshold) {
-                            newProducts[index].priceError = `Price must not be less than ₹${minPrice}`;
+                        newProducts[index].priceError = `Price must not be less than ₹${minPrice}`;
                         }
                     }
                 }

@@ -6,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
 import { ArrowLeftIcon } from 'lucide-react';
 import { type FC } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -63,6 +64,14 @@ const Create: FC<CreateProps> = ({ categories }) => {
         e.preventDefault();
         post(route('products.store'), {
             forceFormData: true,
+            // Backend will redirect with flash message, no need to manually visit
+            onError: (errors) => {
+                if (Object.keys(errors).length > 0) {
+                    toast.error('Please fix the validation errors');
+                } else {
+                    toast.error('Failed to create product');
+                }
+            }
         });
     };
 

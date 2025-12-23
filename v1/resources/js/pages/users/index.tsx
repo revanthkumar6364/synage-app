@@ -8,9 +8,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { MoreVertical, PencilIcon, PlusIcon, TrashIcon, UserCogIcon, KeyIcon, SearchIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast, Toaster } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -30,9 +30,20 @@ export default function UsersIndex({ users, filters, roles, statuses }: {
     roles: Record<string, string>;
     statuses: Record<string, string>;
 }) {
+    const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+
+    // Show flash messages as toast notifications
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash?.success, flash?.error]);
 
     const { data, setData } = useForm({
         search: filters.search || '',
