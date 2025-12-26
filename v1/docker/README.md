@@ -1,4 +1,22 @@
-# SSL Setup - Simple Guide
+# Docker Setup Guide
+
+## Fix Permissions (If Git Reset Fails)
+
+If you get permission errors when running `git reset --hard`:
+
+```bash
+sudo chown -R $USER:$USER storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+git reset --hard
+```
+
+Or use the helper script:
+```bash
+./docker/fix-permissions.sh
+git reset --hard
+```
+
+## SSL Setup - Simple Guide
 
 ## Quick Setup (3 Steps)
 
