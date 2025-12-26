@@ -8,10 +8,22 @@
 DOMAIN="quote.radiantsynage.com"
 EMAIL="your-email@radiantsynage.com"  # ⚠️ CHANGE THIS!
 
+# Detect docker-compose command (docker compose or docker-compose)
+if command -v docker &> /dev/null && docker compose version &> /dev/null 2>&1; then
+    DOCKER_COMPOSE="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+else
+    echo "✗ Error: docker-compose or 'docker compose' not found!"
+    echo "Install docker-compose or use Docker with compose plugin"
+    exit 1
+fi
+
 echo "=========================================="
 echo "SSL Setup for $DOMAIN"
 echo "=========================================="
 echo "⚠️  MYSQL DATA SAFETY: No volumes will be deleted!"
+echo "Using: $DOCKER_COMPOSE"
 echo ""
 
 # Step 1: Create directories
@@ -21,8 +33,28 @@ mkdir -p docker/certbot-conf
 
 # Step 2: Make sure nginx is running
 echo "Starting nginx..."
-docker-compose up -d nginx
+$DOCKER_COMPOSE up -d nginx
+sleep 5
+
+# Reload nginx to ensure config is loaded
+echo "Reloading nginx configuration..."
+$DOCKER_COMPOSE exec -T nginx nginx -s reload 2>/dev/null || $DOCKER_COMPOSE restart nginx
 sleep 3
+
+# Verify nginx is serving .well-known correctly
+echo "Verifying nginx can serve Let's Encrypt challenges..."
+TEST_FILE="docker/certbot-www/test.txt"
+echo "test" > "$TEST_FILE"
+sleep 2
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://$DOMAIN/.well-known/acme-challenge/test.txt" || echo "000")
+if [ "$HTTP_CODE" = "200" ]; then
+    echo "✓ Nginx is serving .well-known correctly (HTTP $HTTP_CODE)"
+    rm -f "$TEST_FILE"
+else
+    echo "⚠️  Warning: .well-known test returned HTTP $HTTP_CODE"
+    echo "   This might still work - continuing..."
+    rm -f "$TEST_FILE"
+fi
 
 # Step 3: Get SSL certificate
 echo "Requesting SSL certificate..."
@@ -60,14 +92,14 @@ if [ -f "docker/certbot-conf/live/$DOMAIN/fullchain.pem" ]; then
 
     # CRITICAL: Stop only nginx (app and mysql keep running - DATA SAFE!)
     echo "Stopping nginx only (MySQL and app stay running)..."
-    docker-compose stop nginx
+    $DOCKER_COMPOSE stop nginx
 
     # CRITICAL: Start production config - uses SAME volume name = NO DATA LOSS
     # docker-compose will REUSE existing mysql_data volume automatically
     # --no-recreate prevents recreating containers (keeps data safe)
     echo "Starting production config (reusing existing MySQL volume)..."
-    docker-compose -f docker-compose.production.yml up -d --no-recreate mysql app
-    docker-compose -f docker-compose.production.yml up -d nginx certbot
+    $DOCKER_COMPOSE -f docker-compose.production.yml up -d --no-recreate mysql app
+    $DOCKER_COMPOSE -f docker-compose.production.yml up -d nginx certbot
 
     # Double-check MySQL is still using same volume
     echo ""
@@ -91,7 +123,7 @@ if [ -f "docker/certbot-conf/live/$DOMAIN/fullchain.pem" ]; then
     echo "✓ MySQL data: 100% SAFE (volume preserved)"
     echo ""
     echo "Update .env: APP_URL=https://$DOMAIN"
-    echo "Then run: docker-compose exec app php artisan config:cache"
+    echo "Then run: $DOCKER_COMPOSE exec app php artisan config:cache"
     echo "=========================================="
 else
     echo ""
