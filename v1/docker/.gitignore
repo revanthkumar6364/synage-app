@@ -1,0 +1,4 @@
+certbot-www/
+certbot-conf/
+nginx-temp.conf
+*.bak
