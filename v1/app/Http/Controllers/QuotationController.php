@@ -147,115 +147,148 @@ class QuotationController extends Controller
 
         $validated = $request->validate($validationRules);
 
-        try {
-            DB::beginTransaction();
+        $maxRetries = 3;
+        $retryCount = 0;
 
-            $quotation = new Quotation();
-            $validated['status'] = 'draft';
-            $validated['created_by'] = $request->user()->id;
-            $validated['updated_by'] = $request->user()->id;
-            $validated['last_action'] = 'created';
-            // Set sales_user_id to current user if role is sales
-            if (auth()->user()->role === 'sales') {
-                $validated['sales_user_id'] = auth()->user()->id;
-            }
-            // Set legacy terms for backward compatibility
-            $legacyTerms = config('all.terms_and_conditions.legacy');
-            $validated['taxes_terms'] = $legacyTerms['taxes_terms'];
-            $validated['warranty_terms'] = $legacyTerms['warranty_terms'];
-            $validated['delivery_terms'] = $legacyTerms['delivery_terms'];
-            $validated['payment_terms'] = $legacyTerms['payment_terms'];
-            $validated['electrical_terms'] = $legacyTerms['electrical_terms'];
+        do {
+            try {
+                DB::beginTransaction();
 
-            // Set comprehensive terms based on product_type
-            $productType = $validated['product_type'] ?? 'standard_led';
-
-            // Set general terms from config
-            $generalTerms = config('all.terms_and_conditions.general');
-            $validated['general_pricing_terms'] = $generalTerms['pricing'];
-            $validated['general_warranty_terms'] = $generalTerms['warranty'];
-            $validated['general_delivery_terms'] = $generalTerms['delivery_timeline'];
-            $validated['general_payment_terms'] = $generalTerms['payment_terms'];
-            $validated['general_site_readiness_terms'] = $generalTerms['site_readiness_delays'];
-            $validated['general_installation_scope_terms'] = $generalTerms['installation_scope'];
-            $validated['general_ownership_risk_terms'] = $generalTerms['ownership_risk'];
-            $validated['general_force_majeure_terms'] = $generalTerms['force_majeure'];
-
-            // Set product type specific terms
-            if ($productType === 'indoor') {
-                $indoorTerms = config('all.terms_and_conditions.indoor');
-                $validated['indoor_data_connectivity_terms'] = $indoorTerms['data_connectivity'];
-                $validated['indoor_infrastructure_readiness_terms'] = $indoorTerms['infrastructure_readiness'];
-                $validated['indoor_logistics_support_terms'] = $indoorTerms['logistics_support'];
-                $validated['indoor_general_conditions_terms'] = $indoorTerms['general_conditions'];
-            } elseif ($productType === 'outdoor') {
-                $outdoorTerms = config('all.terms_and_conditions.outdoor');
-                $validated['outdoor_approvals_permissions_terms'] = $outdoorTerms['approvals_permissions'];
-                $validated['outdoor_data_connectivity_terms'] = $outdoorTerms['data_connectivity'];
-                $validated['outdoor_power_mounting_terms'] = $outdoorTerms['power_mounting_infrastructure'];
-                $validated['outdoor_logistics_site_access_terms'] = $outdoorTerms['logistics_site_access'];
-                $validated['outdoor_general_conditions_terms'] = $outdoorTerms['general_conditions'];
-            }
-            // For 'standard_led' and other types, only general terms apply
-
-            // Auto-generate reference if not provided
-            if (empty($validated['reference'])) {
-                // Create a temporary quotation instance to generate reference
-                $tempQuotation = new Quotation();
-                $tempQuotation->account_id = $validated['account_id'];
-                $validated['reference'] = $tempQuotation->generateReferenceNumber();
-            }
-
-            // Auto-generate quotation number if not provided
-            if (empty($validated['quotation_number'])) {
-                $validated['quotation_number'] = (new Quotation())->generateQuotationNumber();
-            }
-
-            $quotation = Quotation::create($validated);
-
-            // Automatically attach default files
-            $this->attachDefaultFiles($quotation);
-
-            // Handle file uploads if any
-            if ($request->hasFile('files')) {
-                foreach ($request->file('files') as $file) {
-                    $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
-                    $filePath = 'quotation-images/' . $quotation->id;
-                    $fullPath = "{$filePath}/{$fileName}";
-
-                    // Store the file
-                    if (!Storage::disk('public')->put($fullPath, file_get_contents($file->getRealPath()))) {
-                        throw new \Exception('Failed to store file: ' . $file->getClientOriginalName());
-                    }
-
-                    // Create media record
-                    QuotationMedia::create([
-                        'quotation_id' => $quotation->id,
-                        'category' => $validated['category'],
-                        'name' => $file->getClientOriginalName(),
-                        'file_name' => $fileName,
-                        'file_path' => $filePath,
-                        'mime_type' => $file->getMimeType(),
-                        'file_size' => $file->getSize(),
-                        'is_active' => true,
-                        'created_by' => $request->user()->id,
-                        'updated_by' => $request->user()->id,
-                    ]);
+                $quotation = new Quotation();
+                $validated['status'] = 'draft';
+                $validated['created_by'] = $request->user()->id;
+                $validated['updated_by'] = $request->user()->id;
+                $validated['last_action'] = 'created';
+                // Set sales_user_id to current user if role is sales
+                if (auth()->user()->role === 'sales') {
+                    $validated['sales_user_id'] = auth()->user()->id;
                 }
-            }
+                // Set legacy terms for backward compatibility
+                $legacyTerms = config('all.terms_and_conditions.legacy');
+                $validated['taxes_terms'] = $legacyTerms['taxes_terms'];
+                $validated['warranty_terms'] = $legacyTerms['warranty_terms'];
+                $validated['delivery_terms'] = $legacyTerms['delivery_terms'];
+                $validated['payment_terms'] = $legacyTerms['payment_terms'];
+                $validated['electrical_terms'] = $legacyTerms['electrical_terms'];
 
-            DB::commit();
+                // Set comprehensive terms based on product_type
+                $productType = $validated['product_type'] ?? 'standard_led';
 
-            return redirect()->route('quotations.files', $quotation)
-                ->with('success', 'Quotation created successfully. Now add products.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            // Clean up any uploaded files
-            if (isset($quotation) && $request->hasFile('files')) {
-                Storage::disk('public')->deleteDirectory('quotation-images/' . $quotation->id);
+                // Set general terms from config
+                $generalTerms = config('all.terms_and_conditions.general');
+                $validated['general_pricing_terms'] = $generalTerms['pricing'];
+                $validated['general_warranty_terms'] = $generalTerms['warranty'];
+                $validated['general_delivery_terms'] = $generalTerms['delivery_timeline'];
+                $validated['general_payment_terms'] = $generalTerms['payment_terms'];
+                $validated['general_site_readiness_terms'] = $generalTerms['site_readiness_delays'];
+                $validated['general_installation_scope_terms'] = $generalTerms['installation_scope'];
+                $validated['general_ownership_risk_terms'] = $generalTerms['ownership_risk'];
+                $validated['general_force_majeure_terms'] = $generalTerms['force_majeure'];
+
+                // Set product type specific terms
+                if ($productType === 'indoor') {
+                    $indoorTerms = config('all.terms_and_conditions.indoor');
+                    $validated['indoor_data_connectivity_terms'] = $indoorTerms['data_connectivity'];
+                    $validated['indoor_infrastructure_readiness_terms'] = $indoorTerms['infrastructure_readiness'];
+                    $validated['indoor_logistics_support_terms'] = $indoorTerms['logistics_support'];
+                    $validated['indoor_general_conditions_terms'] = $indoorTerms['general_conditions'];
+                } elseif ($productType === 'outdoor') {
+                    $outdoorTerms = config('all.terms_and_conditions.outdoor');
+                    $validated['outdoor_approvals_permissions_terms'] = $outdoorTerms['approvals_permissions'];
+                    $validated['outdoor_data_connectivity_terms'] = $outdoorTerms['data_connectivity'];
+                    $validated['outdoor_power_mounting_terms'] = $outdoorTerms['power_mounting_infrastructure'];
+                    $validated['outdoor_logistics_site_access_terms'] = $outdoorTerms['logistics_site_access'];
+                    $validated['outdoor_general_conditions_terms'] = $outdoorTerms['general_conditions'];
+                }
+                // For 'standard_led' and other types, only general terms apply
+
+                // Auto-generate reference if not provided
+                if (empty($validated['reference'])) {
+                    // Create a temporary quotation instance to generate reference
+                    $tempQuotation = new Quotation();
+                    $tempQuotation->account_id = $validated['account_id'];
+                    $validated['reference'] = $tempQuotation->generateReferenceNumber();
+                }
+
+                // Auto-generate quotation number if not provided
+                // This will be handled by the model event, but we can double check or let it happen.
+                // The implementation plan says: "Auto-generate quotation number if not provided".
+                // In the original code it was:
+                if (empty($validated['quotation_number'])) {
+                    $validated['quotation_number'] = (new Quotation())->generateQuotationNumber();
+                }
+
+                $quotation = Quotation::create($validated);
+
+                // Automatically attach default files
+                $this->attachDefaultFiles($quotation);
+
+                // Handle file uploads if any
+                if ($request->hasFile('files')) {
+                    foreach ($request->file('files') as $file) {
+                        $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                        $filePath = 'quotation-images/' . $quotation->id;
+                        $fullPath = "{$filePath}/{$fileName}";
+
+                        // Store the file
+                        if (!Storage::disk('public')->put($fullPath, file_get_contents($file->getRealPath()))) {
+                            throw new \Exception('Failed to store file: ' . $file->getClientOriginalName());
+                        }
+
+                        // Create media record
+                        QuotationMedia::create([
+                            'quotation_id' => $quotation->id,
+                            'category' => $validated['category'],
+                            'name' => $file->getClientOriginalName(),
+                            'file_name' => $fileName,
+                            'file_path' => $filePath,
+                            'mime_type' => $file->getMimeType(),
+                            'file_size' => $file->getSize(),
+                            'is_active' => true,
+                            'created_by' => $request->user()->id,
+                            'updated_by' => $request->user()->id,
+                        ]);
+                    }
+                }
+
+                DB::commit();
+
+                return redirect()->route('quotations.files', $quotation)
+                    ->with('success', 'Quotation created successfully. Now add products.');
+
+            } catch (\Illuminate\Database\QueryException $e) {
+                DB::rollBack();
+
+                // Check for duplicate entry error (1062)
+                if ($e->errorInfo[1] == 1062) {
+                    $retryCount++;
+                    if ($retryCount >= $maxRetries) {
+                        // Clean up any uploaded files if we fail completely
+                        if (isset($quotation) && isset($quotation->id) && $request->hasFile('files')) {
+                            Storage::disk('public')->deleteDirectory('quotation-images/' . $quotation->id);
+                        }
+                        return back()->withErrors(['error' => 'Failed to create quotation due to duplicate number. Please try again.']);
+                    }
+                    // Continue loop to retry
+                    continue;
+                }
+
+                // If not duplicate entry, throw original exception or handle as before
+                // Clean up any uploaded files
+                if (isset($quotation) && isset($quotation->id) && $request->hasFile('files')) {
+                    Storage::disk('public')->deleteDirectory('quotation-images/' . $quotation->id);
+                }
+                return back()->withErrors(['error' => 'Failed to create quotation: ' . $e->getMessage()]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                // Clean up any uploaded files
+                if (isset($quotation) && isset($quotation->id) && $request->hasFile('files')) {
+                    Storage::disk('public')->deleteDirectory('quotation-images/' . $quotation->id);
+                }
+                return back()->withErrors(['error' => 'Failed to create quotation: ' . $e->getMessage()]);
             }
-            return back()->withErrors(['error' => 'Failed to create quotation: ' . $e->getMessage()]);
-        }
+        } while ($retryCount < $maxRetries);
     }
 
 
@@ -1019,12 +1052,12 @@ class QuotationController extends Controller
             $enablePdfMerging = false;
 
             // Check if there are uploaded PDF files to merge
-            $uploadedPdfs = $quotationFiles->filter(function($file) {
+            $uploadedPdfs = $quotationFiles->filter(function ($file) {
                 $fileName = strtolower($file->file_name ?? '');
                 $name = strtolower($file->name ?? '');
                 return $file->category === 'pdf' ||
-                       substr($fileName, -4) === '.pdf' ||
-                       substr($name, -4) === '.pdf';
+                    substr($fileName, -4) === '.pdf' ||
+                    substr($name, -4) === '.pdf';
             });
 
             // If there are PDFs to merge, use PDF merger
@@ -1063,9 +1096,11 @@ class QuotationController extends Controller
                     $response = response()->download($mergedPdfPath, "quotation_{$filename}.pdf");
 
                     // Clean up temp files after download
-                    register_shutdown_function(function() use ($tempMainPdf, $mergedPdfPath) {
-                        if (file_exists($tempMainPdf)) @unlink($tempMainPdf);
-                        if (file_exists($mergedPdfPath)) @unlink($mergedPdfPath);
+                    register_shutdown_function(function () use ($tempMainPdf, $mergedPdfPath) {
+                        if (file_exists($tempMainPdf))
+                            @unlink($tempMainPdf);
+                        if (file_exists($mergedPdfPath))
+                            @unlink($mergedPdfPath);
                     });
 
                     return $response;
@@ -1074,8 +1109,10 @@ class QuotationController extends Controller
                     \Log::error('PDF merge failed: ' . $e->getMessage());
 
                     // Clean up any temp files
-                    if (isset($tempMainPdf) && file_exists($tempMainPdf)) @unlink($tempMainPdf);
-                    if (isset($mergedPdfPath) && file_exists($mergedPdfPath)) @unlink($mergedPdfPath);
+                    if (isset($tempMainPdf) && file_exists($tempMainPdf))
+                        @unlink($tempMainPdf);
+                    if (isset($mergedPdfPath) && file_exists($mergedPdfPath))
+                        @unlink($mergedPdfPath);
 
                     // Return normal PDF as fallback
                     return $pdf->download("quotation_{$filename}.pdf");
@@ -1115,10 +1152,10 @@ class QuotationController extends Controller
         // Only approved quotations can have sub-status
         if ($quotation->status !== Quotation::STATUS_APPROVED) {
             if ($request->wantsJson() || !$request->header('X-Inertia')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sub-status can only be updated for approved quotations.'
-            ], 400);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sub-status can only be updated for approved quotations.'
+                ], 400);
             }
             return back()->withErrors([
                 'sub_status' => 'Sub-status can only be updated for approved quotations.'
@@ -1139,21 +1176,21 @@ class QuotationController extends Controller
             // Return Inertia-compatible response
             if ($request->wantsJson() && !$request->header('X-Inertia')) {
                 // API request - return JSON
-            return response()->json([
-                'success' => true,
-                'message' => 'Sub-status updated successfully.',
-                'quotation' => $quotation->fresh(),
-            ]);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Sub-status updated successfully.',
+                    'quotation' => $quotation->fresh(),
+                ]);
             }
 
             // Inertia request - redirect back with success message
             return back()->with('success', 'Sub-status updated successfully.');
         } catch (\Exception $e) {
             if ($request->wantsJson() && !$request->header('X-Inertia')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update sub-status.'
-            ], 500);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update sub-status.'
+                ], 500);
             }
             return back()->withErrors([
                 'sub_status' => 'Failed to update sub-status.'

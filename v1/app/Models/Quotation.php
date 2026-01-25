@@ -189,7 +189,7 @@ class Quotation extends Model
 
     public function salesUser(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'sales_user_id','id');
+        return $this->belongsTo(User::class, 'sales_user_id', 'id');
     }
 
     public function selectedProduct(): BelongsTo
@@ -235,19 +235,30 @@ class Quotation extends Model
     }
 
     // Number generation
+    // Number generation
     public function generateQuotationNumber(): string
     {
         $prefix = 'QT';
         $year = date('Y');
         $month = date('m');
 
-        // Count quotations for current month and year
-        $count = self::whereYear('created_at', $year)
+        // Get the last created quotation for current month and year, including soft deleted ones
+        $lastQuotation = self::withTrashed()
+            ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
-            ->count();
+            ->orderBy('id', 'desc')
+            ->first();
 
-        // Start from 1 (001) for the first quotation of the month
-        $sequence = $count + 1;
+        $sequence = 1;
+
+        if ($lastQuotation) {
+            // Extract sequence from the last quotation number similar to QT-YYYYMM-XXXX
+            $parts = explode('-', $lastQuotation->quotation_number);
+            if (count($parts) === 3) {
+                $lastSequence = intval($parts[2]);
+                $sequence = $lastSequence + 1;
+            }
+        }
 
         // Ensure the sequence is padded with leading zeros
         $paddedSequence = str_pad($sequence, 4, '0', STR_PAD_LEFT);
@@ -303,7 +314,7 @@ class Quotation extends Model
             if (count($parts) >= 4) {
                 $sequencePart = end($parts);
                 if (is_numeric($sequencePart)) {
-                    $maxSequence = max($maxSequence, (int)$sequencePart);
+                    $maxSequence = max($maxSequence, (int) $sequencePart);
                 }
             }
         }
@@ -363,7 +374,7 @@ class Quotation extends Model
             if (count($parts) >= 4) {
                 $sequencePart = end($parts);
                 if (is_numeric($sequencePart)) {
-                    $maxSequence = max($maxSequence, (int)$sequencePart);
+                    $maxSequence = max($maxSequence, (int) $sequencePart);
                 }
             }
         }
@@ -621,7 +632,7 @@ class Quotation extends Model
     {
         $effectiveSubStatus = $this->effective_sub_status;
 
-        return match($effectiveSubStatus) {
+        return match ($effectiveSubStatus) {
             self::SUB_STATUS_HOT => 'red',
             self::SUB_STATUS_COLD => 'blue',
             self::SUB_STATUS_OPEN => 'yellow',
