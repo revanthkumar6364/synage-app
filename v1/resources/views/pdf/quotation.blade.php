@@ -56,7 +56,7 @@
             font-size: 28px;
             /* Heading font size for logo section */
             margin: 0 0 8px 0;
-            color: #1a1a1a;
+            color: #1a237e;
         }
 
         .company-info p {
@@ -85,7 +85,7 @@
             font-size: 28px;
             /* Heading font size for main title */
             margin: 0 0 8px 0;
-            color: #1a1a1a;
+            color: #1a237e;
         }
 
         .title-section p {
@@ -131,7 +131,7 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: #1a1a1a;
+            color: #1a237e;
         }
 
         .info-box p {
@@ -172,7 +172,7 @@
             margin: 0 0 6px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: #1a1a1a;
+            color: #1a237e;
         }
 
         .specs-grid p {
@@ -190,14 +190,14 @@
         }
 
         .products-table th {
-            background: #f8f9fa;
+            background: #e8eaf6;
             padding: 10px;
             font-size: 20px;
             /* Subheading font size for table headers */
             font-weight: bold;
             text-align: left;
             border-bottom: 1px solid #e5e5e5;
-            color: #1a1a1a;
+            color: #1a237e;
         }
 
         .products-table td {
@@ -232,7 +232,7 @@
             padding-top: 8px;
             border-top: 1px solid #e5e5e5;
             font-weight: bold;
-            color: #1a1a1a;
+            color: #1a237e;
         }
 
         .note-box {
@@ -313,7 +313,7 @@
             font-size: 20px;
             /* Subheading font size for signature */
             font-weight: bold;
-            color: #1a1a1a;
+            color: #1a237e;
         }
 
         .generated-date {
@@ -431,7 +431,7 @@
                 </td>
             </tr>
         </table>
-        <h2 style="font-size: 28px; color: #1a1a1a; margin: 0 0 8px 0;">{{ $quotation->title }}</h2>
+        <h2 style="font-size: 28px; color: #1a237e; margin: 0 0 8px 0;">{{ $quotation->title }}</h2>
         <p style="font-size: 20px; color: #666;">Kind Attn: {{ optional($quotation->account_contact)->name }}<br>
             {{ optional($quotation->account_contact)->role }}</p>
         <p style="font-size: 15px; color: #333;">{{ $quotation->description }}</p>
@@ -439,13 +439,15 @@
 
     <div class="separator"></div>
 
-    @if (($quotation->show_billing_in_print && $quotation->billing_address) || ($quotation->show_shipping_in_print && $quotation->shipping_address))
+    @if (
+        ($quotation->show_billing_in_print && $quotation->billing_address) ||
+            ($quotation->show_shipping_in_print && $quotation->shipping_address))
         <table class="info-grid">
             <tr>
                 @if ($quotation->show_billing_in_print && $quotation->billing_address)
                     <td>
                         <div class="info-box">
-                            <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Bill To</h3>
+                            <h3 style="font-size: 20px; color: #1a237e; margin: 0 0 10px 0;">Bill To</h3>
                             <p class="business-name">{{ optional($quotation->account)->business_name }}</p>
                             <p style="font-size: 16px; color: #333;">{{ $quotation->billing_address }}</p>
                             <p style="font-size: 16px; color: #333;">{{ $quotation->billing_city }},
@@ -460,7 +462,7 @@
                 @if ($quotation->show_shipping_in_print && $quotation->shipping_address)
                     <td>
                         <div class="info-box">
-                            <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">Ship To</h3>
+                            <h3 style="font-size: 20px; color: #1a237e; margin: 0 0 10px 0;">Ship To</h3>
                             <p class="business-name">{{ optional($quotation->account_contact)->name }}</p>
                             <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_address }}</p>
                             <p style="font-size: 16px; color: #333;">{{ $quotation->shipping_city }},
@@ -504,34 +506,35 @@
                 160);
 
             // Use the item's selected quantity
-            $quantity = (float) $item->quantity;
-            $boxes_in_width = $unit_width_mm > 0 ? floor($available_width_mm / $unit_width_mm) : 0;
-            $boxes_in_height = $unit_height_mm > 0 ? floor($available_height_mm / $unit_height_mm) : 0;
-            $max_possible_boxes = $boxes_in_width * $boxes_in_height;
-            // Limit quantity to max possible boxes to prevent calculation errors
-            $effective_quantity = min($quantity, $max_possible_boxes);
-            // Proposed width/height based on selected quantity (fill rows first)
-            $proposed_width_mm = $boxes_in_width > 0 ? $unit_width_mm * min($boxes_in_width, $effective_quantity) : 0;
-            $proposed_height_mm = $boxes_in_width > 0 ? $unit_height_mm * ceil($effective_quantity / max($boxes_in_width, 1)) : 0;
-            // Ensure proposed size doesn't exceed available size
+$quantity = (float) $item->quantity;
+$boxes_in_width = $unit_width_mm > 0 ? floor($available_width_mm / $unit_width_mm) : 0;
+$boxes_in_height = $unit_height_mm > 0 ? floor($available_height_mm / $unit_height_mm) : 0;
+$max_possible_boxes = $boxes_in_width * $boxes_in_height;
+// Limit quantity to max possible boxes to prevent calculation errors
+$effective_quantity = min($quantity, $max_possible_boxes);
+// Proposed width/height based on selected quantity (fill rows first)
+$proposed_width_mm = $boxes_in_width > 0 ? $unit_width_mm * min($boxes_in_width, $effective_quantity) : 0;
+$proposed_height_mm =
+    $boxes_in_width > 0 ? $unit_height_mm * ceil($effective_quantity / max($boxes_in_width, 1)) : 0;
+// Ensure proposed size doesn't exceed available size
             $proposed_width_mm = min($proposed_width_mm, $available_width_mm);
             $proposed_height_mm = min($proposed_height_mm, $available_height_mm);
             $proposed_width_ft = $proposed_width_mm / 304.8;
             $proposed_height_ft = $proposed_height_mm / 304.8;
             $proposed_sqft = $proposed_width_ft * $proposed_height_ft;
         @endphp
-        @if (in_array($item->product->product_type, ['indoor_led', 'outdoor_led']))
+        @if ($quotation->show_product_specs && in_array($item->product->product_type, ['indoor_led', 'outdoor_led']))
             <div class="specs-section">
                 <h3 style="margin-bottom: 8px; color: #333;">Product Specifications - {{ $item->product->name }}</h3>
                 <table class="specs-grid">
                     <tr>
                         <td>
-                            <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">SIZE AVAILABLE AT LOCATION
+                            <h3 style="font-size: 20px; color: #1a237e; margin: 0 0 10px 0;">SIZE AVAILABLE AT LOCATION
                             </h3>
                             <p style="font-size: 16px; color: #333;">{{ number_format($available_width_mm, 2) }} mm W x
                                 {{ number_format($available_height_mm, 2) }} mm H</p>
                             <div style="margin-top: 8px;">
-                                <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">SUGGESTED SIZE</h3>
+                                <h3 style="font-size: 20px; color: #1a237e; margin: 0 0 10px 0;">SUGGESTED SIZE</h3>
                                 <p style="font-size: 16px; color: #333;">
                                     {{ number_format($proposed_width_mm, 2) }} mm W x
                                     {{ number_format($proposed_height_mm, 2) }} mm H |
@@ -544,7 +547,7 @@
                             </div>
                             @if ($quotation->show_no_of_pixels)
                                 <div style="margin-top: 8px;">
-                                    <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">NO OF PIXELS</h3>
+                                    <h3 style="font-size: 20px; color: #1a237e; margin: 0 0 10px 0;">NO OF PIXELS</h3>
                                     <p style="font-size: 16px; color: #333;">
                                         @php
                                             $pixel_pitch = (float) ($item->product->pixel_pitch ?? 0);
@@ -564,10 +567,10 @@
                             <table style="width: 100%;">
                                 <tr>
                                     <td style="vertical-align: top; padding-right: 16px;">
-                                        <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">BRAND NAME</h3>
+                                        <h3 style="font-size: 20px; color: #1a237e; margin: 0 0 10px 0;">BRAND NAME</h3>
                                         <p style="font-size: 16px; color: #333;">{{ $item->product->brand ?? '-' }}</p>
                                         <div style="margin-top: 8px;">
-                                            <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">PIXEL PITCH
+                                            <h3 style="font-size: 20px; color: #1a237e; margin: 0 0 10px 0;">PIXEL PITCH
                                             </h3>
                                             <p style="font-size: 16px; color: #333;">
                                                 {{ $item->product->pixel_pitch ? $item->product->pixel_pitch . ' mm' : 'N/A' }}
@@ -575,13 +578,13 @@
                                         </div>
                                     </td>
                                     <td style="vertical-align: top;">
-                                        <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">REFRESH RATE
+                                        <h3 style="font-size: 20px; color: #1a237e; margin: 0 0 10px 0;">REFRESH RATE
                                         </h3>
                                         <p style="font-size: 16px; color: #333;">
                                             {{ $item->product->refresh_rate ? $item->product->refresh_rate . ' Hz' : 'N/A' }}
                                         </p>
                                         <div style="margin-top: 8px;">
-                                            <h3 style="font-size: 20px; color: #1a1a1a; margin: 0 0 10px 0;">CABINET
+                                            <h3 style="font-size: 20px; color: #1a237e; margin: 0 0 10px 0;">CABINET
                                                 TYPE</h3>
                                             <p style="font-size: 16px; color: #333;">
                                                 {{ $item->product->cabinet_type ?? 'N/A' }}</p>
@@ -600,7 +603,7 @@
         <thead>
             <tr>
                 <th style="width: 40px; text-align: center">#</th>
-                <th style="font-size: 20px; color: #1a1a1a;">Product Description</th>
+                <th style="font-size: 20px; color: #1a237e;">Product Description</th>
                 @if ($quotation->show_hsn_code)
                     <th>HSN</th>
                 @endif
@@ -624,10 +627,7 @@
                         <td>{{ $item->product->hsn_code }}</td>
                     @endif
                     <td style="font-size: 16px; color: #666;">
-                        {{ $item->available_size_width_mm && $item->available_size_height_mm
-                            ? $item->quantity . ' sqft'
-                            : $item->quantity . ' qty'
-                        }}
+                        {{ $item->quantity }} {{ $item->product->unit ?? 'qty' }}
                     </td>
                     <td class="text-right">₹{{ number_format($item->proposed_unit_price, 2, '.', ',') }}</td>
                     <td class="text-right">{{ $item->tax_percentage }}%</td>
@@ -664,63 +664,80 @@
     <div class="terms-section">
         <h3 style="font-size: 28px; color: #1a1a1a; margin: 0 0 15px 0;">Terms and Conditions</h3>
 
-        @if($quotation->general_pricing_terms)
+        @if ($quotation->general_pricing_terms)
             <!-- Comprehensive Terms Display -->
 
             <!-- General Terms -->
             <div style="margin-bottom: 20px;">
-                <h4 style="font-size: 22px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">General Terms & Conditions</h4>
+                <h4 style="font-size: 22px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">General Terms &
+                    Conditions</h4>
                 <table class="terms-grid">
                     <tr>
                         <td>
-                            @if($quotation->general_pricing_terms)
+                            @if ($quotation->general_pricing_terms)
                                 <div style="margin-bottom: 15px">
-                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Pricing</h5>
-                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_pricing_terms }}</p>
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                        Pricing</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                        {{ $quotation->general_pricing_terms }}</p>
                                 </div>
                             @endif
-                            @if($quotation->general_warranty_terms)
+                            @if ($quotation->general_warranty_terms)
                                 <div style="margin-bottom: 15px">
-                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Warranty</h5>
-                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_warranty_terms }}</p>
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                        Warranty</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                        {{ $quotation->general_warranty_terms }}</p>
                                 </div>
                             @endif
-                            @if($quotation->general_delivery_terms)
+                            @if ($quotation->general_delivery_terms)
                                 <div style="margin-bottom: 15px">
-                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Delivery Timeline</h5>
-                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_delivery_terms }}</p>
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                        Delivery Timeline</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                        {{ $quotation->general_delivery_terms }}</p>
                                 </div>
                             @endif
-                            @if($quotation->general_payment_terms)
+                            @if ($quotation->general_payment_terms)
                                 <div style="margin-bottom: 15px">
-                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Payment Terms</h5>
-                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_payment_terms }}</p>
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                        Payment Terms</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                        {{ $quotation->general_payment_terms }}</p>
                                 </div>
                             @endif
                         </td>
                         <td>
-                            @if($quotation->general_site_readiness_terms)
+                            @if ($quotation->general_site_readiness_terms)
                                 <div style="margin-bottom: 15px">
-                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Site Readiness & Delays</h5>
-                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_site_readiness_terms }}</p>
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                        Site Readiness & Delays</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                        {{ $quotation->general_site_readiness_terms }}</p>
                                 </div>
                             @endif
-                            @if($quotation->general_installation_scope_terms)
+                            @if ($quotation->general_installation_scope_terms)
                                 <div style="margin-bottom: 15px">
-                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Installation Scope</h5>
-                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_installation_scope_terms }}</p>
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                        Installation Scope</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                        {{ $quotation->general_installation_scope_terms }}</p>
                                 </div>
                             @endif
-                            @if($quotation->general_ownership_risk_terms)
+                            @if ($quotation->general_ownership_risk_terms)
                                 <div style="margin-bottom: 15px">
-                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Ownership & Risk</h5>
-                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_ownership_risk_terms }}</p>
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                        Ownership & Risk</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                        {{ $quotation->general_ownership_risk_terms }}</p>
                                 </div>
                             @endif
-                            @if($quotation->general_force_majeure_terms)
+                            @if ($quotation->general_force_majeure_terms)
                                 <div style="margin-bottom: 15px">
-                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Force Majeure</h5>
-                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->general_force_majeure_terms }}</p>
+                                    <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                        Force Majeure</h5>
+                                    <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                        {{ $quotation->general_force_majeure_terms }}</p>
                                 </div>
                             @endif
                         </td>
@@ -728,37 +745,50 @@
                 </table>
             </div>
 
-            @if($quotation->product_type === 'indoor')
+            @if ($quotation->product_type === 'indoor')
                 <!-- Indoor LED Installation Terms -->
                 <div style="margin-bottom: 20px;">
-                    <h4 style="font-size: 22px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">Indoor LED Installation</h4>
+                    <h4 style="font-size: 22px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">Indoor LED
+                        Installation</h4>
                     <table class="terms-grid">
                         <tr>
                             <td>
-                                @if($quotation->indoor_data_connectivity_terms)
+                                @if ($quotation->indoor_data_connectivity_terms)
                                     <div style="margin-bottom: 15px">
-                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Data & Connectivity</h5>
-                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->indoor_data_connectivity_terms }}</p>
+                                        <h5
+                                            style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                            Data & Connectivity</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                            {{ $quotation->indoor_data_connectivity_terms }}</p>
                                     </div>
                                 @endif
-                                @if($quotation->indoor_infrastructure_readiness_terms)
+                                @if ($quotation->indoor_infrastructure_readiness_terms)
                                     <div style="margin-bottom: 15px">
-                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Infrastructure Readiness</h5>
-                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->indoor_infrastructure_readiness_terms }}</p>
+                                        <h5
+                                            style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                            Infrastructure Readiness</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                            {{ $quotation->indoor_infrastructure_readiness_terms }}</p>
                                     </div>
                                 @endif
                             </td>
                             <td>
-                                @if($quotation->indoor_logistics_support_terms)
+                                @if ($quotation->indoor_logistics_support_terms)
                                     <div style="margin-bottom: 15px">
-                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Logistics & Support</h5>
-                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->indoor_logistics_support_terms }}</p>
+                                        <h5
+                                            style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                            Logistics & Support</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                            {{ $quotation->indoor_logistics_support_terms }}</p>
                                     </div>
                                 @endif
-                                @if($quotation->indoor_general_conditions_terms)
+                                @if ($quotation->indoor_general_conditions_terms)
                                     <div style="margin-bottom: 15px">
-                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">General Conditions</h5>
-                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->indoor_general_conditions_terms }}</p>
+                                        <h5
+                                            style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                            General Conditions</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                            {{ $quotation->indoor_general_conditions_terms }}</p>
                                     </div>
                                 @endif
                             </td>
@@ -767,43 +797,59 @@
                 </div>
             @endif
 
-            @if($quotation->product_type === 'outdoor')
+            @if ($quotation->product_type === 'outdoor')
                 <!-- Outdoor LED Installation Terms -->
                 <div style="margin-bottom: 20px;">
-                    <h4 style="font-size: 22px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">Outdoor LED Installation</h4>
+                    <h4 style="font-size: 22px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">Outdoor LED
+                        Installation</h4>
                     <table class="terms-grid">
                         <tr>
                             <td>
-                                @if($quotation->outdoor_approvals_permissions_terms)
+                                @if ($quotation->outdoor_approvals_permissions_terms)
                                     <div style="margin-bottom: 15px">
-                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Approvals & Permissions</h5>
-                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->outdoor_approvals_permissions_terms }}</p>
+                                        <h5
+                                            style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                            Approvals & Permissions</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                            {{ $quotation->outdoor_approvals_permissions_terms }}</p>
                                     </div>
                                 @endif
-                                @if($quotation->outdoor_data_connectivity_terms)
+                                @if ($quotation->outdoor_data_connectivity_terms)
                                     <div style="margin-bottom: 15px">
-                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Data & Connectivity</h5>
-                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->outdoor_data_connectivity_terms }}</p>
+                                        <h5
+                                            style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                            Data & Connectivity</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                            {{ $quotation->outdoor_data_connectivity_terms }}</p>
                                     </div>
                                 @endif
-                                @if($quotation->outdoor_power_mounting_terms)
+                                @if ($quotation->outdoor_power_mounting_terms)
                                     <div style="margin-bottom: 15px">
-                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Power & Mounting Infrastructure</h5>
-                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->outdoor_power_mounting_terms }}</p>
+                                        <h5
+                                            style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                            Power & Mounting Infrastructure</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                            {{ $quotation->outdoor_power_mounting_terms }}</p>
                                     </div>
                                 @endif
                             </td>
                             <td>
-                                @if($quotation->outdoor_logistics_site_access_terms)
+                                @if ($quotation->outdoor_logistics_site_access_terms)
                                     <div style="margin-bottom: 15px">
-                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">Logistics & Site Access</h5>
-                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->outdoor_logistics_site_access_terms }}</p>
+                                        <h5
+                                            style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                            Logistics & Site Access</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                            {{ $quotation->outdoor_logistics_site_access_terms }}</p>
                                     </div>
                                 @endif
-                                @if($quotation->outdoor_general_conditions_terms)
+                                @if ($quotation->outdoor_general_conditions_terms)
                                     <div style="margin-bottom: 15px">
-                                        <h5 style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">General Conditions</h5>
-                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">{{ $quotation->outdoor_general_conditions_terms }}</p>
+                                        <h5
+                                            style="font-size: 18px; color: #1a1a1a; margin: 0 0 8px 0; font-weight: 600;">
+                                            General Conditions</h5>
+                                        <p style="font-size: 14px; color: #333; line-height: 1.4;">
+                                            {{ $quotation->outdoor_general_conditions_terms }}</p>
                                     </div>
                                 @endif
                             </td>
@@ -811,7 +857,6 @@
                     </table>
                 </div>
             @endif
-
         @else
             <!-- Legacy Terms Display -->
             <table class="terms-grid">
@@ -844,6 +889,32 @@
                 </tr>
             </table>
         @endif
+    </div>
+
+    <div class="separator"></div>
+
+    <div style="margin: 25px 0; background: #e8eaf6; padding: 20px; border-radius: 8px; page-break-inside: avoid;">
+        <h3
+            style="font-size: 20px; color: #1a237e; margin: 0 0 15px 0; border-bottom: 2px solid #c5cae9; padding-bottom: 8px;">
+            Bank Account Details</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 50%; vertical-align: top;">
+                    <p style="margin: 5px 0; color: #1a237e; font-weight: bold;">Bank Name:</p>
+                    <p style="margin: 5px 0 20px 0; color: #333;">ICICI</p>
+
+                    <p style="margin: 5px 0; color: #1a237e; font-weight: bold;">Account Name:</p>
+                    <p style="margin: 5px 0 20px 0; color: #333;">RADIANT SYNAGE PRIVATE LIMITED</p>
+                </td>
+                <td style="width: 50%; vertical-align: top;">
+                    <p style="margin: 5px 0; color: #1a237e; font-weight: bold;">Account Number:</p>
+                    <p style="margin: 5px 0 20px 0; color: #333;">218151000001</p>
+
+                    <p style="margin: 5px 0; color: #1a237e; font-weight: bold;">IFSC Code / Branch:</p>
+                    <p style="margin: 5px 0 20px 0; color: #333;">ICIC0002181 / Hope Farm, Whitefield, Bengaluru</p>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <div class="separator"></div>
@@ -899,9 +970,11 @@
     <div style="text-align: center; margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
         <h3 style="font-size: 18px; color: #1a1a1a; margin: 0 0 15px 0; font-weight: bold;">Customer Support</h3>
         <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
-            <img src="{{ public_path('images/zapple.png') }}" alt="Zapple QR Code" style="width: 120px; height: auto;">
+            <img src="{{ public_path('images/zapple.png') }}" alt="Zapple QR Code"
+                style="width: 120px; height: auto;">
             <div style="text-align: left;">
-                <p style="font-size: 14px; color: #333; margin: 0 0 8px 0; font-weight: 600;">Scan QR Code for Support</p>
+                <p style="font-size: 14px; color: #333; margin: 0 0 8px 0; font-weight: 600;">Scan QR Code for Support
+                </p>
                 <p style="font-size: 12px; color: #666; margin: 0;">Get instant help with your quotation</p>
             </div>
         </div>
@@ -912,19 +985,25 @@
             <div class="separator"></div>
             @if ($commonFiles->isNotEmpty())
                 @php
-                    $commonImages = $commonFiles->filter(fn($f) => $f->category !== 'pdf' && !str_ends_with(strtolower($f->name ?? ''), '.pdf'));
-                    $commonPdfs = $commonFiles->filter(fn($f) => $f->category === 'pdf' || str_ends_with(strtolower($f->name ?? ''), '.pdf'));
+                    $commonImages = $commonFiles->filter(
+                        fn($f) => $f->category !== 'pdf' && !str_ends_with(strtolower($f->name ?? ''), '.pdf'),
+                    );
+                    $commonPdfs = $commonFiles->filter(
+                        fn($f) => $f->category === 'pdf' || str_ends_with(strtolower($f->name ?? ''), '.pdf'),
+                    );
                 @endphp
 
                 @if ($commonPdfs->isNotEmpty())
                     <div style="margin-bottom: 15px;">
-                        <h4 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px;">Reference Documents:</h4>
+                        <h4 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px;">Reference
+                            Documents:</h4>
                         @foreach ($commonPdfs as $file)
                             <div class="pdf-link">
                                 <div style="font-size: 11px; font-weight: bold; color: #333; margin-bottom: 3px;">
                                     📄 {{ $file->name }}
                                 </div>
-                                <div style="font-size: 8px; color: #0066cc; word-break: break-all; font-family: monospace;">
+                                <div
+                                    style="font-size: 8px; color: #0066cc; word-break: break-all; font-family: monospace;">
                                     {{ $file->full_url ?? url('storage/' . $file->file_path . '/' . $file->file_name) }}
                                 </div>
                             </div>
@@ -936,28 +1015,35 @@
                     @foreach ($commonImages as $file)
                         <div class="specification-section">
                             <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
-                                alt="{{ $file->name }}" class="attachment-img" style="display: block; margin: 0 auto;">
+                                alt="{{ $file->name }}" class="attachment-img"
+                                style="display: block; margin: 0 auto;">
                         </div>
                     @endforeach
                 @endif
             @endif
             @if ($quotationFiles->isNotEmpty())
                 @php
-                    $images = $quotationFiles->filter(fn($f) => $f->category !== 'pdf' && !str_ends_with(strtolower($f->name ?? ''), '.pdf'));
-                    $pdfs = $quotationFiles->filter(fn($f) => $f->category === 'pdf' || str_ends_with(strtolower($f->name ?? ''), '.pdf'));
+                    $images = $quotationFiles->filter(
+                        fn($f) => $f->category !== 'pdf' && !str_ends_with(strtolower($f->name ?? ''), '.pdf'),
+                    );
+                    $pdfs = $quotationFiles->filter(
+                        fn($f) => $f->category === 'pdf' || str_ends_with(strtolower($f->name ?? ''), '.pdf'),
+                    );
                 @endphp
 
                 <div class="separator"></div>
 
                 @if ($pdfs->isNotEmpty())
                     <div style="margin-bottom: 15px;">
-                        <h4 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px;">Additional Documents:</h4>
+                        <h4 style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px;">Additional
+                            Documents:</h4>
                         @foreach ($pdfs as $file)
                             <div class="pdf-link">
                                 <div style="font-size: 11px; font-weight: bold; color: #333; margin-bottom: 3px;">
                                     📄 {{ $file->name }}
                                 </div>
-                                <div style="font-size: 8px; color: #0066cc; word-break: break-all; font-family: monospace;">
+                                <div
+                                    style="font-size: 8px; color: #0066cc; word-break: break-all; font-family: monospace;">
                                     {{ $file->full_url ?? url('storage/' . $file->file_path . '/' . $file->file_name) }}
                                 </div>
                             </div>
@@ -969,7 +1055,8 @@
                     @foreach ($images as $file)
                         <div class="specification-section">
                             <img src="{{ public_path('storage/' . $file->file_path . '/' . $file->file_name) }}"
-                                alt="{{ $file->name }}" class="attachment-img" style="display: block; margin: 0 auto;">
+                                alt="{{ $file->name }}" class="attachment-img"
+                                style="display: block; margin: 0 auto;">
                         </div>
                     @endforeach
                 @endif

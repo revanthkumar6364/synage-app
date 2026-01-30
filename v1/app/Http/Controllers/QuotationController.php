@@ -97,6 +97,7 @@ class QuotationController extends Controller
             'show_no_of_pixels' => 'boolean',
             'show_billing_in_print' => 'boolean',
             'show_shipping_in_print' => 'boolean',
+            'show_product_specs' => 'boolean',
         ];
 
         // Add size-related validation rules based on product_type

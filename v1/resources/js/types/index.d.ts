@@ -158,4 +158,5 @@ export interface Quotation {
     items?: QuotationItem[];
     show_billing_in_print?: boolean;
     show_shipping_in_print?: boolean;
+    show_product_specs?: boolean;
 }

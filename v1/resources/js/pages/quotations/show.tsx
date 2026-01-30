@@ -365,6 +365,15 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                 ✗ Shipping Address
                                             </span>
                                         )}
+                                        {quotation.show_product_specs ? (
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                ✓ Product Specs
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100">
+                                                ✗ Product Specs
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                                 {/* Header with Logo and Company Info */}
@@ -495,7 +504,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     </div> */}
 
                                     {/* Per-Item Product Specifications for LED Products */}
-                                    {quotation.items.map((item: any, index: number) => {
+                                    {quotation.show_product_specs && quotation.items.map((item: any, index: number) => {
                                         const isIndoorOutdoor = item.product && (item.product.product_type === 'indoor_led' || item.product.product_type === 'outdoor_led');
 
                                         if (!isIndoorOutdoor) return null;
@@ -623,10 +632,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                         </TableCell>
                                                         <TableCell>{item.product.hsn_code}</TableCell>
                                                         <TableCell className="text-right">
-                                                            {item.available_size_width_mm && item.available_size_height_mm
-                                                                ? `${item.quantity} sqft`
-                                                                : `${item.quantity} qty`
-                                                            }
+                                                            {item.quantity} {item.product.unit || 'qty'}
                                                         </TableCell>
                                                         <TableCell className="text-right">{formatCurrency(item.proposed_unit_price || 0)}</TableCell>
                                                         <TableCell className="text-right">{item.tax_percentage}%</TableCell>
@@ -827,6 +833,35 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                             </div>
                                         </div>
                                     )}
+                                </div>
+
+                                <Separator className="my-6" />
+
+                                {/* Bank Account Details */}
+                                <div className="bg-muted/30 p-6 rounded-lg border border-border/50">
+                                    <h3 className="text-lg font-semibold text-primary mb-4 border-b pb-2">Bank Account Details</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <p className="text-sm font-medium text-primary">Bank Name:</p>
+                                                <p className="text-sm text-muted-foreground">ICICI</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-primary">Account Name:</p>
+                                                <p className="text-sm text-muted-foreground">RADIANT SYNAGE PRIVATE LIMITED</p>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <p className="text-sm font-medium text-primary">Account Number:</p>
+                                                <p className="text-sm text-muted-foreground">218151000001</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-primary">IFSC Code / Branch:</p>
+                                                <p className="text-sm text-muted-foreground">ICIC0002181 / Hope Farm, Whitefield, Bengaluru</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <Separator className="my-8" />

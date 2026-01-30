@@ -233,6 +233,7 @@ export interface Quotation {
     items: QuotationItem[];
     show_billing_in_print?: boolean;
     show_shipping_in_print?: boolean;
+    show_product_specs?: boolean;
     can: {
         update: boolean;
         delete: boolean;
@@ -249,7 +250,7 @@ export interface BreadcrumbItem {
 
 export interface QuotationMedia {
     id: number;
-    quotation_id: number|null;
+    quotation_id: number | null;
     category: string;
     name: string;
     file_name: string;

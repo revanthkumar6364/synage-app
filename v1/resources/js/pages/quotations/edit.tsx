@@ -81,6 +81,7 @@ interface FormData extends Record<string, any> {
     show_no_of_pixels: boolean;
     show_billing_in_print: boolean;
     show_shipping_in_print: boolean;
+    show_product_specs: boolean;
     product_type: string;
     selected_product_id: number | undefined;
 }
@@ -128,6 +129,7 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
         show_no_of_pixels: quotation.show_no_of_pixels ?? true,
         show_billing_in_print: quotation.show_billing_in_print ?? true,
         show_shipping_in_print: quotation.show_shipping_in_print ?? true,
+        show_product_specs: quotation.show_product_specs ?? true,
         product_type: quotation.product_type || '',
         selected_product_id: quotation.selected_product_id,
     });
@@ -576,6 +578,14 @@ export default function Edit({ quotation, accounts = [], salesUsers = [], facade
                                             onCheckedChange={(checked) => setData('show_shipping_in_print', checked as boolean)}
                                         />
                                         <Label htmlFor="show_shipping_in_print" className="text-sm">Show Shipping in Print</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="show_product_specs"
+                                            checked={data.show_product_specs}
+                                            onCheckedChange={(checked) => setData('show_product_specs', checked as boolean)}
+                                        />
+                                        <Label htmlFor="show_product_specs" className="text-sm">Show Product Specifications in Print</Label>
                                     </div>
                                 </div>
                             </div>

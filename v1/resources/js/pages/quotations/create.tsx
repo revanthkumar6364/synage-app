@@ -73,6 +73,7 @@ interface FormData {
     show_hsn_code: boolean;
     show_no_of_pixels: boolean;
     show_billing_shipping: boolean;
+    show_product_specs: boolean;
     status: 'draft';
 }
 
@@ -127,6 +128,7 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
         show_hsn_code: false,
         show_no_of_pixels: true,
         show_billing_shipping: false,
+        show_product_specs: true,
         status: 'draft',
 
     });
@@ -723,6 +725,15 @@ export default function Create({ accounts = [], salesUsers = [], facadeTypes = {
                                     onCheckedChange={(checked) => setData('show_shipping_in_print', checked as boolean)}
                                 />
                                 <Label htmlFor="show_shipping_in_print">Show Shipping in Print</Label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="show_product_specs"
+                                    checked={data.show_product_specs}
+                                    onCheckedChange={(checked) => setData('show_product_specs', checked as boolean)}
+                                />
+                                <Label htmlFor="show_product_specs">Show Product Specifications in Print</Label>
                             </div>
 
                             <div className="space-y-4">
