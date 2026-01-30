@@ -626,8 +626,19 @@ $proposed_height_mm =
                     @if ($quotation->show_hsn_code)
                         <td>{{ $item->product->hsn_code }}</td>
                     @endif
-                    <td style="font-size: 16px; color: #666;">
-                        {{ $item->quantity }} {{ $item->product->unit ?? 'qty' }}
+                    @php
+                        $unit = $item->product->unit ?? 'qty';
+                        $quantity = $item->quantity;
+
+                        // Format quantity based on unit type
+                        if (str_contains(strtolower($unit), 'sqft') || str_contains(strtolower($unit), 'sq ft')) {
+                            $formattedQty = number_format($quantity, 2, '.', ',');
+                        } else {
+                            $formattedQty = number_format($quantity, 0, '.', ',');
+                        }
+                    @endphp
+                    <td class="text-right" style="font-size: 16px; color: #666;">
+                        {{ $formattedQty }} {{ $unit }}
                     </td>
                     <td class="text-right">₹{{ number_format($item->proposed_unit_price, 2, '.', ',') }}</td>
                     <td class="text-right">{{ $item->tax_percentage }}%</td>

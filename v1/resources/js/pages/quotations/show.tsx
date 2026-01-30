@@ -41,6 +41,17 @@ interface FormData {
     rejection_reason: string;
 }
 
+// Helper function to format quantity based on unit type
+const formatQuantityByUnit = (quantity: number | string, unit: string): string => {
+    const qty = typeof quantity === 'string' ? parseFloat(quantity) : quantity;
+    const unitLower = unit.toLowerCase();
+
+    if (unitLower.includes('sqft') || unitLower.includes('sq ft')) {
+        return qty.toFixed(2);
+    }
+    return Math.round(qty).toString();
+};
+
 export default function Show({ quotation, commonFiles, quotationFiles }: Props) {
     const { auth } = usePage<{ auth: any }>().props;
     const [loading, setLoading] = useState(false);
@@ -632,7 +643,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                                         </TableCell>
                                                         <TableCell>{item.product.hsn_code}</TableCell>
                                                         <TableCell className="text-right">
-                                                            {item.quantity} {item.product.unit || 'qty'}
+                                                            {formatQuantityByUnit(item.quantity, item.product.unit || 'qty')} {item.product.unit || 'qty'}
                                                         </TableCell>
                                                         <TableCell className="text-right">{formatCurrency(item.proposed_unit_price || 0)}</TableCell>
                                                         <TableCell className="text-right">{item.tax_percentage}%</TableCell>
