@@ -450,7 +450,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     <div className="grid grid-cols-2 gap-8">
                                         {quotation.billing_address && (
                                             <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
-                                                <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Bill To</h3>
+                                                <h3 className="font-semibold text-secondary-foreground bg-secondary px-3 py-1.5 rounded text-sm uppercase tracking-wide inline-block">Bill To</h3>
                                                 <div className="text-sm space-y-2">
                                                     <p className="font-medium text-foreground">{quotation.account?.business_name}</p>
                                                     <div className="text-muted-foreground space-y-1">
@@ -463,7 +463,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                         )}
                                         {quotation.shipping_address && (
                                             <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
-                                                <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Ship To</h3>
+                                                <h3 className="font-semibold text-secondary-foreground bg-secondary px-3 py-1.5 rounded text-sm uppercase tracking-wide inline-block">Ship To</h3>
                                                 <div className="text-sm space-y-2">
                                                     <p className="font-medium text-foreground">{quotation.account_contact?.name}</p>
                                                     <div className="text-muted-foreground space-y-1">
@@ -560,7 +560,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
 
                                         return (
                                             <div key={item.id} className="bg-muted/30 p-5 rounded-lg border border-border/50 space-y-4">
-                                                <h3 className="text-lg font-semibold text-primary">Product Specifications - {item.product.name}</h3>
+                                                <h3 className="text-lg font-semibold text-secondary-foreground bg-secondary p-3 rounded-md inline-block">Product Specifications - {item.product.name}</h3>
                                                 <div className="grid grid-cols-2 gap-6">
                                                     <div className="space-y-4">
                                                         <div>
@@ -619,14 +619,14 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
                                     <div className="rounded-lg border">
                                         <Table>
                                             <TableHeader>
-                                                <TableRow className="bg-muted/50">
-                                                    <TableHead className="w-[40px] text-center">#</TableHead>
-                                                    <TableHead>Product Description</TableHead>
-                                                    <TableHead>HSN</TableHead>
-                                                    <TableHead className="text-right">Unit</TableHead>
-                                                    <TableHead className="text-right">Unit Price</TableHead>
-                                                    <TableHead className="text-right">Tax %</TableHead>
-                                                    <TableHead className="text-right">Total</TableHead>
+                                                <TableRow className="bg-secondary hover:bg-secondary">
+                                                    <TableHead className="w-[40px] text-center text-secondary-foreground">#</TableHead>
+                                                    <TableHead className="text-secondary-foreground">Product Description</TableHead>
+                                                    <TableHead className="text-secondary-foreground">HSN</TableHead>
+                                                    <TableHead className="text-right text-secondary-foreground">Unit</TableHead>
+                                                    <TableHead className="text-right text-secondary-foreground">Unit Price</TableHead>
+                                                    <TableHead className="text-right text-secondary-foreground">Tax %</TableHead>
+                                                    <TableHead className="text-right text-secondary-foreground">Total</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -683,7 +683,7 @@ export default function Show({ quotation, commonFiles, quotationFiles }: Props) 
 
                                 {/* Terms and Conditions */}
                                 <div className="space-y-6">
-                                    <h3 className="text-lg font-semibold text-primary">Terms and Conditions</h3>
+                                    <h3 className="text-lg font-semibold text-secondary-foreground bg-secondary p-3 rounded-md inline-block mb-4">Terms and Conditions</h3>
 
                                     {/* Show comprehensive terms if available, otherwise show legacy terms */}
                                     {quotation.general_pricing_terms ? (

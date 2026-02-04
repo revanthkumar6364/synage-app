@@ -449,7 +449,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                         <div className="grid grid-cols-2 gap-8">
                                             {quotation.show_billing_in_print && quotation.billing_address && (
                                                 <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
-                                                    <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Bill To</h3>
+                                                    <h3 className="font-semibold text-secondary-foreground bg-secondary px-3 py-1.5 rounded text-sm uppercase tracking-wide inline-block">Bill To</h3>
                                                     <div className="text-sm space-y-2">
                                                         <p className="font-medium text-foreground">{quotation.account?.business_name}</p>
                                                         <div className="text-muted-foreground space-y-1">
@@ -462,7 +462,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                             )}
                                             {quotation.show_shipping_in_print && quotation.shipping_address && (
                                                 <div className="space-y-3 bg-muted/30 p-5 rounded-lg border border-border/50">
-                                                    <h3 className="font-semibold text-primary text-sm uppercase tracking-wide">Ship To</h3>
+                                                    <h3 className="font-semibold text-secondary-foreground bg-secondary px-3 py-1.5 rounded text-sm uppercase tracking-wide inline-block">Ship To</h3>
                                                     <div className="text-sm space-y-2">
                                                         <p className="font-medium text-foreground">{quotation.account_contact?.name}</p>
                                                         <div className="text-muted-foreground space-y-1">
@@ -527,7 +527,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
 
                                         return (
                                             <div key={item.id} className="bg-muted/30 p-5 rounded-lg border border-border/50 space-y-4">
-                                                <h3 className="text-lg font-semibold text-primary">Product Specifications - {item.product.name}</h3>
+                                                <h3 className="text-lg font-semibold text-secondary-foreground bg-secondary p-3 rounded-md inline-block">Product Specifications - {item.product.name}</h3>
                                                 <div className="grid grid-cols-2 gap-6">
                                                     <div className="space-y-4">
                                                         <div>
@@ -588,13 +588,13 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                     <div className="rounded-lg border">
                                         <Table>
                                             <TableHeader>
-                                                <TableRow className="bg-muted/50">
-                                                    <TableHead className="w-[40px] text-center">#</TableHead>
-                                                    <TableHead>Product Description</TableHead>
-                                                    <TableHead className="text-right">Unit</TableHead>
-                                                    <TableHead className="text-right">Unit Price</TableHead>
-                                                    <TableHead className="text-right">Tax %</TableHead>
-                                                    <TableHead className="text-right">Total</TableHead>
+                                                <TableRow className="bg-secondary hover:bg-secondary">
+                                                    <TableHead className="w-[40px] text-center text-secondary-foreground">#</TableHead>
+                                                    <TableHead className="text-secondary-foreground">Product Description</TableHead>
+                                                    <TableHead className="text-right text-secondary-foreground">Unit</TableHead>
+                                                    <TableHead className="text-right text-secondary-foreground">Unit Price</TableHead>
+                                                    <TableHead className="text-right text-secondary-foreground">Tax %</TableHead>
+                                                    <TableHead className="text-right text-secondary-foreground">Total</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -647,7 +647,7 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
 
                                 {/* Terms and Conditions */}
                                 <div className="space-y-6">
-                                    <h3 className="text-lg font-semibold text-primary">Terms and Conditions</h3>
+                                    <h3 className="text-lg font-semibold text-secondary-foreground bg-secondary p-3 rounded-md inline-block mb-4">Terms and Conditions</h3>
 
                                     {/* Show comprehensive terms if available, otherwise show legacy terms */}
                                     {quotation.general_pricing_terms ? (
@@ -1143,92 +1143,42 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                 </div>
 
                                 {/* Attachments */}
-                                {(commonFiles.length > 0 || quotationFiles.length > 0) && (
-                                    <div className="mt-8 space-y-6">
+                                {
+                                    (commonFiles.length > 0 || quotationFiles.length > 0) && (
+                                        <div className="mt-8 space-y-6">
 
-                                        {commonFiles.length > 0 && (() => {
-                                            const commonPdfs = commonFiles.filter(f => f.category === 'pdf' || f.name?.toLowerCase().endsWith('.pdf'));
-                                            const commonImages = commonFiles.filter(f => f.category !== 'pdf' && !f.name?.toLowerCase().endsWith('.pdf'));
+                                            {commonFiles.length > 0 && (() => {
+                                                const commonPdfs = commonFiles.filter(f => f.category === 'pdf' || f.name?.toLowerCase().endsWith('.pdf'));
+                                                const commonImages = commonFiles.filter(f => f.category !== 'pdf' && !f.name?.toLowerCase().endsWith('.pdf'));
 
-                                            return (
-                                                <>
-                                                    <Separator />
-                                                    <div className="space-y-4">
-                                                        {commonPdfs.length > 0 && (
-                                                            <div>
-                                                                <h4 className="text-sm font-semibold mb-2">Reference Documents:</h4>
-                                                                <div className="space-y-2">
-                                                                    {commonPdfs.map((file) => (
-                                                                        <a
-                                                                            key={file.id}
-                                                                            href={file.full_url}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 transition-colors rounded"
-                                                                        >
-                                                                            <FileTextIcon className="h-5 w-5 text-red-600 flex-shrink-0" />
-                                                                            <span className="text-xs text-gray-800 dark:text-gray-200 flex-1">{file.name}</span>
-                                                                            <FileIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-                                                                        </a>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        )}
-
-                                                        {commonImages.length > 0 && (
-                                                            <div className="grid grid-cols-3 gap-4">
-                                                                {commonImages.map((file) => (
-                                                                    <div key={file.id} className="space-y-2">
-                                                                        <img
-                                                                            src={file.full_url}
-                                                                            alt={file.name}
-                                                                            className="rounded-lg shadow-sm w-full h-auto object-cover"
-                                                                        />
-                                                                        <p className="text-xs text-center text-gray-600 font-medium">
-                                                                            {file.name.replace('Specification - ', '')}
-                                                                        </p>
+                                                return (
+                                                    <>
+                                                        <Separator />
+                                                        <div className="space-y-4">
+                                                            {commonPdfs.length > 0 && (
+                                                                <div>
+                                                                    <h4 className="text-sm font-semibold mb-2">Reference Documents:</h4>
+                                                                    <div className="space-y-2">
+                                                                        {commonPdfs.map((file) => (
+                                                                            <a
+                                                                                key={file.id}
+                                                                                href={file.full_url}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 transition-colors rounded"
+                                                                            >
+                                                                                <FileTextIcon className="h-5 w-5 text-red-600 flex-shrink-0" />
+                                                                                <span className="text-xs text-gray-800 dark:text-gray-200 flex-1">{file.name}</span>
+                                                                                <FileIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                                                                            </a>
+                                                                        ))}
                                                                     </div>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </>
-                                            );
-                                        })()}
-                                        {quotationFiles.length > 0 && (() => {
-                                            const pdfs = quotationFiles.filter(f => f.category === 'pdf' || f.name?.toLowerCase().endsWith('.pdf'));
-                                            const images = quotationFiles.filter(f => f.category !== 'pdf' && !f.name?.toLowerCase().endsWith('.pdf'));
-
-                                            return (
-                                                <>
-                                                    <Separator />
-                                                    <div className="space-y-4">
-                                                        {pdfs.length > 0 && (
-                                                            <div>
-                                                                <h4 className="text-sm font-semibold mb-2">Additional Documents:</h4>
-                                                                <div className="space-y-2">
-                                                                    {pdfs.map((file) => (
-                                                                        <a
-                                                                            key={file.id}
-                                                                            href={file.full_url}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 transition-colors rounded"
-                                                                        >
-                                                                            <FileTextIcon className="h-5 w-5 text-red-600 flex-shrink-0" />
-                                                                            <span className="text-xs text-gray-800 dark:text-gray-200 flex-1">{file.name}</span>
-                                                                            <FileIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-                                                                        </a>
-                                                                    ))}
                                                                 </div>
-                                                            </div>
-                                                        )}
+                                                            )}
 
-                                                        {images.length > 0 && (
-                                                            <div>
-                                                                <h4 className="text-sm font-semibold mb-2">Product Specifications:</h4>
+                                                            {commonImages.length > 0 && (
                                                                 <div className="grid grid-cols-3 gap-4">
-                                                                    {images.map((file) => (
+                                                                    {commonImages.map((file) => (
                                                                         <div key={file.id} className="space-y-2">
                                                                             <img
                                                                                 src={file.full_url}
@@ -1241,14 +1191,66 @@ export default function Preview({ quotation, commonFiles, quotationFiles }: Prop
                                                                         </div>
                                                                     ))}
                                                                 </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </>
-                                            );
-                                        })()}
-                                    </div>
-                                )}
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
+                                            {quotationFiles.length > 0 && (() => {
+                                                const pdfs = quotationFiles.filter(f => f.category === 'pdf' || f.name?.toLowerCase().endsWith('.pdf'));
+                                                const images = quotationFiles.filter(f => f.category !== 'pdf' && !f.name?.toLowerCase().endsWith('.pdf'));
+
+                                                return (
+                                                    <>
+                                                        <Separator />
+                                                        <div className="space-y-4">
+                                                            {pdfs.length > 0 && (
+                                                                <div>
+                                                                    <h4 className="text-sm font-semibold mb-2">Additional Documents:</h4>
+                                                                    <div className="space-y-2">
+                                                                        {pdfs.map((file) => (
+                                                                            <a
+                                                                                key={file.id}
+                                                                                href={file.full_url}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="flex items-center gap-2 p-2 border-l-2 border-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 transition-colors rounded"
+                                                                            >
+                                                                                <FileTextIcon className="h-5 w-5 text-red-600 flex-shrink-0" />
+                                                                                <span className="text-xs text-gray-800 dark:text-gray-200 flex-1">{file.name}</span>
+                                                                                <FileIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                                                                            </a>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {images.length > 0 && (
+                                                                <div>
+                                                                    <h4 className="text-sm font-semibold mb-2">Product Specifications:</h4>
+                                                                    <div className="grid grid-cols-3 gap-4">
+                                                                        {images.map((file) => (
+                                                                            <div key={file.id} className="space-y-2">
+                                                                                <img
+                                                                                    src={file.full_url}
+                                                                                    alt={file.name}
+                                                                                    className="rounded-lg shadow-sm w-full h-auto object-cover"
+                                                                                />
+                                                                                <p className="text-xs text-center text-gray-600 font-medium">
+                                                                                    {file.name.replace('Specification - ', '')}
+                                                                                </p>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    )
+                                }
                             </div>
                         </ScrollArea>
                     </CardContent>
