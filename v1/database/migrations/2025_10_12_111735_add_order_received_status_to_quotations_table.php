@@ -9,13 +9,11 @@ return new class extends Migration
 {
     public function up()
     {
-        // Add order_received to the status enum
-        DB::statement("ALTER TABLE quotations MODIFY COLUMN status ENUM('draft', 'pending', 'approved', 'rejected', 'order_received') DEFAULT 'draft'");
+        // Redundant since 2025_05_09_000000_create_quotations_table.php already includes this status
     }
 
     public function down()
     {
-        // Remove order_received from the status enum
-        DB::statement("ALTER TABLE quotations MODIFY COLUMN status ENUM('draft', 'pending', 'approved', 'rejected') DEFAULT 'draft'");
+        //
     }
 };
